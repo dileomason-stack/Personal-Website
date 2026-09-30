@@ -166,6 +166,8 @@ dd{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em}
 .shot:after{content:"";position:absolute;left:12px;top:9px;width:8px;height:8px;border-radius:50%;background:#e2786a;box-shadow:13px 0 #e6bd5a,26px 0 #7cbf73;z-index:2}
 .shot img{position:absolute;left:0;top:26px;width:100%;height:calc(100% - 26px);object-fit:cover;object-position:top;transition:transform 1.2s var(--ease)}
 .proj:hover .shot img{transform:scale(1.03)}
+.shot video{position:relative;display:block;width:100%;aspect-ratio:16/9;margin-top:26px;background:#111;object-fit:contain}
+.shot:has(video){aspect-ratio:auto}
 .shot.site-preview .mini{position:absolute;inset:26px 0 0;display:grid;grid-template-columns:1.3fr .7fr;align-items:center;gap:6%;padding:0 8%;
   background:linear-gradient(#e4dfd4 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,#e4dfd4 1px,transparent 1px) 0 0/22px 22px,var(--paper)}
 .mini b{display:block;font-size:clamp(26px,3.6vw,50px);line-height:.82;letter-spacing:-.085em;font-weight:800}
@@ -182,9 +184,10 @@ dd{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em}
 .proj-grid.single{grid-template-columns:1fr}
 .single .proj{display:grid;grid-template-columns:1.15fr .85fr}
 .single .shot{margin:22px 0 22px 22px;border-radius:14px;border-bottom:1px solid var(--line);aspect-ratio:auto;min-height:340px}
+.single .shot:has(video){min-height:0;align-self:center}
 .single .proj-body{padding:clamp(26px,4vw,48px)}
 .single .proj h4{font-size:clamp(34px,4vw,52px)}
-@media(max-width:900px){.proj-grid{grid-template-columns:1fr}.single .proj{display:flex}.single .shot{margin:18px 18px 0;border-radius:14px 14px 0 0;border-bottom:0;aspect-ratio:16/10;min-height:0}}
+@media(max-width:900px){.proj-grid{grid-template-columns:1fr}.single .proj{display:flex}.single .shot{margin:18px 18px 0;border-radius:14px 14px 0 0;border-bottom:0;aspect-ratio:16/10;min-height:0}.single .shot:has(video){aspect-ratio:auto}}
 @media(max-width:640px){.projects .head{display:block}.projects .head p.body{margin-top:18px}.shot{margin:12px 12px 0}.proj-body{padding:22px}}
 
 /* ---------- Education ---------- */
@@ -388,7 +391,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   </div>
   <div class="proj-grid single">
     <article class="proj reveal">
-      <div class="shot"><img src="project-homeroom.jpg" alt="Homeroom dashboard showing widgets for Spotify, to-dos, Canvas assignments and more" loading="lazy"></div>
+      <div class="shot"><video class="demo" src="homeroom-demo.mp4" poster="homeroom-demo-poster.jpg" muted loop playsinline controls preload="none" aria-label="Homeroom demo video"></video></div>
       <div class="proj-body">
         <span class="mo">Build Day #1 / Live</span>
         <h4>Homeroom</h4>
@@ -561,6 +564,14 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   }, { threshold: .12 });
   function revealVisible() { document.querySelectorAll('.reveal').forEach(el => revObs.observe(el)); }
   if (reduce) document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+
+  // Demo videos: play muted while on screen
+  document.querySelectorAll('video.demo').forEach(v => {
+    new IntersectionObserver(([en]) => {
+      if (en.isIntersecting && !reduce) { v.preload = 'auto'; v.play().catch(() => {}); }
+      else if (!en.isIntersecting) v.pause();
+    }, { threshold: .4 }).observe(v);
+  });
 
   // Galleries
   document.querySelectorAll('.gallery-wrap').forEach(wrap => {

@@ -390,7 +390,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     <p class="body">Side projects I’ve designed, built with AI coding tools, and put live on the internet. More on my GitHub.</p>
   </div>
   <div class="proj-grid single">
-    <article class="proj reveal">
+    <article class="proj reveal" id="homeroom">
       <div class="shot"><video class="demo" src="homeroom-demo.mp4" poster="homeroom-demo-poster.jpg" muted loop playsinline controls preload="none" aria-label="Homeroom demo video"></video></div>
       <div class="proj-body">
         <span class="mo">Build Day #1 / Live</span>
@@ -403,7 +403,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         </div>
       </div>
     </article>
-    <article class="proj reveal">
+    <article class="proj reveal" id="whenworks">
       <div class="shot"><img src="whenworks-preview.jpg" alt="WhenWorks group page showing suggested meeting times and votes" loading="lazy" decoding="async"></div>
       <div class="proj-body">
         <span class="mo">Side project / Live</span>
@@ -518,6 +518,10 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   const EMAIL = 'dileomason@gmail.com';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // A link to one project (like …/#homeroom) skips the intro and goes straight to it.
+  const linked = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  const deepLink = linked && linked.closest('.proj') === linked ? linked : null;
+
   // Always start at the top behind the intro, even on reload
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
@@ -538,6 +542,15 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       revealVisible();
     }, reduce ? 50 : 1150);
   });
+
+  if (deepLink) {
+    intro.style.transition = 'none';
+    intro.classList.add('on', 'done');
+    label.textContent = 'Lights / on';
+    document.body.classList.remove('locked');
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+    requestAnimationFrame(() => deepLink.scrollIntoView({ block: 'center' }));
+  }
 
   // Email buttons: reveal and copy the address
   document.querySelectorAll('.email-btn').forEach(btn => {

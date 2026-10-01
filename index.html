@@ -518,13 +518,14 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   const EMAIL = 'dileomason@gmail.com';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // A link to one project (like …/#homeroom) skips the intro and goes straight to it.
-  const linked = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  // A link to one project (…/?project=homeroom, or …/#homeroom) skips the intro and goes straight to it.
+  const wanted = new URLSearchParams(location.search).get('project') || location.hash.slice(1);
+  const linked = wanted && document.getElementById(wanted);
   const deepLink = linked && linked.closest('.proj') === linked ? linked : null;
 
   // Always start at the top behind the intro, even on reload
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  if (location.hash || deepLink) history.replaceState(null, '', location.pathname);
   scrollTo(0, 0);
 
   // Intro light switch

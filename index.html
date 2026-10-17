@@ -283,6 +283,20 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .proj p{color:var(--text-2);line-height:1.6;margin:0 0 20px}
 .proj .pills{margin-bottom:24px}
 .proj-links{display:flex;gap:10px;margin-top:auto;flex-wrap:wrap}
+/* Build log: every commit as a tick, work sessions side by side (idle gaps squeezed out) */
+.build{margin:0 0 24px;padding:14px 0 0;border-top:1px solid var(--line)}
+.proj-body .build-head,.build-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;color:var(--muted)}
+.build-head b{color:var(--text);font-weight:500}
+.build-track{position:relative;height:30px;touch-action:pan-y;cursor:crosshair}
+.build-track i{position:absolute;bottom:0;width:2px;height:14px;margin-left:-1px;border-radius:1px;background:var(--line-strong);transform-origin:bottom;transition:background .15s,height .15s}
+.build-track i.done{background:var(--text-2)}
+.build-track i.on{background:var(--accent);height:30px}
+.build-track s{position:absolute;bottom:4px;height:6px;border-left:1px dashed var(--line-strong);border-right:1px dashed var(--line-strong);opacity:.7}
+.build-head span{white-space:nowrap}
+.build-days{position:relative;height:16px;margin-top:6px;font:500 10px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.build-days span{position:absolute;white-space:nowrap}
+.build-msg{min-height:2.9em;margin:10px 0 0!important;font-size:14px;line-height:1.45;color:var(--text-2)}
+.build-msg time{display:block;font:500 10.5px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
 .proj-links .btn{height:42px;padding:0 18px;font-size:12px}
 .proj-grid.single{grid-template-columns:1fr}
 .single .proj{display:grid;grid-template-columns:1.15fr .85fr}
@@ -353,40 +367,54 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .phone-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.05) translateY(2%);transition:opacity .55s var(--ease),transform .9s var(--ease)}
 .phone-screen img.is-active{opacity:1;transform:none}
 @media(max-width:900px){.showcase{grid-template-columns:1fr}.sc-device{order:-1}}
-/* Try the app: a real input over the screenshot's "Hold a thought…" bar, and a card that reads it */
+/* Try the app: an input beside the phone; the phone's own bar mirrors it and a card reads it */
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.htt-try{position:absolute;left:18%;width:55%;top:84.2%;height:4.4%;z-index:1;transition:opacity .3s}
-.htt-input{all:unset;box-sizing:border-box;width:100%;height:100%;padding:0 4px;border-radius:8px;background:#f1f3f0;color:#141414;
-  font:500 calc(var(--w) * .039) Manrope,system-ui,sans-serif;letter-spacing:-.01em;cursor:text;caret-color:#2f7d34}
-.htt-input::placeholder{color:#8a8b88}
-.htt-input:focus-visible{outline:2px solid #2f7d34;outline-offset:2px}
-.phone-screen img:first-of-type:not(.is-active)~.htt-try,.phone-screen img:first-of-type:not(.is-active)~.htt-card{opacity:0;pointer-events:none}
+.htt-bar{all:unset;position:absolute;left:17.6%;width:56%;top:84.2%;height:4.4%;z-index:1;display:flex;align-items:center;padding:0 4px;border-radius:8px;background:#f1f3f0;
+  color:#141414;font:500 calc(var(--w) * .039) Manrope,system-ui,sans-serif;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;cursor:text;opacity:0;transition:opacity .25s}
+.htt-bar.on{opacity:1}
+.htt-typed{flex:none}
+.htt-bar.over{justify-content:flex-end}
+.htt-caret{flex:none;width:1.5px;height:1.1em;margin-left:1px;background:#2f7d34;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.phone-screen img:first-of-type:not(.is-active)~.htt-bar,.phone-screen img:first-of-type:not(.is-active)~.htt-card{opacity:0;pointer-events:none}
 .htt-card{position:absolute;left:4%;right:4%;bottom:17%;z-index:1;padding:calc(var(--w) * .045);border-radius:calc(var(--w) * .06);background:#fff;color:#141414;
-  box-shadow:0 1px 2px rgb(0 0 0 / .08),0 18px 40px -12px rgb(0 0 0 / .35);font-family:Manrope,system-ui,sans-serif;
+  box-shadow:0 1px 2px rgb(0 0 0 / .08),0 18px 40px -12px rgb(0 0 0 / .35);font-family:Manrope,system-ui,sans-serif;font-size:calc(var(--w) * .041);
   transform-origin:50% 100%;animation:cardIn .45s var(--ease) both}
 .htt-card[hidden]{display:none}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(.96)}}
-.showcase .htt-head{display:flex;justify-content:space-between;gap:8px;margin:0 0 .5em;max-width:none;line-height:1.2;font:500 calc(var(--w) * .03) "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#7a7b77}
-.htt-card.saved .htt-state{color:#2f7d34}
-.htt-card.saved .htt-state:before{content:"✓ "}
-.showcase .htt-title{margin:0 0 .55em;max-width:none;color:#141414;font-weight:800;font-size:calc(var(--w) * .056);line-height:1.2;letter-spacing:-.02em;overflow-wrap:anywhere}
-.htt-rows{list-style:none;margin:0;padding:0;display:grid;gap:.45em;font-size:calc(var(--w) * .041);font-weight:600;color:#2a2b29}
-.htt-rows li{display:flex;align-items:center;gap:.5em;animation:rowIn .35s var(--ease) both}
+.htt-head{display:flex;justify-content:space-between;gap:8px;margin:0 0 .5em;font:500 .74em/1.2 "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#7a7b77}
+.htt-card.saved .htt-state,.try-result.saved .htt-state{color:#2f7d34}
+.htt-card.saved .htt-state:before,.try-result.saved .htt-state:before{content:"✓ "}
+.htt-title{margin:0 0 .55em;color:#141414;font-weight:800;font-size:1.36em;line-height:1.2;letter-spacing:-.02em;overflow-wrap:anywhere}
+.htt-rows{list-style:none;margin:0;padding:0;display:grid;gap:.5em;font-weight:600;color:#2a2b29}
+.htt-rows li{display:grid;grid-template-columns:auto 4.2em 1fr;align-items:center;gap:.5em;animation:rowIn .35s var(--ease) both}
 .htt-rows li:nth-child(2){animation-delay:.05s}.htt-rows li:nth-child(3){animation-delay:.1s}
+.htt-rows .k{font:500 .72em "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#7a7b77}
 @keyframes rowIn{from{opacity:0;transform:translateX(-6px)}}
-.htt-rows svg{flex:none;width:1.25em;height:1.25em;padding:.22em;border-radius:.35em;background:#e8f4dc;stroke:#2f7d34;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.htt-rows svg{flex:none;width:1.3em;height:1.3em;padding:.22em;border-radius:.35em;background:#e8f4dc;stroke:#2f7d34;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .htt-rows .none{color:#7a7b77;font-weight:500}
-.htt-rows .nearby{color:#2f7d34}
-.htt-rows .nearby svg{background:transparent;border:1px dashed #9fc98a}
-.sc-try{margin-top:22px;padding-top:20px;border-top:1px solid var(--inv-line)}
-.showcase .sc-try .mo{margin:0 0 12px;font-size:11px;color:var(--inv-muted)}
-.sc-try .mo b{color:var(--inv-text);font-weight:500}
-.try-chips{display:flex;flex-wrap:wrap;gap:8px}
-.try-chips button{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 13px;border-radius:40px;border:1px solid var(--inv-line);background:var(--inv-surface-2);
-  color:var(--inv-text-2);font:500 13px Manrope,system-ui,sans-serif;transition:border-color .2s,color .2s,background .2s}
+.htt-rows .nearby span:last-child{color:#2f7d34}
+.sc-try{margin-top:24px;padding:20px;border:1px solid var(--inv-line);border-radius:var(--r-md);background:var(--inv-surface)}
+.try-label{display:block;margin-bottom:12px;font-size:16px;font-weight:700;color:var(--inv-text);letter-spacing:-.01em}
+.try-label .mo{display:block;margin-bottom:6px;color:var(--inv-accent);font-weight:500}
+.try-field{display:flex;align-items:center;gap:6px;padding:5px 5px 5px 16px;border-radius:40px;background:var(--inv-bg);border:1px solid var(--inv-line);transition:border-color .2s}
+.try-field:focus-within{border-color:var(--inv-accent)}
+.try-field input{all:unset;flex:1;min-width:0;height:38px;font:500 15px Manrope,system-ui,sans-serif;color:var(--inv-text)}
+.try-field input::placeholder{color:var(--inv-muted)}
+.try-clear{all:unset;cursor:pointer;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--inv-muted);font-size:18px}
+.try-clear:hover{color:var(--inv-text);background:var(--inv-surface-2)}
+.try-go{all:unset;cursor:pointer;height:38px;padding:0 18px;border-radius:40px;background:var(--inv-accent);color:var(--inv-bg);font:700 13px Manrope,system-ui,sans-serif}
+.try-go:hover{filter:brightness(1.08)}
+.try-go:focus-visible,.try-clear:focus-visible{outline:2px solid var(--inv-text);outline-offset:2px}
+.try-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.try-chips button{all:unset;box-sizing:border-box;cursor:pointer;padding:7px 12px;border-radius:40px;border:1px solid var(--inv-line);background:transparent;
+  color:var(--inv-text-2);font:500 12.5px Manrope,system-ui,sans-serif;transition:border-color .2s,color .2s}
 .try-chips button:hover,.try-chips button.on{border-color:var(--inv-accent);color:var(--inv-text)}
 .try-chips button:focus-visible{outline:2px solid var(--inv-accent);outline-offset:2px}
-.showcase .try-note{margin:16px 0 0;font-size:13px;line-height:1.55;color:var(--inv-muted);max-width:52ch}
+.try-result{display:none}
+.showcase .try-note{margin:14px 0 0;font-size:12.5px;line-height:1.55;color:var(--inv-muted);max-width:none}
+/* On a phone the mockup has scrolled away by the time you type, so the card shows right under the field */
+@media(max-width:900px){.try-result:not(:empty){display:block;margin-top:14px;padding:16px;border-radius:var(--r-md);background:#fff;color:#141414;font-family:Manrope,system-ui,sans-serif;font-size:15px}}
 
 /* ---------- Motion (site-motion.js): GSAP owns these, so CSS transitions step aside ---------- */
 html.lenis,html.lenis body{height:auto}
@@ -447,63 +475,114 @@ html.lenis{scroll-behavior:auto}
 .contact .btn:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .contact .btn.ghost{background:transparent;color:var(--inv-text);border-color:var(--inv-line)}
 .contact .btn.ghost:hover{background:var(--inv-text);color:var(--inv-bg);border-color:var(--inv-text)}
-/* ---------- GitHub activity: a day-by-day grid of commits across every repo ---------- */
-.activity{margin-top:clamp(56px,7vw,88px);display:grid;grid-template-columns:minmax(240px,.8fr) 1.2fr;gap:clamp(28px,5vw,72px);align-items:start;
-  padding:clamp(24px,3vw,36px);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
-.act-label{margin:0 0 18px;color:var(--muted)}
-.act-total{margin:0;font-size:clamp(44px,5.2vw,72px);font-weight:800;letter-spacing:-.05em;line-height:.95}
-.act-total b{font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
-.act-sub{margin:10px 0 22px;color:var(--muted);font-size:15px}
-.act-legend{list-style:none;margin:0;padding:0;display:grid;gap:9px}
-.act-legend li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--text-2)}
-.act-legend li i{width:9px;height:9px;border-radius:3px;background:var(--c)}
-.act-legend li span{font:500 12px "DM Mono",monospace;color:var(--muted)}
-.act-legend li.dim{opacity:.35}
-.act-chart{min-width:0}
-.act-months{display:grid;grid-auto-flow:column;grid-auto-columns:var(--cell);gap:var(--gap);margin-bottom:8px;font:500 10px "DM Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);height:12px;white-space:nowrap}
-.act-chart{--cell:22px;--gap:6px}
-.act-grid{display:grid;grid-template-rows:repeat(7,var(--cell));grid-auto-flow:column;grid-auto-columns:var(--cell);gap:var(--gap)}
-.act-grid i{border-radius:clamp(3px,.4vw,6px);background:var(--line);outline:1px solid transparent;transition:outline-color .15s}
-.act-grid i[data-n]{cursor:default}
-.act-grid i.l1{background:var(--heat-1)}
-.act-grid i.l2{background:var(--heat-2)}
-.act-grid i.l3{background:var(--heat-3)}
-.act-grid i.l4{background:var(--accent)}
-.act-grid i.future{background:transparent;outline:1px dashed var(--line)}
-.act-grid i:hover,.act-grid i.hot{outline-color:var(--text)}
-.act-grid i.fade{opacity:.18}
-.act-tip{margin:14px 0 0;color:var(--muted);min-height:1.4em}
-.act-tip b{color:var(--text);font-weight:500}
-@media(max-width:900px){.activity{grid-template-columns:1fr}}
+/* ---------- Case studies: a full page over the site; the card's video and title morph into it ---------- */
+.case-open .arr{display:inline-block}
+.case{position:fixed;inset:0;z-index:60;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);color:var(--text)}
+.case[hidden]{display:none}
+.case:focus{outline:none}
+.case-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:16px;height:60px;padding:0 var(--pad-x);background:var(--bar-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.case-back,.case-x{all:unset;cursor:pointer;color:var(--text-2);border-radius:20px}
+.case-back:hover,.case-x:hover{color:var(--text)}
+.case-back:focus-visible,.case-x:focus-visible,.case-reset:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.case-crumb{margin-left:auto;color:var(--muted)}
+.case-x{width:36px;height:36px;display:grid;place-items:center;font-size:24px;border:1px solid var(--line-strong);border-radius:50%}
+.case-body{max-width:var(--max);margin:0 auto;padding:clamp(40px,6vw,80px) var(--gutter) 100px}
+.case-kicker{color:var(--accent);margin:0 0 16px}
+.case-title{font-size:clamp(48px,8vw,112px);line-height:.9;letter-spacing:-.055em;margin:0 0 22px;font-weight:800;width:fit-content}
+.case-lede{font-size:clamp(18px,1.6vw,22px);line-height:1.5;color:var(--text-2);max-width:46ch;margin:0 0 clamp(32px,4vw,56px)}
+.case-shot{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:var(--r-lg);background:#111;box-shadow:var(--shadow-lg);object-fit:cover}
+.case-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,80px);margin-top:clamp(56px,7vw,96px)}
+.case-h{color:var(--muted);margin:0 0 14px}
+.case-grid p:not(.case-h){font-size:17px;line-height:1.65;color:var(--text-2);margin:0}
+.case-list{margin:0;padding-left:1.1em;display:grid;gap:12px;font-size:16px;line-height:1.55;color:var(--text-2)}
+.case-list b{color:var(--text)}
+.case-demo{margin-top:clamp(56px,7vw,96px);display:grid;grid-template-columns:minmax(240px,.7fr) 1.3fr;gap:clamp(28px,4vw,64px);align-items:center;
+  padding:clamp(24px,3vw,40px);border-radius:var(--r-lg);background:var(--inv-bg);color:var(--inv-text)}
+.case-demo .case-h{color:var(--inv-accent)}
+.case-demo h3{font-size:clamp(30px,3vw,42px);letter-spacing:-.04em;line-height:1;margin:0 0 14px}
+.case-demo-copy>p:not(.case-h){color:var(--inv-text-2);line-height:1.6;margin:0 0 18px}
+.case-reset{all:unset;cursor:pointer;color:var(--inv-muted);border-bottom:1px solid var(--inv-line);padding-bottom:2px}
+.case-reset:hover{color:var(--inv-text)}
+.case-fig{margin:clamp(56px,7vw,96px) 0 0}
+.case-fig img{width:100%;height:auto;border-radius:var(--r-md);border:1px solid var(--line)}
+.case-fig figcaption{margin-top:12px;color:var(--muted)}
+.case-log{margin-top:clamp(56px,7vw,96px)}
+.build.big{border-top:0;padding:0}
+.build.big .build-track{height:56px}
+.build.big .build-track i{height:26px;width:3px}
+.build.big .build-track i.on{height:56px}
+.build.big .build-msg{font-size:17px}
+.case-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:48px}
+html.case-is-open{overflow:hidden}
+/* The rest of the page fades under the morph (the theme switch keeps its own circle reveal) */
+html.vt-case-in::view-transition-new(root){animation:caseFade .45s ease both}
+html.vt-case-out::view-transition-old(root){animation:caseFade .35s ease reverse both;z-index:1}
+html.vt-case-out::view-transition-new(root){animation:none}
+@keyframes caseFade{from{opacity:0}}
+::view-transition-group(case-shot),::view-transition-group(case-title){animation-duration:.6s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+::view-transition-old(case-title),::view-transition-new(case-title){height:100%;object-fit:contain;object-position:left}
+@media(max-width:900px){.case-grid,.case-demo{grid-template-columns:1fr}.case-crumb{display:none}}
 
-/* ---------- Versions: scrub through the site's git history ---------- */
-.versions{background:var(--inv-bg);color:var(--inv-text);display:grid;grid-template-columns:minmax(260px,.7fr) 1.3fr;gap:clamp(32px,5vw,80px);align-items:center;border-top:1px solid var(--inv-line)}
-.ver-label{color:var(--inv-accent);margin:0 0 18px}
-.ver-title{font-weight:800;margin:0 0 14px;font-size:clamp(28px,3vw,40px);letter-spacing:-.04em;line-height:1.05}
-.ver-copy>p:not([class]){margin:0 0 26px;color:var(--inv-text-2);line-height:1.6;font-size:15px;max-width:40ch}
-.ver-meta{display:flex;gap:14px;margin:0 0 8px;color:var(--inv-muted)}
-.ver-sha{color:var(--inv-accent)}
-.ver-msg{margin:0;font-size:18px;font-weight:700;letter-spacing:-.02em;min-height:2.6em;line-height:1.3}
-.ver-frame{border-radius:14px;overflow:hidden;border:1px solid var(--inv-line);background:var(--inv-surface);box-shadow:0 40px 80px -40px rgb(0 0 0 / .7)}
-.ver-chrome{display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-bottom:1px solid var(--inv-line);background:var(--inv-surface-2)}
-.ver-chrome i{width:9px;height:9px;border-radius:50%;background:var(--inv-line)}
-.ver-chrome span{margin-left:12px;font:500 11px "DM Mono",monospace;color:var(--inv-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ver-shots{position:relative;aspect-ratio:16/10;background:#111}
-.ver-shots img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
-.ver-track{position:relative;margin-top:18px;padding-bottom:22px}
-.ver-range{-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;background:transparent;cursor:grab;position:relative;z-index:1}
-.ver-range:active{cursor:grabbing}
-.ver-range::-webkit-slider-runnable-track{height:2px;background:var(--inv-line)}
-.ver-range::-moz-range-track{height:2px;background:var(--inv-line)}
-.ver-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-8px;border-radius:50%;background:var(--inv-accent);box-shadow:0 0 0 6px rgb(0 0 0 / .35)}
-.ver-range::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:var(--inv-accent)}
-.ver-range:focus-visible{outline:none}
-.ver-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--inv-text);outline-offset:3px}
-.ver-ticks{position:absolute;left:9px;right:9px;top:13px;height:24px;pointer-events:none}
-.ver-ticks span{position:absolute;top:0;width:1px;height:8px;background:var(--inv-muted);translate:-.5px 0}
-.ver-ticks span.on{background:var(--inv-accent);height:12px;top:-2px}
-.ver-ticks b{position:absolute;top:16px;translate:-50% 0;font:500 10px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--inv-muted);white-space:nowrap}
-@media(max-width:900px){.versions{grid-template-columns:1fr}.ver-stage{order:-1}}
+/* Homeroom demo: a tiny dashboard grid (4 columns) with draggable, resizable cards */
+.hr-demo{--cols:4;--row:64px;--gap:8px;position:relative;height:calc(var(--rows,5) * (var(--row) + var(--gap)) - var(--gap));border-radius:14px;padding:0;
+  background:repeating-linear-gradient(90deg,transparent 0 calc((100% + var(--gap)) / var(--cols) - var(--gap)),rgb(255 255 255 / .03) 0 calc((100% + var(--gap)) / var(--cols)));transition:height .3s var(--ease)}
+.hr-card{position:absolute;display:flex;flex-direction:column;border-radius:12px;background:#fbfaf7;color:#1b1b19;overflow:hidden;box-shadow:0 1px 2px rgb(0 0 0 / .2);
+  transition:left .3s var(--ease),top .3s var(--ease),width .3s var(--ease),height .3s var(--ease),box-shadow .2s;font:500 12px/1.35 Manrope,system-ui,sans-serif}
+.hr-card.moving{transition:box-shadow .2s;z-index:3;box-shadow:0 20px 40px -12px rgb(0 0 0 / .6);cursor:grabbing}
+.hr-ghost{position:absolute;border-radius:12px;background:rgb(255 255 255 / .08);border:1px dashed rgb(255 255 255 / .35);transition:all .15s;pointer-events:none}
+.hr-top{touch-action:none;display:flex;align-items:center;gap:6px;height:24px;padding:0 9px;flex:none;cursor:grab;font:600 10px "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#6d6b64;border-bottom:1px solid #ece8df}
+.hr-top i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.hr-in{padding:8px 10px;overflow:hidden;flex:1;min-height:0}
+.hr-in ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.hr-in li{display:flex;gap:6px;align-items:baseline}
+.hr-in .due{margin-left:auto;color:#c2410c;font-size:10.5px;white-space:nowrap}
+.hr-in label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.hr-in input{accent-color:#1b1b19;margin:0}
+.hr-in .big{font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.hr-in .dim{color:#77746c}
+.hr-in textarea{all:unset;width:100%;height:100%;font:inherit;white-space:pre-wrap;cursor:text}
+.hr-music{display:flex;gap:9px;align-items:center}
+.hr-music b{display:block}
+.hr-art{flex:none;width:38px;height:38px;border-radius:7px;background:linear-gradient(135deg,#1db954,#0b6b31)}
+.hr-size{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;touch-action:none;background:linear-gradient(135deg,transparent 55%,#b9b4a8 55% 62%,transparent 62% 72%,#b9b4a8 72% 79%,transparent 79%)}
+@media(max-width:640px){.hr-demo{--row:54px;--gap:6px}}
+
+/* WhenWorks demo: three classmates' busy times on a week grid; green where all three are free */
+.ww-demo{font:500 11px Manrope,system-ui,sans-serif;color:var(--inv-text-2)}
+.ww-people{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.ww-people button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:30px;border:1px solid var(--inv-line);color:var(--inv-text);font-size:12px}
+.ww-people button i{width:9px;height:9px;border-radius:3px;background:var(--c)}
+.ww-people button[aria-pressed="false"]{color:var(--inv-muted);border-style:dashed}
+.ww-people button[aria-pressed="false"] i{background:transparent;outline:1px solid var(--c)}
+.ww-people button:focus-visible{outline:2px solid var(--inv-accent);outline-offset:2px}
+.ww-sum{margin-left:auto;align-self:center;color:#4ade80;font:500 11px "DM Mono",monospace;letter-spacing:.05em;text-transform:uppercase}
+.ww-grid{position:relative;display:grid;grid-template-columns:42px repeat(5,1fr);grid-template-rows:20px repeat(var(--hours),var(--h));--h:30px}
+.ww-day{text-align:center;font:500 10px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--inv-muted)}
+.ww-hour{font:500 10px "DM Mono",monospace;color:var(--inv-muted);transform:translateY(-6px)}
+.ww-cell{border-top:1px solid var(--inv-line);border-left:1px solid var(--inv-line);transition:background .25s}
+.ww-cell.free{background:rgba(74,222,128,.22)}
+.ww-block{position:absolute;border-radius:5px;background:var(--c);opacity:.9;cursor:grab;touch-action:none;transition:left .2s var(--ease),top .2s var(--ease),opacity .2s;display:flex;align-items:flex-start;justify-content:center;
+  padding-top:3px;font:700 9px "DM Mono",monospace;color:rgb(0 0 0 / .55)}
+.ww-block.moving{transition:none;z-index:2;opacity:1;cursor:grabbing;box-shadow:0 10px 24px -6px rgb(0 0 0 / .6)}
+.ww-block.off{opacity:0;pointer-events:none}
+.ww-best{margin-top:10px;min-height:1.4em;color:var(--inv-text-2);font-size:13px}
+.ww-best b{color:#4ade80;font-weight:600}
+@media(max-width:640px){.ww-grid{--h:26px;grid-template-columns:34px repeat(5,1fr)}}
+
+/* ---------- GitHub activity: total commits and a bar per day (data/activity.json) ---------- */
+.activity{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:auto auto 1fr;align-items:end;gap:6px 22px;padding:20px 24px;
+  border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);text-decoration:none;position:relative;transition:border-color .25s}
+.activity:hover{border-color:var(--line-strong)}
+.act-total{margin:0;font-size:clamp(28px,3vw,40px);font-weight:800;letter-spacing:-.04em;line-height:1;white-space:nowrap}
+.act-total b{color:var(--accent);font-variant-numeric:tabular-nums}
+.act-sub{margin:0 0 4px;color:var(--muted);white-space:nowrap}
+.act-bars{display:flex;align-items:end;gap:3px;height:40px;min-width:0}
+.act-bars i{flex:1;min-width:2px;max-width:12px;border-radius:2px;background:var(--accent);height:var(--h);transform-origin:bottom}
+.act-bars i.zero{background:var(--line);height:3px}
+.act-tip{position:absolute;right:24px;top:10px;color:var(--muted);font-size:10px;opacity:0;transition:opacity .2s}
+.activity:hover .act-tip{opacity:1}
+@media(max-width:700px){.activity{grid-template-columns:1fr auto}.act-bars{grid-column:1/-1;height:34px}.act-tip{display:none}}
+
 footer{display:flex;justify-content:space-between;gap:12px;padding:26px var(--pad-x);background:var(--inv-bg);color:var(--inv-muted);font-size:12px;border-top:1px solid var(--inv-line)}
 footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{color:var(--inv-text)}
 
@@ -692,17 +771,23 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         <p class="sc-cap">Get reminded when you walk into home, the grocery store, or the gym.</p>
         <p class="sc-cap">Share a thought with a friend or a group. When one of you does it, it comes off both lists.</p>
       </div>
-      <div class="sc-try">
-        <p class="mo"><b>Try it.</b> Type on the phone, or tap one:</p>
-        <div class="try-chips">
+      <form class="sc-try" autocomplete="off" spellcheck="false">
+        <label class="try-label" for="htt-input"><span class="mo">Try the app</span>Type a reminder the way you’d text it</label>
+        <div class="try-field">
+          <input id="htt-input" type="text" placeholder="remind me to call Sam tomorrow at 5" maxlength="120" enterkeyhint="done">
+          <button class="try-clear" type="button" aria-label="Clear" hidden>×</button>
+          <button class="try-go" type="submit">Save</button>
+        </div>
+        <div class="try-chips" aria-label="Examples">
           <button type="button">call mom tmrw at 5</button>
           <button type="button">buy batteries next time I’m at Costco</button>
           <button type="button">MWF at 8am lift</button>
           <button type="button">check the bread in 20</button>
           <button type="button">pay rent on the 1st of every month</button>
         </div>
-        <p class="try-note">The app’s own reminder reader, ported from Swift to JavaScript. It runs in your browser and passes all 295 of the app’s test cases.</p>
-      </div>
+        <div class="try-result" aria-live="polite"></div>
+        <p class="try-note">This is the app’s own reminder reader, ported from Swift to JavaScript and running in your browser. It passes all 295 of the app’s test cases.</p>
+      </form>
     </div>
     <div class="sc-device">
       <div class="phone-frame">
@@ -711,15 +796,8 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
           <img src="app/htt-capture.webp" alt="Hold This Thought screen listing one-tap ways to capture a thought" width="828" height="1800" loading="lazy" decoding="async">
           <img src="app/htt-places.webp" alt="Hold This Thought places screen with thoughts waiting at home, the grocery store, and the pharmacy" width="828" height="1800" loading="lazy" decoding="async">
           <img src="app/htt-friends.webp" alt="Hold This Thought friends screen with shared thoughts and a group" width="828" height="1800" loading="lazy" decoding="async">
-          <form class="htt-try" autocomplete="off" spellcheck="false">
-            <label class="sr-only" for="htt-input">Try the app: type a thought</label>
-            <input id="htt-input" class="htt-input" placeholder="Hold a thought…" maxlength="120" enterkeyhint="done">
-          </form>
-          <div class="htt-card" aria-live="polite" hidden>
-            <p class="htt-head"><span class="htt-state">Reading as you type</span><span class="htt-ms"></span></p>
-            <p class="htt-title"></p>
-            <ul class="htt-rows"></ul>
-          </div>
+          <button class="htt-bar" type="button" tabindex="-1" aria-hidden="true"><span class="htt-typed"></span><i class="htt-caret"></i></button>
+          <div class="htt-card" aria-hidden="true" hidden></div>
         </div>
       </div>
     </div>
@@ -767,8 +845,10 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         <h4>Homeroom</h4>
         <p>A customizable dashboard where a student’s day starts: Canvas assignments, calendar, Spotify, to-dos, search and AI quick-ask on one screen. Drag and resize widgets, and your layout is saved. Free, no login.</p>
         <div class="pills"><span class="pill">React</span><span class="pill">Vite</span><span class="pill">Vercel</span><span class="pill">Serverless API</span></div>
+        <div class="build" data-build="homeroom"></div>
         <div class="proj-links">
-          <a class="btn" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
+          <button class="btn case-open" type="button" data-case="homeroom">CASE STUDY + DEMO <span class="arr">→</span></button>
+          <a class="btn ghost" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
           <a class="btn ghost" href="https://github.com/dileomason-stack/Project---Homeroom-" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a>
         </div>
       </div>
@@ -780,26 +860,21 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         <h4>WhenWorks</h4>
         <p>Finding a time for a group project shouldn’t take forty texts. Everyone uploads a screenshot of their schedule, AI reads it, and the times the whole group is free light up. Vote on a time and add it to everyone’s calendar. Free, no login.</p>
         <div class="pills"><span class="pill">Next.js</span><span class="pill">TypeScript</span><span class="pill">Gemini AI</span><span class="pill">Postgres</span><span class="pill">Vercel</span></div>
+        <div class="build" data-build="whenworks"></div>
         <div class="proj-links">
-          <a class="btn" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
+          <button class="btn case-open" type="button" data-case="whenworks">CASE STUDY + DEMO <span class="arr">→</span></button>
+          <a class="btn ghost" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
           <a class="btn ghost" href="https://github.com/dileomason-stack/Project---WhenWorks" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a>
         </div>
       </div>
     </article>
   </div>
-  <div class="activity reveal" id="activity">
-    <div class="act-copy">
-      <p class="mo act-label">GitHub activity / every commit, every repo</p>
-      <p class="act-total"><b data-count="0">0</b> commits</p>
-      <p class="act-sub">since <span class="act-since"></span>, across <span class="act-repos"></span> projects</p>
-      <ul class="act-legend"></ul>
-    </div>
-    <div class="act-chart">
-      <div class="act-months" aria-hidden="true"></div>
-      <div class="act-grid" role="img"></div>
-      <p class="act-tip mo" aria-hidden="true">Hover a day</p>
-    </div>
-  </div>
+  <a class="activity reveal" id="activity" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">
+    <p class="act-total"><b>0</b> commits</p>
+    <p class="act-sub mo">on GitHub since <span class="act-since">Sep 4</span></p>
+    <div class="act-bars" aria-hidden="true"></div>
+    <span class="act-tip mo" aria-hidden="true"></span>
+  </a>
 </section>
 
 <section class="education" id="education">
@@ -889,27 +964,80 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       <a class="btn ghost" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GITHUB <span class="arr">↗</span></a>
   </div>
 </section>
-<section class="versions" id="versions" aria-labelledby="versions-title">
-  <div class="ver-copy">
-    <p class="mo ver-label">This site, version by version</p>
-    <p class="ver-title" id="versions-title">Six weeks of git history.</p>
-    <p>Drag through it. Every frame is a real commit from this site’s repo, screenshotted as it looked that day, from a class starter page to what you’re reading now.</p>
-    <p class="ver-meta mo"><span class="ver-date"></span><span class="ver-sha"></span></p>
-    <p class="ver-msg"></p>
-  </div>
-  <div class="ver-stage">
-    <div class="ver-frame">
-      <div class="ver-chrome" aria-hidden="true"><i></i><i></i><i></i><span>dileomason-stack.github.io/Personal-Website</span></div>
-      <div class="ver-shots"></div>
-    </div>
-    <div class="ver-track">
-      <input class="ver-range" type="range" min="0" max="9" step="0.001" value="9" aria-label="Site version">
-      <div class="ver-ticks" aria-hidden="true"></div>
-    </div>
-  </div>
-</section>
 <footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="?intro">Replay intro ↺</a></span><span>Cal Poly SLO / Business + IS</span></footer>
 </main>
+
+<!-- Case studies (case-study.js): each card's screenshot and title morph into the page (View Transitions) -->
+<div class="case" id="case" tabindex="-1" data-lenis-prevent role="dialog" aria-modal="true" aria-labelledby="case-title" hidden>
+  <div class="case-bar"><button class="case-back mo" type="button">← Back to projects</button><span class="mo case-crumb"></span><button class="case-x" type="button" aria-label="Close case study">×</button></div>
+  <div class="case-body"></div>
+</div>
+<template id="case-homeroom">
+  <header class="case-hero">
+    <p class="mo case-kicker">Build Day #1 / Live / Built in four days</p>
+    <h2 class="case-title" id="case-title">Homeroom</h2>
+    <p class="case-lede">Where your school day starts. Canvas, your calendar, Spotify, mail, to-dos and AI on one screen, arranged the way you want.</p>
+    <img class="case-shot" src="homeroom-demo-poster.jpg" alt="Homeroom demo" width="1280" height="720">
+  </header>
+  <section class="case-grid">
+    <div><p class="mo case-h">The problem</p><p>A college day starts with a dozen tabs: Canvas, Gmail, the calendar, Spotify, the group chat, and a few more. Homeroom puts them on one screen, like home-screen widgets on your phone but for your laptop. Add the widgets you want, drag them around, resize them, and the layout is there the next time you open it. No account needed.</p></div>
+    <div><p class="mo case-h">What it does</p><ul class="case-list">
+      <li><b>Widgets for the whole day.</b> Canvas assignments, Google Calendar, to-dos, notes, Spotify, Gmail and Outlook, Claude and ChatGPT, news, sports scores and Sleeper fantasy football.</li>
+      <li><b>Your layout.</b> Drag any card, resize it from any edge, right-click for options. Separate dashboards for class, a project or downtime.</li>
+      <li><b>Paste any link to make a card.</b> Sites that can’t be shown inside a card get a link preview instead.</li>
+      <li><b>A Fun tab.</b> An arcade of 13 games, a daily word game and the daily puzzles everyone plays.</li>
+    </ul></div>
+  </section>
+  <section class="case-demo">
+    <div class="case-demo-copy"><p class="mo case-h">Try it</p><h3>Make it your layout.</h3><p>A tiny Homeroom. Drag a card by its top bar, resize it from the corner, and the others shuffle up out of the way, the same way the real dashboard behaves. Your layout is saved, so it’s still here if you reload.</p><button class="case-reset mo" type="button">Reset layout</button></div>
+    <div class="hr-demo" data-demo="homeroom"></div>
+  </section>
+  <section class="case-grid">
+    <div><p class="mo case-h">How it works</p><p>Most big sites (Canvas, Gmail, Google) refuse to be shown inside another page, so every widget is one of three things: an official embed, a widget that fetches the data and draws it itself, or a quick launcher that opens the real site. Small server functions fetch what a browser can’t (Canvas and calendar feeds, headlines, link previews, Spotify’s player colors), and each one only talks to the sites it’s meant to, so none can be used as an open proxy.</p></div>
+    <div><p class="mo case-h">Choices</p><ul class="case-list">
+      <li><b>No accounts by default.</b> Dashboards live in your browser; Google sign-in is only for syncing devices or Google features.</li>
+      <li><b>Private by design.</b> Canvas and calendar feed links stay in your own browser and are never logged.</li>
+      <li><b>Built with</b> React, Vite, react-grid-layout, Vercel Functions and Upstash Redis.</li>
+    </ul></div>
+  </section>
+  <figure class="case-fig"><img src="projects/homeroom-example.webp" alt="Homeroom’s example dashboard with Spotify, Canvas assignments, Google Calendar, a Google Doc, notes, mail, fantasy football and Claude on one screen" width="1600" height="1000" loading="lazy"><figcaption class="mo">The example dashboard, for a fictional Cal Poly student</figcaption></figure>
+  <section class="case-log"><p class="mo case-h">Every commit</p><div class="build big" data-build="homeroom"></div></section>
+  <div class="case-links"><a class="btn" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN HOMEROOM <span class="arr">↗</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---Homeroom-" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a></div>
+</template>
+<template id="case-whenworks">
+  <header class="case-hero">
+    <p class="mo case-kicker">Side project / Live / First version in one evening</p>
+    <h2 class="case-title" id="case-title">WhenWorks</h2>
+    <p class="case-lede">Find a time when everyone in your group project is actually free. Everyone uploads a screenshot of their schedule, AI reads it, and the times that work for the whole group light up.</p>
+    <img class="case-shot" src="whenworks-demo-poster.jpg" alt="WhenWorks demo" width="1280" height="720">
+  </header>
+  <section class="case-grid">
+    <div><p class="mo case-h">The problem</p><p>Group chats are a terrible place to schedule a meeting. WhenWorks replaces “when is everyone free?” with one link. No accounts, and no painting a grid by hand: a screenshot of the calendar you already have is enough.</p></div>
+    <div><p class="mo case-h">How it works</p><ol class="case-list">
+      <li><b>Make a group link</b> and paste it in the group chat.</li>
+      <li><b>Everyone uploads a screenshot</b> of their class schedule or calendar.</li>
+      <li><b>Check what it read.</b> A calendar of what it found sits beside the screenshot; tap to fix anything.</li>
+      <li><b>See when everyone is free.</b> Green means everyone can make it.</li>
+      <li><b>Suggest, vote, lock it in,</b> then add it to Google, Apple or Outlook calendars in one tap.</li>
+    </ol></div>
+  </section>
+  <section class="case-demo">
+    <div class="case-demo-copy"><p class="mo case-h">Try it</p><h3>Find the time.</h3><p>Three made-up classmates and their busy times. Drag any block to another hour or day and watch the green, the hours when all three are free, update. Tap a name to take their schedule out or put it back.</p><button class="case-reset mo" type="button">Reset schedules</button></div>
+    <div class="ww-demo" data-demo="whenworks"></div>
+  </section>
+  <figure class="case-fig"><img src="projects/whenworks-review.webp" alt="WhenWorks review screen comparing a schedule screenshot to the calendar it was read into" width="1491" height="812" loading="lazy"><figcaption class="mo">Checking what it read: the screenshot beside the calendar it became</figcaption></figure>
+  <section class="case-grid">
+    <div><p class="mo case-h">Reading screenshots</p><p>Google’s Gemini turns a schedule screenshot into busy times. It handles layered calendars with events side by side, columns labeled only with dates, and two time zones on the axis, and it skips all-day events and asynchronous classes. When Gemini is overloaded it retries and falls back to another model. Classes repeat weekly; one-off events only block their own week.</p></div>
+    <div><p class="mo case-h">Private by default</p><ul class="case-list">
+      <li><b>Screenshots are never stored.</b> Only the busy times are saved.</li>
+      <li><b>Event names stay hidden</b> from the group unless you share them.</li>
+      <li><b>No accounts.</b> Each browser keeps a private key, so only you can edit your schedule.</li>
+      <li><b>Built with</b> Next.js, TypeScript, Tailwind, Gemini, Neon Postgres and Vercel.</li>
+    </ul></div>
+  </section>
+  <section class="case-log"><p class="mo case-h">Every commit</p><div class="build big" data-build="whenworks"></div></section>
+  <div class="case-links"><a class="btn" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN WHENWORKS <span class="arr">↗</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---WhenWorks" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a></div>
+</template>
 
 <script>
 (() => {

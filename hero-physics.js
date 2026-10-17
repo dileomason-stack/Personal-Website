@@ -6,7 +6,7 @@ const KEY = 'mdl-grabbed';
 
 export function initHeadline(h2) {
   // One span per letter, keeping the <br>s and the colored <em>
-  h2.setAttribute('aria-label', h2.textContent.replace(/\s+/g, ' ').trim());
+  h2.setAttribute('aria-label', h2.innerText.replace(/\s+/g, ' ').trim());
   const split = node => {
     for (const child of [...node.childNodes]) {
       if (child.nodeType === Node.TEXT_NODE) {
@@ -28,7 +28,7 @@ export function initHeadline(h2) {
   const load = () => (loading ??= import('matter-js').then(m => (Matter = m.default || m)));
   h2.addEventListener('pointerenter', load, { once: true });
 
-  let engine, bodies, homes, drag = null, raf = 0, still = 0, last = 0;
+  let engine, bodies, homes, drag = null, raf = 0, still = 0, idle = 0, last = 0;
 
   // Bodies sized to each letter's box, at its place in the word; walls at the edges of the hero
   function build() {
@@ -70,14 +70,15 @@ export function initHeadline(h2) {
     });
     // Once everything is home and still for a moment, snap exactly into place and stop
     still = moving ? 0 : still + 1;
-    if (still > 20) {
+    idle = drag ? 0 : idle + 1;
+    if (still > 20 || idle > 480) {
       bodies.forEach((b, i) => {
         Matter.Body.setPosition(b, homes[i]); Matter.Body.setAngle(b, 0);
         Matter.Body.setVelocity(b, { x: 0, y: 0 }); Matter.Body.setAngularVelocity(b, 0);
       });
       chars.forEach(c => (c.style.transform = ''));
       h2.classList.remove('live');
-      raf = 0; last = 0;
+      raf = 0; last = 0; idle = 0;
       return;
     }
     raf = requestAnimationFrame(frame);
@@ -90,7 +91,7 @@ export function initHeadline(h2) {
     h2.setPointerCapture(e.pointerId);
     await load();
     // Measured fresh each time it starts from rest, so a resize or font swap can't misplace anything
-    if (!raf) { engine && Matter.Engine.clear(engine); build(); }
+    if (!raf || !engine) { engine && Matter.Engine.clear(engine); build(); }
     const body = bodies[chars.indexOf(ch)], p = local(e);
     const offset = Matter.Vector.rotate({ x: p.x - body.position.x, y: p.y - body.position.y }, -body.angle);
     if (drag) Matter.Composite.remove(engine.world, drag);
@@ -102,6 +103,28 @@ export function initHeadline(h2) {
     if (note) { note.classList.remove('on'); try { localStorage.setItem(KEY, '1'); } catch (err) {} }
   });
   h2.addEventListener('pointermove', e => { if (drag) drag.pointA = local(e); });
+
+  // A resize (full screen to split screen, rotating a tablet) moves every letter's home and the
+  // hero's walls, so anything in motion would spring toward stale spots. Drop the physics instead:
+  // letters slide back into the new layout, and the next grab measures everything fresh.
+  let width = h2.offsetWidth;
+  new ResizeObserver(() => {
+    if (h2.offsetWidth === width) return;
+    width = h2.offsetWidth;
+    if (!engine) return;
+    cancelAnimationFrame(raf);
+    raf = 0; last = 0; still = 0;
+    if (drag) { Matter.Composite.remove(engine.world, drag); drag = null; }
+    Matter.Engine.clear(engine);
+    engine = null;
+    h2.classList.remove('live');
+    chars.forEach(c => {
+      c.classList.remove('held');
+      if (!c.style.transform) return;
+      c.animate([{ transform: c.style.transform }, { transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      c.style.transform = '';
+    });
+  }).observe(h2);
   const release = () => {
     if (!drag) return;
     Matter.Composite.remove(engine.world, drag);

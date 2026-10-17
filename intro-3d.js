@@ -466,30 +466,33 @@ function start() {
 
     // Time-lapse the rest of the session so the phone gets the build before the camera dives in
     session.auto = false;
-    if (session.t < INSTALL_AT + 1.2) gsap.to(session, { t: INSTALL_AT + 1.2, duration: 1.25, ease: 'power1.inOut' });
+    if (session.t < INSTALL_AT + 1.2) gsap.to(session, { t: INSTALL_AT + 1.2, duration: 1.9, ease: 'power1.inOut' });
 
     tl = gsap.timeline();
     tl.to(leverPivot.rotation, { x: ON, duration: 0.3, ease: 'back.out(3)' }, 0)
       .to(shake, { keyframes: [{ y: -0.035 }, { y: 0.015 }, { y: 0 }], duration: 0.3 }, 0.04)
       .to(S, { swing: 0.13, duration: 0.25, ease: 'power2.out' }, 0.1)
       .to(S, { swing: 0.03, duration: 3, ease: 'power2.inOut' }, 0.35)
-      .set(S, { led: 0 }, 0.14);
+      .set(S, { led: 0 }, 0.18);
 
-    // A fluorescent-style stutter before it catches
-    [[0.14, 1], [0.17, 0], [0.26, 0.8], [0.29, 0.05], [0.46, 1], [0.5, 0.2], [0.54, 0.9], [0.58, 0.35]]
-      .forEach(([at, v]) => tl.set(S, { bulb: v, room: v * 0.3 }, at));
+    // A bulb on a tired connection: a faint warm-up, a few uneven flashes with soft edges (a
+    // filament takes a moment to glow and to fade), one last wobble, then it catches.
+    // [when, brightness, how long it takes to get there]
+    [[0.18, 0.22, 0.12], [0.34, 0, 0.1], [0.52, 0.85, 0.06], [0.66, 0.08, 0.12], [0.86, 0.6, 0.07],
+     [0.95, 0.15, 0.1], [1.08, 1, 0.08], [1.2, 0.7, 0.06], [1.28, 1, 0.1]]
+      .forEach(([at, v, d]) => tl.to(S, { bulb: v, room: v * 0.35, duration: d, ease: 'sine.inOut' }, at));
 
-    tl.to(S, { bulb: 1, room: 1, torch: 0, duration: 0.8, ease: 'power2.out' }, 0.62)
-      .to(copy, { '--hi': '#121a19', '--base': '#121a19', duration: 0.6 }, 0.64)
-      .to(label, { color: '#121a19', duration: 0.6 }, 0.64)
+    tl.to(S, { bulb: 1, room: 1, torch: 0, duration: 0.8, ease: 'power2.out' }, 1.38)
+      .to(copy, { '--hi': '#121a19', '--base': '#121a19', duration: 0.6 }, 1.4)
+      .to(label, { color: '#121a19', duration: 0.6 }, 1.4)
       // Into the laptop, which switches from the terminal to the homepage on the way in
-      .to(copy, { y: -innerHeight * 0.25, opacity: 0, filter: 'blur(6px)', duration: 0.8, ease: 'power2.in' }, 1.3)
-      .to([switchbox, intro.querySelector('.intro-tools')], { opacity: 0, duration: 0.45, ease: 'power2.in' }, 1.3)
-      .add(() => sound.whoosh(2), 1.4)
-      .to(S, { fly: 1, duration: 2, ease: 'power3.inOut' }, 1.4)
-      .to(S, { paper: 1, duration: 0.6, ease: 'power1.inOut' }, 2.3)
-      .add(() => { if (!snap.texture) gsap.to(wash, { opacity: 1, duration: 0.15 }); }, 3.25)
-      .add(finish, 3.45);
+      .to(copy, { y: -innerHeight * 0.25, opacity: 0, filter: 'blur(6px)', duration: 0.8, ease: 'power2.in' }, 2.05)
+      .to([switchbox, intro.querySelector('.intro-tools')], { opacity: 0, duration: 0.45, ease: 'power2.in' }, 2.05)
+      .add(() => sound.whoosh(2), 2.15)
+      .to(S, { fly: 1, duration: 2, ease: 'power3.inOut' }, 2.15)
+      .to(S, { paper: 1, duration: 0.6, ease: 'power1.inOut' }, 3.05)
+      .add(() => { if (!snap.texture) gsap.to(wash, { opacity: 1, duration: 0.15 }); }, 4)
+      .add(finish, 4.2);
   });
 
   // Snapshot of the homepage as it looks once the intro is gone, to put on the laptop screen

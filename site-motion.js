@@ -70,7 +70,7 @@ function heroEntrance() {
   tl.fromTo(hero, { '--grid-size': '0%' }, { '--grid-size': '80%', duration: 2, ease: 'power2.out' }, 0)
     .add(() => decode(eyebrow, 0.9), 0.05)
     .from(letters.chars, { yPercent: 115, rotate: 6, transformOrigin: '0% 100%', duration: 1.1, stagger: 0.028 }, 0.15)
-    .add(() => letters.revert(), 1.6)
+    .add(() => letters.revert(), 2.1)
     .from(lines.lines, { yPercent: 105, duration: 1, stagger: 0.08 }, 0.55)
     .add(() => lines.revert(), 1.8)
     .from(buttons, { y: 26, autoAlpha: 0, scale: 0.92, duration: 0.9, ease: 'back.out(1.8)', stagger: 0.08 }, 0.85)

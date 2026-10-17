@@ -40,90 +40,118 @@ if (now) {
 }
 
 // ---------- Hold This Thought: type a thought and the app's own parser reads it ----------
-// The field sits beside the phone; the phone's "Hold a thought…" bar mirrors what you type and a card
-// shows what the app understood. On phones the card also shows right under the field.
+// Mirrors the app (CaptureView.swift): typing opens the "New thought" sheet over the home screen, the
+// "Remind me" choice follows the words as they're typed, and Save closes the sheet and shows the lime
+// "Reminder set" banner with the same wording as MemoryStore.confirmSaved. On phones, where the mockup
+// has scrolled away, a summary card also shows under the field.
 const showcase = $('.showcase');
 if (showcase) {
   const form = $('.sc-try', showcase), input = $('#htt-input', form), clear = $('.try-clear', form), inline = $('.try-result', form);
-  const bar = $('.htt-bar', showcase), typed = $('.htt-typed', bar), card = $('.htt-card', showcase);
+  const screen = $('.phone-screen', showcase), sheet = $('.htt-sheet', screen), field = $('.htt-text', sheet);
+  const chipEls = $$('.htt-chips span', sheet), detail = $('.htt-detail', sheet), saveBtn = $('.htt-save', sheet);
+  const banner = $('.htt-banner', screen), bannerText = $('.htt-banner-text', banner);
   const chips = $$('.try-chips button', form);
-  const icons = {
-    when: '<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="8"/>',
-    timer: '<path d="M12 9v4l2 1"/><circle cx="12" cy="13" r="7"/><path d="M10 3h4"/>',
-    where: '<path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2"/>',
+  const EXAMPLES = ['What do you want to remember?', 'Try “gym every Tue and Thu at 6”', 'Try “buy batteries next time I’m at Target”', 'Try “call mom after work”', 'Try “pay rent on the 1st of every month”'];
+  const ICON = {
+    clock: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/>',
+    pin: '<path d="M20 4 4 10.6l6.6 2.7L13.4 20z"/>',
     repeat: '<path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>',
+    when: '<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="8"/>',
     none: '<path d="M6 4h12v17l-6-4-6 4z"/>',
   };
+  const svg = (d, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
   const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const row = (icon, key, text, cls = '') => `<li class="${cls}"><svg viewBox="0 0 24 24" aria-hidden="true">${icons[icon]}</svg><span class="k">${key}</span><span>${text}</span></li>`;
   const timeOf = d => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  function whenText({ date, timer }) {
-    const now = new Date(), mins = Math.round((date - now) / 60000);
-    if (timer && mins < 24 * 60) return `In ${mins < 60 ? `${mins} min` : `${Math.floor(mins / 60)} hr${mins % 60 ? ` ${mins % 60} min` : ''}`} (${timeOf(date)})`;
-    const days = Math.round((new Date(date.getFullYear(), date.getMonth(), date.getDate()) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
-    const day = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days < 7 ? date.toLocaleDateString('en-US', { weekday: 'long' })
-      : date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: date.getFullYear() === now.getFullYear() ? undefined : 'numeric' });
-    return `${day}, ${timeOf(date)}`;
+  const sameDay = (a, b) => a.toDateString() === b.toDateString();
+  // "Reminder set · Tomorrow 5:00 PM", "Reminder set · Every Mon, Wed, Fri · 8:00 AM", "Reminder set · At Costco"
+  function confirmation(r) {
+    if (r.when) {
+      const d = r.when.date, now = new Date(), tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const day = sameDay(d, now) ? 'Today' : sameDay(d, tomorrow) ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      return `Reminder set · ${r.repeat ? `${r.repeat} · ${timeOf(d)}` : `${day} ${timeOf(d)}`}`;
+    }
+    if (r.place) return `Reminder set · At ${r.place}`;
+    return 'Saved · no reminder';
   }
 
-  let lastRows = '';
-  function read(saved) {
+  let example = 0, bannerTimer = 0, lastDetail = '';
+  setInterval(() => { if (!input.value) { example = (example + 1) % EXAMPLES.length; field.dataset.placeholder = EXAMPLES[example]; } }, 3500);
+  field.dataset.placeholder = EXAMPLES[0];
+  const open = on => screen.classList.toggle('typing', on);
+
+  function read() {
     const text = input.value.trim();
     clear.hidden = !input.value;
-    typed.textContent = input.value;
-    bar.classList.toggle('on', !!input.value);
-    bar.classList.toggle('over', typed.offsetWidth > bar.clientWidth - 10);
+    field.textContent = input.value;
+    saveBtn.classList.toggle('off', !text);
     chips.forEach(c => c.classList.toggle('on', c.textContent.replace(/’/g, "'") === input.value.replace(/’/g, "'")));
-    if (!text) { card.hidden = true; inline.innerHTML = ''; lastRows = ''; return; }
-    const t0 = performance.now(), r = parseThought(text), took = performance.now() - t0;
-    const list = [];
-    if (r.when) list.push(row(r.when.timer ? 'timer' : 'when', 'When', whenText(r.when)));
-    if (r.repeat) list.push(row('repeat', 'Repeats', r.repeat));
-    if (r.place) list.push(row('where', 'Where', r.place === 'Home' ? 'When you get home' : `When you get to ${esc(r.place)}`));
-    if (r.nearby) list.push(row('where', 'Offers', `A reminder at ${esc(r.nearby)}`, 'nearby'));
-    if (!list.length) list.push(row('none', 'When', 'Not said yet, so it’s saved for later', 'none'));
-    const rows = list.join('');
-    const html = `<div class="htt-head"><span class="htt-state">${saved ? 'Saved' : 'Reading…'}</span><span>${took < 1 ? took.toFixed(2) : took.toFixed(1)} ms</span></div>
-      <div class="htt-title">${esc(r.title)}</div><ul class="htt-rows">${rows}</ul>`;
-    // The rows only re-render (and animate in) when what was understood changes, not on every key
-    const fresh = rows !== lastRows || card.hidden;
-    lastRows = rows;
-    for (const el of [card, inline]) {
-      if (fresh || !el.firstChild) el.innerHTML = html;
-      else {
-        $('.htt-state', el).textContent = saved ? 'Saved' : 'Reading…';
-        $('.htt-head span:last-child', el).textContent = `${took < 1 ? took.toFixed(2) : took.toFixed(1)} ms`;
-        $('.htt-title', el).textContent = r.title;
-      }
-      el.classList.toggle('saved', !!saved);
+    if (!text) { chipEls.forEach((c, i) => c.classList.toggle('on', i === 0)); detail.innerHTML = lastDetail = ''; inline.innerHTML = ''; return null; }
+    const r = parseThought(text);
+    // The "Remind me" choice follows the words: Time, Place, or No reminder
+    const pick = r.when ? 1 : r.place ? 2 : 0;
+    chipEls.forEach((c, i) => c.classList.toggle('on', i === pick));
+    let html = '';
+    if (pick === 1) {
+      const d = r.when.date;
+      html = `<div class="htt-row"><span class="htt-tile">${svg(ICON.clock)}</span><span class="htt-pills"><span>${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span><span>${timeOf(d)}</span></span></div>`
+        + (r.repeat ? `<div class="htt-repeat">${svg(ICON.repeat)}${esc(r.repeat)}</div>` : '');
+    } else if (pick === 2) {
+      html = `<div class="htt-row"><span class="htt-tile" style="--c:#ff7300">${svg(ICON.pin)}</span><span class="htt-label">${esc(r.place)}</span><span class="chev">›</span></div>`;
     }
-    if (card.hidden) { card.hidden = false; card.style.animation = 'none'; card.offsetWidth; card.style.animation = ''; }
+    if (html !== lastDetail) detail.innerHTML = lastDetail = html;
+    // Phones: a summary under the field
+    const rows = [];
+    if (r.when) rows.push([r.repeat ? 'repeat' : 'when', r.repeat ? `${r.repeat} · ${timeOf(r.when.date)}` : confirmation({ when: r.when }).replace('Reminder set · ', '')]);
+    else if (r.place) rows.push(['pin', r.place === 'Home' ? 'When you get home' : `When you get to ${r.place}`]);
+    else rows.push(['none', 'No reminder yet. Saved for later']);
+    inline.innerHTML = `<div class="htt-title">${esc(r.title)}</div><ul class="htt-rows">${rows.map(([i, t]) => `<li>${svg(ICON[i])}<span>${esc(t)}</span></li>`).join('')}</ul>`;
+    return r;
   }
 
-  // The phone has to be on its home screen (the bar is part of that screenshot); stop the tabs advancing
+  function save() {
+    const r = read();
+    if (!r) return;
+    // Like the app: the sheet goes away, then the banner comes up from the bottom for five seconds
+    open(false);
+    input.value = '';
+    read();
+    inline.innerHTML = `<div class="htt-saved">${svg('<circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5" stroke="#9eeb1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>')}<span>${esc(confirmation(r))}</span></div>`;
+    clearTimeout(bannerTimer);
+    banner.classList.remove('on');
+    bannerText.textContent = confirmation(r);
+    setTimeout(() => banner.classList.add('on'), reduce ? 0 : 380);
+    bannerTimer = setTimeout(() => { banner.classList.remove('on'); inline.innerHTML = ''; }, 5400);
+  }
+
+  // The phone has to be on its home screen (the sheet opens over it); stop the tabs advancing
   const goHome = () => { const tab = $('.sc-step', showcase); if (!tab.classList.contains('is-active') || !showcase.classList.contains('manual')) tab.click(); };
   let typing = 0;
-  input.addEventListener('focus', goHome);
-  input.addEventListener('input', () => { typing++; read(false); });
-  form.addEventListener('submit', e => { e.preventDefault(); read(true); });
-  clear.addEventListener('click', () => { typing++; input.value = ''; read(false); input.focus(); });
-  bar.addEventListener('click', () => input.focus());
+  input.addEventListener('focus', () => { goHome(); open(true); banner.classList.remove('on'); });
+  input.addEventListener('blur', () => setTimeout(() => { if (!input.value && document.activeElement !== input) open(false); }, 150));
+  input.addEventListener('input', () => { typing++; open(true); banner.classList.remove('on'); read(); });
+  form.addEventListener('submit', e => { e.preventDefault(); typing++; save(); });
+  saveBtn.addEventListener('click', () => { typing++; save(); });
+  $('.htt-cancel', sheet).addEventListener('click', () => { typing++; input.value = ''; read(); open(false); });
+  clear.addEventListener('click', () => { typing++; input.value = ''; read(); input.focus(); });
   chips.forEach(chip => chip.addEventListener('click', () => {
     goHome();
     const text = chip.textContent, run = ++typing;
-    if (reduce) { input.value = text; read(true); return; }
-    // Typed out a letter at a time, so you can watch it read the thought as it grows
+    banner.classList.remove('on');
+    open(true);
+    if (reduce) { input.value = text; read(); setTimeout(() => run === typing && save(), 900); return; }
+    // Typed out a letter at a time, then saved, so the whole flow plays
     input.value = '';
     let i = 0;
     const tick = () => {
       if (run !== typing) return;
       input.value = text.slice(0, ++i);
-      read(false);
-      if (i < text.length) setTimeout(tick, 22 + Math.random() * 30);
-      else setTimeout(() => run === typing && read(true), 300);
+      read();
+      if (i < text.length) setTimeout(tick, 30 + Math.random() * 35);
+      else setTimeout(() => run === typing && save(), 1100);
     };
-    tick();
+    setTimeout(tick, 380);
   }));
+  read();
 }
 
 // Runs `fn` once, when `el` comes within a screen or so of view

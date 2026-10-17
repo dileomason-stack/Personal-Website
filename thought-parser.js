@@ -558,7 +558,8 @@ function weekdaysLabel(days, other) {
   if (key === '12345') return 'Every weekday';
   if (key === '06') return 'Every weekend';
   const names = days.map(d => (days.length > 1 ? SHORT_DAYS[d] : WEEKDAYS[d][0].toUpperCase() + WEEKDAYS[d].slice(1)));
-  return `Every ${other ? 'other ' : ''}${names.length > 1 ? names.slice(0, -1).join(', ') + ' & ' + names.at(-1) : names[0]}`;
+  // The app's wording (RepeatRule.description): two days with "&", more with commas
+  return `Every ${other ? 'other ' : ''}${names.length === 2 ? names.join(' & ') : names.join(', ')}`;
 }
 
 // ---------- Where ----------

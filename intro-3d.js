@@ -494,8 +494,7 @@ function start() {
       snap.image = await html2canvas(document.body, {
         x: 0, y: 0, width: innerWidth, height: innerHeight, windowWidth: innerWidth, windowHeight: innerHeight,
         scrollX: 0, scrollY: 0, scale: Math.min(devicePixelRatio, 2), backgroundColor: pageColor(), logging: false,
-        // (the intro itself, and the blueprint layers, whose circular clip html2canvas can't do)
-        ignoreElements: el => el.id === 'intro' || ['bp', 'bp-ring', 'bp-tip', 'bp-chip'].some(c => el.classList?.contains(c)),
+        ignoreElements: el => el.id === 'intro',
         onclone: doc => {
           doc.getElementById('bar').style.backdropFilter = 'none';
           // The live page keeps the hero hidden behind the intro; the snapshot shows it as it'll look after

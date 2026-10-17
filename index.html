@@ -176,7 +176,7 @@ body.locked .hero .reveal{opacity:0}
 .now-roll.flip .now-b{transform:none;opacity:1}
 
 /* ---------- Shared ---------- */
-section{padding:clamp(88px,11vw,144px) var(--pad-x);position:relative}
+section{padding:clamp(72px,8vw,112px) var(--pad-x);position:relative}
 .num{color:var(--accent);margin:0 0 22px;display:flex;align-items:center;gap:12px}
 .num:before{content:"";width:24px;height:1px;background:currentColor}
 .display{font-size:clamp(44px,6vw,84px);line-height:.92;letter-spacing:-.045em;margin:0;font-weight:800}
@@ -283,20 +283,6 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .proj p{color:var(--text-2);line-height:1.6;margin:0 0 20px}
 .proj .pills{margin-bottom:24px}
 .proj-links{display:flex;gap:10px;margin-top:auto;flex-wrap:wrap}
-/* Build log: every commit as a tick, work sessions side by side (idle gaps squeezed out) */
-.build{margin:0 0 24px;padding:14px 0 0;border-top:1px solid var(--line)}
-.proj-body .build-head,.build-head{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;color:var(--muted)}
-.build-head b{color:var(--text);font-weight:500}
-.build-track{position:relative;height:30px;touch-action:pan-y;cursor:crosshair}
-.build-track i{position:absolute;bottom:0;width:2px;height:14px;margin-left:-1px;border-radius:1px;background:var(--line-strong);transform-origin:bottom;transition:background .15s,height .15s}
-.build-track i.done{background:var(--text-2)}
-.build-track i.on{background:var(--accent);height:30px}
-.build-track s{position:absolute;bottom:4px;height:6px;border-left:1px dashed var(--line-strong);border-right:1px dashed var(--line-strong);opacity:.7}
-.build-head span{white-space:nowrap}
-.build-days{position:relative;height:16px;margin-top:6px;font:500 10px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.build-days span{position:absolute;white-space:nowrap}
-.build-msg{min-height:2.9em;margin:10px 0 0!important;font-size:14px;line-height:1.45;color:var(--text-2)}
-.build-msg time{display:block;font:500 10.5px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
 .proj-links .btn{height:42px;padding:0 18px;font-size:12px}
 .proj-grid.single{grid-template-columns:1fr}
 .single .proj{display:grid;grid-template-columns:1.15fr .85fr}
@@ -308,7 +294,8 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 @media(max-width:640px){.projects .head{display:block}.projects .head p.body{margin-top:18px}.shot{margin:12px 12px 0}.proj-body{padding:22px}}
 
 /* ---------- Education ---------- */
-.education{background:var(--tint)}
+.education{background:var(--tint);padding-top:clamp(64px,7vw,96px);padding-bottom:clamp(64px,7vw,96px)}
+.school:last-child{margin-bottom:0}
 .edu-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(40px,8vw,110px)}
 /* The heading and logos ride along beside the school cards instead of leaving a gap */
 @media(min-width:901px){.edu-grid>:first-child{position:sticky;top:120px;align-self:start}}
@@ -327,7 +314,7 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .school .pills{margin-top:20px}
 
 /* ---------- About ---------- */
-.details{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,7vw,100px);background:var(--bg);padding-bottom:clamp(40px,5vw,64px)}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,7vw,100px);background:var(--bg);padding-top:clamp(56px,6vw,88px);padding-bottom:clamp(32px,4vw,48px)}
 .details h4{font-size:30px;letter-spacing:-.035em;margin:0 0 22px}
 .details p.body{color:var(--text-2);line-height:1.7;font-size:16px;margin:0}
 .block+.block{margin-top:48px}
@@ -370,10 +357,11 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 /* Try the app: an input beside the phone; the phone's own bar mirrors it and a card reads it */
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .htt-bar{all:unset;position:absolute;left:17.6%;width:56%;top:84.2%;height:4.4%;z-index:1;display:flex;align-items:center;padding:0 4px;border-radius:8px;background:#f1f3f0;
-  color:#141414;font:500 calc(var(--w) * .039) Manrope,system-ui,sans-serif;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;cursor:text;opacity:0;transition:opacity .25s}
+  color:#3a3b39;font:400 calc(var(--w) * .038) -apple-system,system-ui,sans-serif;white-space:nowrap;overflow:hidden;cursor:text;opacity:0;transition:opacity .25s}
 .htt-bar.on{opacity:1}
 .htt-typed{flex:none}
 .htt-bar.over{justify-content:flex-end}
+.htt-bar.over:before{content:"";position:absolute;left:0;top:0;bottom:0;width:22%;z-index:1;background:linear-gradient(90deg,#f1f3f0 25%,rgba(241,243,240,0))}
 .htt-caret{flex:none;width:1.5px;height:1.1em;margin-left:1px;background:#2f7d34;animation:caret 1s steps(1) infinite}
 @keyframes caret{50%{opacity:0}}
 .phone-screen img:first-of-type:not(.is-active)~.htt-bar,.phone-screen img:first-of-type:not(.is-active)~.htt-card{opacity:0;pointer-events:none}
@@ -382,14 +370,15 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
   transform-origin:50% 100%;animation:cardIn .45s var(--ease) both}
 .htt-card[hidden]{display:none}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(.96)}}
-.htt-head{display:flex;justify-content:space-between;gap:8px;margin:0 0 .5em;font:500 .74em/1.2 "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#7a7b77}
+.htt-head{display:flex;justify-content:space-between;gap:8px;margin:0 0 .35em;font:600 .78em/1.2 Manrope,system-ui,sans-serif;color:#7a7b77}
+.htt-head span:last-child{font-weight:500;font-variant-numeric:tabular-nums;opacity:.8}
 .htt-card.saved .htt-state,.try-result.saved .htt-state{color:#2f7d34}
 .htt-card.saved .htt-state:before,.try-result.saved .htt-state:before{content:"✓ "}
-.htt-title{margin:0 0 .55em;color:#141414;font-weight:800;font-size:1.36em;line-height:1.2;letter-spacing:-.02em;overflow-wrap:anywhere}
-.htt-rows{list-style:none;margin:0;padding:0;display:grid;gap:.5em;font-weight:600;color:#2a2b29}
-.htt-rows li{display:grid;grid-template-columns:auto 4.2em 1fr;align-items:center;gap:.5em;animation:rowIn .35s var(--ease) both}
+.htt-title{margin:0 0 .5em;color:#141414;font-weight:700;font-size:1.3em;line-height:1.2;letter-spacing:-.02em;overflow-wrap:anywhere}
+.htt-rows{list-style:none;margin:0;padding:0;display:grid;gap:.45em;font-weight:500;color:#2a2b29;letter-spacing:-.01em}
+.htt-rows li{display:flex;align-items:center;gap:.55em;animation:rowIn .35s var(--ease) both}
 .htt-rows li:nth-child(2){animation-delay:.05s}.htt-rows li:nth-child(3){animation-delay:.1s}
-.htt-rows .k{font:500 .72em "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#7a7b77}
+.htt-rows .k{display:none}
 @keyframes rowIn{from{opacity:0;transform:translateX(-6px)}}
 .htt-rows svg{flex:none;width:1.3em;height:1.3em;padding:.22em;border-radius:.35em;background:#e8f4dc;stroke:#2f7d34;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .htt-rows .none{color:#7a7b77;font-weight:500}
@@ -506,12 +495,6 @@ html.lenis{scroll-behavior:auto}
 .case-fig{margin:clamp(56px,7vw,96px) 0 0}
 .case-fig img{width:100%;height:auto;border-radius:var(--r-md);border:1px solid var(--line)}
 .case-fig figcaption{margin-top:12px;color:var(--muted)}
-.case-log{margin-top:clamp(56px,7vw,96px)}
-.build.big{border-top:0;padding:0}
-.build.big .build-track{height:56px}
-.build.big .build-track i{height:26px;width:3px}
-.build.big .build-track i.on{height:56px}
-.build.big .build-msg{font-size:17px}
 .case-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:48px}
 html.case-is-open{overflow:hidden}
 /* The rest of the page fades under the morph (the theme switch keeps its own circle reveal) */
@@ -523,29 +506,45 @@ html.vt-case-out::view-transition-new(root){animation:none}
 ::view-transition-old(case-title),::view-transition-new(case-title){height:100%;object-fit:contain;object-position:left}
 @media(max-width:900px){.case-grid,.case-demo{grid-template-columns:1fr}.case-crumb{display:none}}
 
-/* Homeroom demo: a tiny dashboard grid (4 columns) with draggable, resizable cards */
-.hr-demo{--cols:4;--row:64px;--gap:8px;position:relative;height:calc(var(--rows,5) * (var(--row) + var(--gap)) - var(--gap));border-radius:14px;padding:0;
-  background:repeating-linear-gradient(90deg,transparent 0 calc((100% + var(--gap)) / var(--cols) - var(--gap)),rgb(255 255 255 / .03) 0 calc((100% + var(--gap)) / var(--cols)));transition:height .3s var(--ease)}
-.hr-card{position:absolute;display:flex;flex-direction:column;border-radius:12px;background:#fbfaf7;color:#1b1b19;overflow:hidden;box-shadow:0 1px 2px rgb(0 0 0 / .2);
-  transition:left .3s var(--ease),top .3s var(--ease),width .3s var(--ease),height .3s var(--ease),box-shadow .2s;font:500 12px/1.35 Manrope,system-ui,sans-serif}
-.hr-card.moving{transition:box-shadow .2s;z-index:3;box-shadow:0 20px 40px -12px rgb(0 0 0 / .6);cursor:grabbing}
-.hr-ghost{position:absolute;border-radius:12px;background:rgb(255 255 255 / .08);border:1px dashed rgb(255 255 255 / .35);transition:all .15s;pointer-events:none}
-.hr-top{touch-action:none;display:flex;align-items:center;gap:6px;height:24px;padding:0 9px;flex:none;cursor:grab;font:600 10px "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#6d6b64;border-bottom:1px solid #ece8df}
-.hr-top i{width:7px;height:7px;border-radius:50%;background:var(--c)}
-.hr-in{padding:8px 10px;overflow:hidden;flex:1;min-height:0}
+/* Homeroom demo: its workspace in miniature (Homeroom's own colors, cards and placeholder) */
+.hr-demo{position:relative;min-height:240px;border-radius:14px;background:#f4f4f2;box-shadow:inset 0 0 0 1px #e2e2de;padding:0;transition:height .2s ease;user-select:none;-webkit-user-select:none}
+.hr-item{position:absolute;left:0;top:0;padding:2px;will-change:transform}
+.hr-demo.ready .hr-item{transition:transform .2s ease,width .2s ease,height .2s ease}
+.hr-demo.ready .hr-item.dragging,.hr-demo.ready .hr-item.resizing{transition:none;z-index:3}
+.hr-card{height:100%;display:flex;flex-direction:column;background:#fff;border:1px solid #e2e2de;border-radius:12px;overflow:hidden;color:#1c1c1a;
+  box-shadow:0 1px 2px rgb(0 0 0 / .06),0 2px 8px rgb(0 0 0 / .04);font:400 12px/1.4 -apple-system,system-ui,sans-serif;cursor:grab}
+.hr-item.dragging .hr-card{cursor:grabbing;box-shadow:0 12px 32px -8px rgb(0 0 0 / .3)}
+.hr-top{display:flex;align-items:center;gap:6px;height:24px;padding:0 10px;flex:none;border-bottom:1px solid #f0f0ee}
+.hr-top i{width:8px;height:8px;border-radius:3px;background:var(--c)}
+.hr-top span{font-size:.78rem;font-weight:600;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hr-in{padding:8px 12px;overflow:hidden;flex:1;min-height:0}
+.hr-in p{margin:0 0 4px}
 .hr-in ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .hr-in li{display:flex;gap:6px;align-items:baseline}
-.hr-in .due{margin-left:auto;color:#c2410c;font-size:10.5px;white-space:nowrap}
-.hr-in label{display:flex;gap:6px;align-items:center;cursor:pointer}
-.hr-in input{accent-color:#1b1b19;margin:0}
-.hr-in .big{font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1.1}
-.hr-in .dim{color:#77746c}
-.hr-in textarea{all:unset;width:100%;height:100%;font:inherit;white-space:pre-wrap;cursor:text}
-.hr-music{display:flex;gap:9px;align-items:center}
-.hr-music b{display:block}
-.hr-art{flex:none;width:38px;height:38px;border-radius:7px;background:linear-gradient(135deg,#1db954,#0b6b31)}
-.hr-size{position:absolute;right:0;bottom:0;width:18px;height:18px;cursor:nwse-resize;touch-action:none;background:linear-gradient(135deg,transparent 55%,#b9b4a8 55% 62%,transparent 62% 72%,#b9b4a8 72% 79%,transparent 79%)}
-@media(max-width:640px){.hr-demo{--row:54px;--gap:6px}}
+.hr-in .due{margin-left:auto;color:#b45309;font-size:11px;white-space:nowrap}
+.hr-in label{display:flex;gap:7px;align-items:center;cursor:pointer}
+.hr-in input{accent-color:#2f6fed;margin:0}
+.hr-in .big{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.hr-in .dim{color:#6b6b66}
+.hr-in textarea{all:unset;box-sizing:border-box;width:100%;height:100%;font:inherit;white-space:pre-wrap;cursor:text}
+.hr-music{display:flex;gap:10px;align-items:center}
+.hr-music b{display:block;font-weight:600}
+.hr-art{flex:none;width:40px;height:40px;border-radius:6px;background:linear-gradient(135deg,#1db954,#0b6b31)}
+.hr-place{position:absolute;left:0;top:0;pointer-events:none;transition:transform .1s ease,width .1s ease,height .1s ease}
+.hr-place:before{content:"";position:absolute;inset:4px;border-radius:12px;border:2px dashed #2f6fed;background:rgba(47,111,237,.1)}
+/* Resize from any edge or corner; the right and bottom edges light up blue, the corner has a grip */
+.hr-h{position:absolute;z-index:2;touch-action:none}
+.hr-n,.hr-s{left:18px;right:18px;height:8px;cursor:ns-resize}.hr-n{top:0}.hr-s{bottom:0}
+.hr-e,.hr-w{top:18px;bottom:18px;width:8px;cursor:ew-resize}.hr-e{right:0}.hr-w{left:0}
+.hr-ne,.hr-nw,.hr-se,.hr-sw{width:14px;height:14px}
+.hr-ne{top:0;right:0;cursor:nesw-resize}.hr-nw{top:0;left:0;cursor:nwse-resize}.hr-sw{bottom:0;left:0;cursor:nesw-resize}
+.hr-se{bottom:0;right:0;width:22px;height:22px;cursor:nwse-resize}
+.hr-se:after{content:"";position:absolute;right:7px;bottom:7px;width:7px;height:7px;border-right:2px solid #6b6b66;border-bottom:2px solid #6b6b66;border-bottom-right-radius:3px;opacity:.45}
+.hr-item:hover .hr-se:after{opacity:1}
+.hr-e:hover:before,.hr-s:hover:before,.hr-w:hover:before,.hr-n:hover:before{content:"";position:absolute;border-radius:2px;background:#2f6fed}
+.hr-e:before,.hr-w:before{top:0;bottom:0;width:3px}.hr-e:before{right:3px}.hr-w:before{left:3px}
+.hr-s:before,.hr-n:before{left:0;right:0;height:3px}.hr-s:before{bottom:3px}.hr-n:before{top:3px}
+@media(max-width:520px){.hr-card{cursor:default}.hr-top{cursor:grab;touch-action:none}}
 
 /* WhenWorks demo: three classmates' busy times on a week grid; green where all three are free */
 .ww-demo{font:500 11px Manrope,system-ui,sans-serif;color:var(--inv-text-2)}
@@ -596,7 +595,8 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   .nav{display:none}
   .bar .loc{display:none}
   .bar .btn{height:40px;padding:0 16px}
-  section{padding:72px 22px}
+  section{padding:56px 22px}
+  .education{padding-top:56px;padding-bottom:56px}.details{padding-top:48px;padding-bottom:32px}
   .hero{padding-top:48px;min-height:auto}
   .exp-grid{grid-template-columns:1fr}
   .personal-head{display:block}.personal-head p.body{margin-top:18px}
@@ -845,7 +845,6 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         <h4>Homeroom</h4>
         <p>A customizable dashboard where a student’s day starts: Canvas assignments, calendar, Spotify, to-dos, search and AI quick-ask on one screen. Drag and resize widgets, and your layout is saved. Free, no login.</p>
         <div class="pills"><span class="pill">React</span><span class="pill">Vite</span><span class="pill">Vercel</span><span class="pill">Serverless API</span></div>
-        <div class="build" data-build="homeroom"></div>
         <div class="proj-links">
           <button class="btn case-open" type="button" data-case="homeroom">CASE STUDY + DEMO <span class="arr">→</span></button>
           <a class="btn ghost" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
@@ -860,7 +859,6 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         <h4>WhenWorks</h4>
         <p>Finding a time for a group project shouldn’t take forty texts. Everyone uploads a screenshot of their schedule, AI reads it, and the times the whole group is free light up. Vote on a time and add it to everyone’s calendar. Free, no login.</p>
         <div class="pills"><span class="pill">Next.js</span><span class="pill">TypeScript</span><span class="pill">Gemini AI</span><span class="pill">Postgres</span><span class="pill">Vercel</span></div>
-        <div class="build" data-build="whenworks"></div>
         <div class="proj-links">
           <button class="btn case-open" type="button" data-case="whenworks">CASE STUDY + DEMO <span class="arr">→</span></button>
           <a class="btn ghost" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
@@ -989,7 +987,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     </ul></div>
   </section>
   <section class="case-demo">
-    <div class="case-demo-copy"><p class="mo case-h">Try it</p><h3>Make it your layout.</h3><p>A tiny Homeroom. Drag a card by its top bar, resize it from the corner, and the others shuffle up out of the way, the same way the real dashboard behaves. Your layout is saved, so it’s still here if you reload.</p><button class="case-reset mo" type="button">Reset layout</button></div>
+    <div class="case-demo-copy"><p class="mo case-h">Try it</p><h3>Make it your layout.</h3><p>A small copy of Homeroom’s workspace, built the same way. Grab any card and drop it anywhere; a card it lands on gets pushed down out of the way. Resize from any edge or corner. Your layout is saved, so it’s still here if you reload.</p><button class="case-reset mo" type="button">Reset layout</button></div>
     <div class="hr-demo" data-demo="homeroom"></div>
   </section>
   <section class="case-grid">
@@ -1001,7 +999,6 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     </ul></div>
   </section>
   <figure class="case-fig"><img src="projects/homeroom-example.webp" alt="Homeroom’s example dashboard with Spotify, Canvas assignments, Google Calendar, a Google Doc, notes, mail, fantasy football and Claude on one screen" width="1600" height="1000" loading="lazy"><figcaption class="mo">The example dashboard, for a fictional Cal Poly student</figcaption></figure>
-  <section class="case-log"><p class="mo case-h">Every commit</p><div class="build big" data-build="homeroom"></div></section>
   <div class="case-links"><a class="btn" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN HOMEROOM <span class="arr">↗</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---Homeroom-" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a></div>
 </template>
 <template id="case-whenworks">
@@ -1035,7 +1032,6 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       <li><b>Built with</b> Next.js, TypeScript, Tailwind, Gemini, Neon Postgres and Vercel.</li>
     </ul></div>
   </section>
-  <section class="case-log"><p class="mo case-h">Every commit</p><div class="build big" data-build="whenworks"></div></section>
   <div class="case-links"><a class="btn" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN WHENWORKS <span class="arr">↗</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---WhenWorks" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a></div>
 </template>
 

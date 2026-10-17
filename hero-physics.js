@@ -66,7 +66,7 @@ export function initHeadline(h2) {
     bodies.forEach((b, i) => {
       const dx = b.position.x - homes[i].x, dy = b.position.y - homes[i].y;
       chars[i].style.transform = `translate(${dx.toFixed(2)}px,${dy.toFixed(2)}px) rotate(${b.angle.toFixed(4)}rad)`;
-      if (Math.abs(dx) > 0.4 || Math.abs(dy) > 0.4 || Math.abs(b.angle) > 0.004 || b.speed > 0.05) moving = true;
+      if (Math.abs(dx) > 0.6 || Math.abs(dy) > 0.6 || Math.abs(b.angle) > 0.006 || b.speed > 0.15) moving = true;
     });
     // Once everything is home and still for a moment, snap exactly into place and stop
     still = moving ? 0 : still + 1;

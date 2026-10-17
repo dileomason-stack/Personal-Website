@@ -83,7 +83,7 @@ if (showcase) {
     if (r.nearby) list.push(row('where', 'Offers', `A reminder at ${esc(r.nearby)}`, 'nearby'));
     if (!list.length) list.push(row('none', 'When', 'Not said yet, so it’s saved for later', 'none'));
     const rows = list.join('');
-    const html = `<div class="htt-head"><span class="htt-state">${saved ? 'Saved' : 'Reading as you type'}</span><span>${took < 1 ? took.toFixed(2) : took.toFixed(1)} ms</span></div>
+    const html = `<div class="htt-head"><span class="htt-state">${saved ? 'Saved' : 'Reading…'}</span><span>${took < 1 ? took.toFixed(2) : took.toFixed(1)} ms</span></div>
       <div class="htt-title">${esc(r.title)}</div><ul class="htt-rows">${rows}</ul>`;
     // The rows only re-render (and animate in) when what was understood changes, not on every key
     const fresh = rows !== lastRows || card.hidden;
@@ -91,7 +91,7 @@ if (showcase) {
     for (const el of [card, inline]) {
       if (fresh || !el.firstChild) el.innerHTML = html;
       else {
-        $('.htt-state', el).textContent = saved ? 'Saved' : 'Reading as you type';
+        $('.htt-state', el).textContent = saved ? 'Saved' : 'Reading…';
         $('.htt-head span:last-child', el).textContent = `${took < 1 ? took.toFixed(2) : took.toFixed(1)} ms`;
         $('.htt-title', el).textContent = r.title;
       }
@@ -170,83 +170,6 @@ if (activity) whenNear(activity, async () => {
     };
     requestAnimationFrame(step);
   });
-});
-
-// ---------- Build logs: each project's commits as ticks, from data/builds.json ----------
-// Work happens in sessions (an evening, a weekend), so gaps of more than four hours are squeezed to a
-// fixed sliver; within a session, ticks sit at their real times. Scrolling it into view plays it back.
-const pacific = (iso, opts) => new Date(iso).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', ...opts });
-export function buildLog(el, commits) {
-  const times = commits.map(c => +new Date(c[0])), GAP = 4 * 3600e3;
-  const sessions = [];
-  times.forEach((t, i) => { if (!i || t - times[i - 1] > GAP) sessions.push([i]); else sessions.at(-1).push(i); });
-  // Width: each session by its length (with a floor, so a burst isn't a single line), plus a fixed gap between
-  const spans = sessions.map(s => Math.max(times[s.at(-1)] - times[s[0]], 40 * 60e3));
-  const gapW = 0.035, inner = 1 - gapW * (sessions.length - 1), totalSpan = spans.reduce((a, b) => a + b, 0);
-  const pos = [], starts = [];
-  let x = 0;
-  sessions.forEach((s, k) => {
-    starts.push(x);
-    const w = (spans[k] / totalSpan) * inner, first = times[s[0]];
-    s.forEach(i => pos.push(x + (s.length === 1 ? w / 2 : ((times[i] - first) / spans[k]) * w)));
-    x += w + gapW;
-  });
-  const longest = sessions.reduce((a, b) => (b.length > a.length ? b : a));
-  const hours = (times[longest.at(-1)] - times[longest[0]]) / 3600e3;
-  const days = new Set(commits.map(c => pacific(c[0], { month: 'short', day: 'numeric' }))).size;
-  el.innerHTML = `<div class="build-head mo"><span>Build log</span><span><b>${commits.length}</b> commits · ${days} days</span></div>
-    <div class="build-track">${pos.map(p => `<i style="left:${(p * 100).toFixed(2)}%"></i>`).join('')}${sessions.slice(1).map((s, k) => `<s style="left:${((starts[k + 1] - gapW) * 100).toFixed(2)}%;width:${(gapW * 100).toFixed(2)}%"></s>`).join('')}</div>
-    <div class="build-days"></div>
-    <p class="build-msg"></p>`;
-  const ticks = $$('.build-track i', el), msg = $('.build-msg', el), track = $('.build-track', el), dayRow = $('.build-days', el);
-  // Day labels under the first session of each day, skipping any that would collide
-  let lastDay = '', lastX = -1;
-  sessions.forEach((s, k) => {
-    const day = pacific(commits[s[0]][0], { month: 'short', day: 'numeric' });
-    if (day === lastDay || starts[k] - lastX < 0.14) return;
-    lastDay = day; lastX = starts[k];
-    dayRow.insertAdjacentHTML('beforeend', `<span style="left:${(starts[k] * 100).toFixed(2)}%">${day}</span>`);
-  });
-  const summary = `Busiest session: ${longest.length} commits in ${hours < 1 ? `${Math.round(hours * 60)} minutes` : `${hours.toFixed(1).replace('.0', '')} hours`}, ${pacific(commits[longest[0]][0], { weekday: 'short', month: 'short', day: 'numeric' })}, ${pacific(commits[longest[0]][0], { hour: 'numeric', minute: '2-digit' })} to ${pacific(commits[longest.at(-1)][0], { hour: 'numeric', minute: '2-digit' })}.`;
-  const show = i => {
-    ticks.forEach((t, k) => t.classList.toggle('on', k === i));
-    if (i < 0) { msg.textContent = summary; return; }
-    msg.innerHTML = `<time>${pacific(commits[i][0], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · commit ${i + 1} of ${commits.length}</time>`;
-    msg.append(commits[i][1]);
-  };
-  show(-1);
-  let playing = false;
-  const nearest = e => {
-    const r = track.getBoundingClientRect(), p = (e.clientX - r.left) / r.width;
-    let best = 0;
-    pos.forEach((q, k) => { if (Math.abs(q - p) < Math.abs(pos[best] - p)) best = k; });
-    return best;
-  };
-  track.addEventListener('pointermove', e => { if (!playing) show(nearest(e)); });
-  track.addEventListener('pointerdown', e => { if (!playing) show(nearest(e)); });
-  track.addEventListener('pointerleave', () => { if (!playing) show(-1); });
-  if (reduce) { ticks.forEach(t => t.classList.add('done')); return; }
-  // Playback: a playhead runs through the history, each commit's message flashing as it lands
-  whenSeen(el, () => {
-    playing = true;
-    const t0 = performance.now(), length = 2600;
-    let shown = -1;
-    const step = now => {
-      const p = Math.min(1, (now - t0) / length), upto = Math.floor(p * (ticks.length - 1));
-      for (let k = shown + 1; k <= upto; k++) ticks[k].classList.add('done');
-      if (upto !== shown) { shown = upto; show(upto); }
-      if (p < 1) requestAnimationFrame(step);
-      else setTimeout(() => { playing = false; show(-1); }, 900);
-    };
-    requestAnimationFrame(step);
-  });
-}
-const buildEls = $$('.build[data-build]');
-if (buildEls.length) whenNear(buildEls[0], async () => {
-  try {
-    const data = await (await fetch('data/builds.json')).json();
-    buildEls.forEach(el => data[el.dataset.build] && buildLog(el, data[el.dataset.build]));
-  } catch (e) { buildEls.forEach(el => (el.hidden = true)); }
 });
 
 // ---------- Case studies (case-study.js, fetched when a visitor first reaches for one) ----------

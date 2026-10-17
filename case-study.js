@@ -1,15 +1,13 @@
 // Case studies: clicking "Case study + demo" on a project card opens a full page over the site. With
 // View Transitions, the card's video and title morph into the page's hero image and headline (and back
 // again when it closes). Each page has a hands-on demo of the project. Loaded on first use.
-import { buildLog } from './site-live.js';
-
 const $ = (sel, el = document) => el.querySelector(sel);
 const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
 const root = document.documentElement;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const page = $('#case'), body = $('.case-body', page);
 const names = { homeroom: 'Homeroom', whenworks: 'WhenWorks' };
-let current = null, opener = null, builds = null;
+let current = null, opener = null;
 
 const transition = (update, cls) => {
   if (!document.startViewTransition || reduce) { update(); return Promise.resolve(); }
@@ -81,111 +79,126 @@ addEventListener('popstate', () => {
   if (key) openCase(key, null, { push: false }); else closeCase({ pop: true });
 });
 
-async function setup(key) {
-  try { builds ??= await (await fetch('data/builds.json')).json(); } catch (e) { builds = {}; }
-  const log = $('.build[data-build]', body);
-  if (log && builds[key]) buildLog(log, builds[key]);
+function setup(key) {
   const demo = $('[data-demo]', body);
   if (demo) (key === 'homeroom' ? homeroomDemo : whenworksDemo)(demo, $('.case-reset', body));
 }
 
-// ---------- Homeroom: a tiny dashboard. Drag cards by their top bar, resize from the corner; the rest
-// move out of the way and float back up (the same vertical packing react-grid-layout does in the app). ----------
+// ---------- Homeroom: a small copy of its workspace, built the way the real one is (src/lib/grid.js):
+// a fine grid (48 columns, 8px rows) so cards move almost free-form; the card you drag stays exactly
+// where you drop it; any card it lands on is pushed straight down (and springs back once it's clear,
+// since pushes are worked out from where cards started); nothing floats up to fill gaps. Resize from
+// any edge or corner. Cards move with transforms, so dragging stays smooth. ----------
 function homeroomDemo(el, reset) {
+  const COLS = 48, ROW = 8, GAP = 4, MIN_W = 8, MIN_H = 8;
   const CARDS = {
-    todo: ['To-do', '#d4471f', `<ul>${['Finish STAT 217 homework', 'Email advisor', 'Groceries', 'Call home'].map((t, i) => `<li><label><input type="checkbox"${i === 2 ? ' checked' : ''}> ${t}</label></li>`).join('')}</ul>`],
-    canvas: ['Canvas', '#e1442c', '<ul><li>Case write-up<span class="due">Tue</span></li><li>Homework 5<span class="due">Wed</span></li><li>Lab 3 report<span class="due">Fri</span></li><li class="dim">Midterm review<span class="due">Mon</span></li></ul>'],
-    music: ['Spotify', '#1db954', '<div class="hr-music"><span class="hr-art"></span><span><b>Study Session</b><span class="dim">Lo-fi beats · playlist</span></span></div>'],
-    cal: ['Calendar', '#4285f4', '<span class="dim">Next up</span><div class="big">10:10</div><span>Statistics, Bldg 38</span>'],
-    notes: ['Notes', '#e9b949', '<textarea aria-label="Notes">Ideas: group project plan\n- meet Thu after class\n- split the slides</textarea>'],
+    todo: ['To-do', '#e8710a', `<ul>${['Finish STAT 217 homework', 'Email advisor', 'Groceries', 'Call home'].map((t, i) => `<li><label><input type="checkbox"${i === 2 ? ' checked' : ''}> ${t}</label></li>`).join('')}</ul>`],
+    canvas: ['Canvas', '#e1442c', '<p class="dim">Due soon</p><ul><li>Case write-up<span class="due">Tue</span></li><li>Homework 5<span class="due">Wed</span></li><li>Lab 3 report<span class="due">Fri</span></li></ul>'],
+    music: ['Spotify', '#1db954', '<div class="hr-music"><span class="hr-art"></span><span><b>Study Session</b><span class="dim">Lo-fi beats</span></span></div>'],
+    cal: ['Calendar', '#2f6fed', '<span class="dim">Next up</span><div class="big">10:10 AM</div><span>Statistics, Bldg 38</span>'],
+    notes: ['Notes', '#e9b949', '<textarea aria-label="Notes">Group project plan\n- meet Thu after class\n- split the slides</textarea>'],
   };
+  // [x, y, w, h] in grid units
   const DEFAULTS = {
-    4: { todo: [0, 0, 1, 3], canvas: [1, 0, 2, 2], music: [3, 0, 1, 2], cal: [1, 2, 1, 2], notes: [2, 2, 2, 2] },
-    2: { canvas: [0, 0, 2, 2], todo: [0, 2, 1, 3], music: [1, 2, 1, 2], cal: [1, 4, 1, 2], notes: [0, 5, 2, 2] },
+    wide: { todo: [0, 0, 13, 22], canvas: [13, 0, 21, 16], music: [34, 0, 14, 16], cal: [13, 16, 13, 16], notes: [26, 16, 22, 16] },
+    narrow: { canvas: [0, 0, 48, 16], todo: [0, 16, 24, 21], music: [24, 16, 24, 11], cal: [24, 27, 24, 14], notes: [0, 41, 48, 15] },
   };
-  const cols = el.clientWidth < 480 ? 2 : 4, KEY = `mdl-homeroom-demo-${cols}`;
-  el.style.setProperty('--cols', cols);
+  const mode = el.clientWidth < 520 ? 'narrow' : 'wide', KEY = `mdl-homeroom-demo-${mode}`;
+  const narrow = mode === 'narrow';
   let layout;
   try { layout = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
-  if (!layout || Object.keys(layout).length !== 5) layout = structuredClone(DEFAULTS[cols]);
+  if (!layout || Object.keys(layout).length !== 5) layout = structuredClone(DEFAULTS[mode]);
+  const HANDLES = ['n', 'e', 's', 'w', 'ne', 'nw', 'se', 'sw'];
   el.innerHTML = Object.entries(CARDS).map(([id, [t, c, html]]) =>
-    `<div class="hr-card" data-id="${id}" style="--c:${c}"><div class="hr-top"><i></i>${t}</div><div class="hr-in">${html}</div><span class="hr-size" aria-hidden="true"></span></div>`).join('') + '<div class="hr-ghost" hidden></div>';
-  const ghost = $('.hr-ghost', el);
-  const metrics = () => {
-    const cs = getComputedStyle(el), gap = parseFloat(cs.getPropertyValue('--gap')), row = parseFloat(cs.getPropertyValue('--row'));
-    return { gap, row, col: (el.clientWidth - gap * (cols - 1)) / cols };
+    `<div class="hr-item" data-id="${id}"><div class="hr-card" style="--c:${c}"><div class="hr-top"><i></i><span>${t}</span></div><div class="hr-in">${html}</div></div>${HANDLES.map(h => `<span class="hr-h hr-${h}" data-dir="${h}"></span>`).join('')}</div>`).join('')
+    + '<div class="hr-place" hidden></div>';
+  const items = Object.fromEntries($$('.hr-item', el).map(n => [n.dataset.id, n]));
+  const place = $('.hr-place', el);
+  let col = (el.clientWidth) / COLS;
+  const px = ([x, y, w, h]) => ({ x: x * col, y: y * ROW, w: w * col, h: h * ROW });
+  const put = (node, r) => {
+    const b = px(r);
+    node.style.transform = `translate3d(${b.x}px,${b.y}px,0)`;
+    node.style.width = `${b.w}px`;
+    node.style.height = `${b.h}px`;
   };
-  const box = ([x, y, w, h], m) => ({ left: x * (m.col + m.gap), top: y * (m.row + m.gap), width: w * m.col + (w - 1) * m.gap, height: h * m.row + (h - 1) * m.gap });
+  const height = l => { el.style.height = `${(Math.max(...Object.values(l).map(r => r[1] + r[3])) + 6) * ROW}px`; };
+  const draw = (l, skip) => { for (const [id, node] of Object.entries(items)) if (id !== skip) put(node, l[id]); height(l); };
   const hits = (a, b) => a[0] < b[0] + b[2] && b[0] < a[0] + a[2] && a[1] < b[1] + b[3] && b[1] < a[1] + a[3];
-  // Push anything the moved card overlaps below it, then float everything up as far as it can go
-  function settle(l, moving) {
-    const out = structuredClone(l), queue = moving ? [moving] : [];
-    while (queue.length) {
-      const id = queue.shift();
-      for (const other of Object.keys(out)) {
-        if (other !== id && other !== moving && hits(out[id], out[other])) { out[other][1] = out[id][1] + out[id][3]; queue.push(other); }
-      }
-    }
-    const order = Object.keys(out).sort((a, b) => out[a][1] - out[b][1] || out[a][0] - out[b][0]);
-    const placed = [];
-    for (const id of order) {
-      if (id !== moving) while (out[id][1] > 0 && !placed.some(p => hits([out[id][0], out[id][1] - 1, out[id][2], out[id][3]], out[p]))) out[id][1]--;
-      placed.push(id);
+  // The active card stays put; everything else, from where it started, is pushed down past anything it hits
+  const pushDown = (start, id, r) => {
+    const out = { [id]: r }, placed = [r];
+    for (const k of Object.keys(start).filter(k => k !== id).sort((a, b) => start[a][1] - start[b][1] || start[a][0] - start[b][0])) {
+      const next = start[k].slice();
+      let hit;
+      while ((hit = placed.find(p => hits(p, next)))) next[1] = hit[1] + hit[3];
+      out[k] = next; placed.push(next);
     }
     return out;
-  }
-  function draw(l, skip) {
-    const m = metrics();
-    for (const card of $$('.hr-card', el)) {
-      if (card.dataset.id === skip) continue;
-      Object.assign(card.style, Object.fromEntries(Object.entries(box(l[card.dataset.id], m)).map(([k, v]) => [k, `${v}px`])));
-    }
-    el.style.setProperty('--rows', Math.max(5, ...Object.values(l).map(r => r[1] + r[3])) + (skip ? 1 : 0));
-  }
-  layout = settle(layout, null);
+  };
   draw(layout);
-  new ResizeObserver(() => draw(layout)).observe(el);
+  requestAnimationFrame(() => el.classList.add('ready'));
+  // Only a change of width matters (the height follows the cards, and changes during a drag)
+  let width = el.clientWidth;
+  new ResizeObserver(() => {
+    if (el.clientWidth === width || el.classList.contains('active')) return;
+    width = el.clientWidth; col = width / COLS;
+    el.classList.remove('ready'); draw(layout); requestAnimationFrame(() => el.classList.add('ready'));
+  }).observe(el);
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(layout)); } catch (e) {} };
-  reset?.addEventListener('click', () => { layout = structuredClone(DEFAULTS[cols]); draw(layout); save(); });
+  reset?.addEventListener('click', () => { layout = structuredClone(DEFAULTS[mode]); draw(layout); save(); });
 
   el.addEventListener('pointerdown', e => {
-    const card = e.target.closest('.hr-card'), resizing = e.target.classList.contains('hr-size');
-    if (!card || (!resizing && !e.target.closest('.hr-top'))) return;
+    const item = e.target.closest('.hr-item');
+    if (!item || e.button > 0) return;
+    const dir = e.target.dataset.dir;
+    // Grab a card anywhere but its checkboxes and note (on phones, by its top strip, so the page still scrolls)
+    if (!dir && (e.target.closest('input, label, textarea') || (narrow && !e.target.closest('.hr-top')))) return;
     e.preventDefault();
-    const id = card.dataset.id, m = metrics(), start = layout[id].slice(), rect = el.getBoundingClientRect();
-    const b0 = box(start, m), ox = e.clientX - rect.left - b0.left, oy = e.clientY - rect.top - b0.top;
-    card.setPointerCapture(e.pointerId);
-    card.classList.add('moving');
-    ghost.hidden = false;
-    let next = layout;
-    const move = ev => {
-      const px = ev.clientX - rect.left, py = ev.clientY - rect.top, r = start.slice();
-      if (resizing) {
-        const w = Math.max(b0.width + px - (e.clientX - rect.left), m.col * 0.6), h = Math.max(b0.height + py - (e.clientY - rect.top), m.row * 0.6);
-        Object.assign(card.style, { width: `${w}px`, height: `${h}px` });
-        r[2] = Math.min(cols - r[0], Math.max(1, Math.round((w + m.gap) / (m.col + m.gap))));
-        r[3] = Math.min(6, Math.max(1, Math.round((h + m.gap) / (m.row + m.gap))));
-      } else {
-        const left = px - ox, top = py - oy;
-        Object.assign(card.style, { left: `${left}px`, top: `${top}px` });
-        r[0] = Math.min(cols - r[2], Math.max(0, Math.round(left / (m.col + m.gap))));
-        r[1] = Math.max(0, Math.round(top / (m.row + m.gap)));
+    const id = item.dataset.id, start = structuredClone(layout), r0 = start[id], b0 = px(r0);
+    const sx = e.clientX, sy = e.clientY;
+    item.setPointerCapture(e.pointerId);
+    item.classList.add(dir ? 'resizing' : 'dragging');
+    el.classList.add('active');
+    place.hidden = false;
+    put(place, r0);
+    let target = r0.slice(), frame = 0, last = e;
+    const update = () => {
+      frame = 0;
+      const dx = last.clientX - sx, dy = last.clientY - sy;
+      let { x, y, w, h } = b0;
+      if (!dir) { x += dx; y += dy; } else {
+        if (dir.includes('e')) w = Math.max(MIN_W * col, w + dx);
+        if (dir.includes('s')) h = Math.max(MIN_H * ROW, h + dy);
+        if (dir.includes('w')) { const nw = Math.max(MIN_W * col, w - dx); x += w - nw; w = nw; }
+        if (dir.includes('n')) { const nh = Math.max(MIN_H * ROW, h - dy); y += h - nh; h = nh; }
       }
-      next = settle({ ...layout, [id]: r }, id);
-      Object.assign(ghost.style, Object.fromEntries(Object.entries(box(next[id], m)).map(([k, v]) => [k, `${v}px`])));
-      draw(next, id);
+      // The card follows the pointer exactly; the placeholder shows where it will land
+      x = Math.max(0, Math.min(el.clientWidth - w, x)); y = Math.max(0, y);
+      item.style.transform = `translate3d(${x}px,${y}px,0)`;
+      item.style.width = `${w}px`; item.style.height = `${h}px`;
+      const next = [Math.round(x / col), Math.round(y / ROW), Math.round(w / col), Math.round(h / ROW)];
+      next[2] = Math.min(COLS, next[2]); next[0] = Math.min(COLS - next[2], next[0]);
+      if (next.join() === target.join()) return;
+      target = next;
+      put(place, target);
+      const l = pushDown(start, id, target);
+      draw(l, id);
+      layout = l;
     };
+    const move = ev => { last = ev; if (!frame) frame = requestAnimationFrame(update); };
     const up = () => {
-      card.removeEventListener('pointermove', move);
-      card.classList.remove('moving');
-      ghost.hidden = true;
-      layout = settle(next, null);
+      cancelAnimationFrame(frame);
+      item.removeEventListener('pointermove', move);
+      item.classList.remove('dragging', 'resizing');
+      el.classList.remove('active');
+      place.hidden = true;
       draw(layout);
       save();
     };
-    card.addEventListener('pointermove', move);
-    card.addEventListener('pointerup', up, { once: true });
-    card.addEventListener('pointercancel', up, { once: true });
+    item.addEventListener('pointermove', move);
+    item.addEventListener('pointerup', up, { once: true });
+    item.addEventListener('pointercancel', up, { once: true });
   });
 }
 

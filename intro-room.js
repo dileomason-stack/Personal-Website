@@ -259,11 +259,16 @@ export function buildRoom(scene, renderer) {
     }
   }
 
-  // Things in the room that link to parts of the site
+  // Things in the room that link to parts of the site. Each has two edge points (left, right) where a
+  // note's arrow can land, and a preferred side for the note (1 right, -1 left, 0 toward the middle).
+  const edge = (obj, x, y) => ({ obj, at: new THREE.Vector3(x, y, 0.03) });
   const hotspots = [
-    { obj: laptop, label: 'Projects →', target: 'projects' },
-    { obj: phone, label: 'Hold This Thought →', target: 'work' },
-    ...posters.map(({ group }) => ({ obj: group, label: 'About me →', target: 'cars' })),
+    { obj: laptop, title: 'Projects', sub: 'What I’ve built', target: 'projects', prefer: 1,
+      edges: [edge(screen, -SCREEN_W / 2 + 0.06, SCREEN_H / 2 + 0.05), edge(screen, SCREEN_W / 2 - 0.06, SCREEN_H / 2 + 0.05)] },
+    { obj: phone, title: 'Hold This Thought', sub: 'My iPhone app', target: 'work', prefer: 1,
+      edges: [edge(handset, -0.2, 0.6), edge(handset, 0.2, 0.6)] },
+    ...posters.map(({ p, group }) => ({ obj: group, title: 'About me', sub: 'Cars and photos', target: 'cars', prefer: 0,
+      edges: [edge(group, -p.w / 2 - 0.02, p.h * 0.15), edge(group, p.w / 2 + 0.02, p.h * 0.15)] })),
   ];
 
   return { layout, update, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot, hotspots };

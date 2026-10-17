@@ -82,10 +82,24 @@ a{color:inherit}
 .intro-tools button{font:inherit;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8d9a97;background:#ffffff0d;border:1px solid #ffffff1f;border-radius:40px;padding:8px 14px;cursor:pointer;transition:color .25s,border-color .25s,background .25s}
 .intro-tools button:hover{color:#fff;border-color:#ffffff55}
 .intro-sound{display:none}.intro-3d .intro-sound{display:inline-block}
-/* Label for room objects the visitor points at */
-.intro-tip{position:absolute;z-index:4;pointer-events:none;padding:7px 12px;border-radius:40px;background:#0b0f0fdd;color:#f4f1ea;border:1px solid #ffffff22;
-  font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;opacity:0;translate:-50% -140%;transition:opacity .2s}
-.intro-tip.on{opacity:1}
+/* Notes on room objects: a hand-drawn arrow draws itself to the object and the label writes in beside it */
+.intro-note{position:absolute;z-index:4;width:0;height:0;pointer-events:none;opacity:0;transition:opacity .2s}
+.intro-note.on{opacity:1}
+.intro-note svg{position:absolute;left:-6px;top:-38px;width:80px;height:44px;overflow:visible}
+.intro-note.left svg{left:-74px;transform:scaleX(-1)}
+.intro-note path{fill:none;stroke:#f4f1ea;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;filter:drop-shadow(0 1px 4px #000a)}
+.intro-note.on .shaft{animation:note-draw .45s .05s var(--ease) forwards}
+.intro-note.on .head{animation:note-draw .2s .42s ease-out forwards}
+.intro-note-text{position:absolute;left:80px;bottom:28px;white-space:nowrap;text-shadow:0 1px 14px #000d;translate:var(--nudge,0) 0}
+.intro-note.left .intro-note-text{left:auto;right:80px;text-align:right}
+.intro-note b{display:block;font:600 17px/1.15 Manrope,system-ui,sans-serif;letter-spacing:-.01em;color:#f4f1ea}
+.intro-note small{display:block;margin-top:4px;font-size:10px;color:#a3aeab}
+.intro-note b,.intro-note small{clip-path:inset(0 100% 0 0);opacity:0}
+.intro-note.left b,.intro-note.left small{clip-path:inset(0 0 0 100%)}
+.intro-note.on b{animation:note-write .55s .22s var(--ease) forwards}
+.intro-note.on small{animation:note-write .55s .38s var(--ease) forwards}
+@keyframes note-draw{to{stroke-dashoffset:0}}
+@keyframes note-write{to{clip-path:inset(0 0 0 0);opacity:1}}
 /* While the match-cut snapshot of the homepage is taken */
 .snap .reveal{transition:none!important}
 /* In the room the switch sits on the wall left of the desk */
@@ -364,7 +378,10 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     <button class="intro-sound mo" type="button" aria-pressed="false">Sound off</button>
     <button class="intro-skip mo" type="button">Skip intro →</button>
   </div>
-  <span class="intro-tip mo" aria-hidden="true"></span>
+  <div class="intro-note" aria-hidden="true">
+    <svg viewBox="0 0 80 44"><path class="shaft" pathLength="1" d="M78 4C54 5 24 13 6 38"/><path class="head" pathLength="1" d="M3 26L6 38L18 35"/></svg>
+    <span class="intro-note-text"><b></b><small class="mo"></small></span>
+  </div>
   <div class="switchbox">
     <button class="switch" id="switch" type="button" aria-label="Turn on the lights"><span class="plate"><span class="lever"></span><span class="led"></span></span></button>
     <span class="switch-label mo">Lights / off</span>

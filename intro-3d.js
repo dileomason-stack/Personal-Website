@@ -38,7 +38,7 @@ function start() {
   const lit = [...intro.querySelectorAll('.lit')];
   const switchbox = intro.querySelector('.switchbox');
   const label = intro.querySelector('.switch-label');
-  const tip = intro.querySelector('.intro-tip');
+  const note = intro.querySelector('.intro-note');
   const sound = createSound(intro.querySelector('.intro-sound'));
 
   // ---------- Renderer ----------
@@ -273,6 +273,38 @@ function start() {
     }
     return null;
   }
+  // The note sits on whichever side of the object has room, preferring the object's own side
+  const noteEdge = new THREE.Vector3();
+  let noteFor = null, noteSide = 1, noteWidth = 0;
+  function edgeOnScreen(e) { return toScreen(e.obj.localToWorld(noteEdge.copy(e.at))); }
+  function showNote(h) {
+    note.classList.remove('on');
+    noteFor = h;
+    if (!h) return;
+    note.querySelector('b').textContent = h.title;
+    note.querySelector('small').textContent = h.sub + ' →';
+    noteWidth = note.querySelector('.intro-note-text').offsetWidth + 92;
+    const left = edgeOnScreen(h.edges[0]).x, right = edgeOnScreen(h.edges[1]).x;
+    const roomR = innerWidth - right, roomL = left;
+    let side = h.prefer || ((left + right) / 2 < innerWidth / 2 ? 1 : -1);
+    if (side > 0 && roomR < noteWidth && roomL > roomR) side = -1;
+    else if (side < 0 && roomL < noteWidth && roomR > roomL) side = 1;
+    noteSide = side;
+    note.classList.toggle('left', side < 0);
+    placeNote();
+    void note.offsetWidth; // restart the draw-in animation
+    note.classList.add('on');
+  }
+  function placeNote() {
+    if (!noteFor) return;
+    const p = edgeOnScreen(noteFor.edges[noteSide < 0 ? 0 : 1]);
+    note.style.left = p.x.toFixed(1) + 'px';
+    note.style.top = p.y.toFixed(1) + 'px';
+    // If even the roomier side is too tight, slide the words back inside the window
+    const over = noteSide > 0 ? p.x + noteWidth - (innerWidth - 12) : 12 - (p.x - noteWidth);
+    note.style.setProperty('--nudge', (over > 0 ? -noteSide * over : 0).toFixed(1) + 'px');
+  }
+
   // Clicking an object flips the lights like the switch does, then lands on that part of the site
   intro.addEventListener('click', e => {
     if (entered || e.target.closest('button')) return;
@@ -344,17 +376,16 @@ function start() {
     camera.lookAt(look);
     camera.updateMatrixWorld();
 
-    // Room objects under the cursor get a label and act as links
+    // Room objects under the cursor get a note pinned beside them, and act as links
     if (pointerSeen && !entered) {
       const h = pick(px, py);
       if (h !== hovered) {
         hovered = h;
-        tip.textContent = h ? h.label : '';
-        tip.classList.toggle('on', !!h);
+        showNote(h);
         intro.style.cursor = h ? 'pointer' : '';
       }
-      if (h) tip.style.left = px + 'px', tip.style.top = py + 'px';
     }
+    placeNote();
 
     // Flashlight follows the cursor, or wanders around the headline
     if (pointerSeen) screenToPlane(px, py, 0, aimTarget);
@@ -424,7 +455,7 @@ function start() {
     if (entered) return;
     entered = true;
     label.textContent = 'Lights / on';
-    tip.classList.remove('on');
+    showNote(null);
     intro.style.cursor = '';
     gsap.set([switchbox, intro.querySelector('.intro-tools')], { animation: 'none', opacity: 1 });
     sound.click();

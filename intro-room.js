@@ -120,7 +120,7 @@ export function buildRoom(scene, renderer) {
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCREEN_W, SCREEN_H), screenMat);
   screen.position.set(0, 0.345, 0.005);
   // Fades the screen to the site's paper color at the end of the fly-in
-  const paperMat = new THREE.MeshBasicMaterial({ color: 0xf4f1ea, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
+  const paperMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f3f0ea'), transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
   paperMat.color.multiplyScalar(1.15);
   const paper = new THREE.Mesh(screen.geometry, paperMat);
   paper.position.set(0, 0.345, 0.008);

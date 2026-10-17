@@ -493,12 +493,10 @@ function start() {
       document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('in'));
       snap.image = await html2canvas(document.body, {
         x: 0, y: 0, width: innerWidth, height: innerHeight, windowWidth: innerWidth, windowHeight: innerHeight,
-        scrollX: 0, scrollY: 0, scale: Math.min(devicePixelRatio, 2), backgroundColor: '#f4f1ea', logging: false,
+        scrollX: 0, scrollY: 0, scale: Math.min(devicePixelRatio, 2), backgroundColor: pageColor(), logging: false,
         ignoreElements: el => el.id === 'intro',
         onclone: doc => {
-          const bar = doc.getElementById('bar');
-          bar.style.background = 'rgba(244,241,234,.82)';
-          bar.style.backdropFilter = 'none';
+          doc.getElementById('bar').style.backdropFilter = 'none';
           // The live page keeps the hero hidden behind the intro; the snapshot shows it as it'll look after
           doc.body.classList.remove('locked');
           // The hero builds itself in after the cut, so the snapshot is the empty page (nav and paper)
@@ -521,7 +519,7 @@ function start() {
     const c = document.createElement('canvas');
     c.width = 2048; c.height = 1152;
     const g = c.getContext('2d');
-    g.fillStyle = '#f4f1ea';
+    g.fillStyle = pageColor();
     g.fillRect(0, 0, c.width, c.height);
     const w = c.width * snap.frac[0], h = c.height * snap.frac[1];
     g.drawImage(snap.image, (c.width - w) / 2, (c.height - h) / 2, w, h);
@@ -599,6 +597,11 @@ function start() {
   intro.dataset.mode = '3d';
   root.classList.remove('intro-3d-pending');
   requestAnimationFrame(() => canvas.classList.add('in'));
+}
+
+// The site's page color for the current theme (the match cut lands on it)
+function pageColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f3f0ea';
 }
 
 function shadowed(mesh) {

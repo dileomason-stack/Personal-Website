@@ -52,7 +52,7 @@ gsap.to('.scroll-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '
 
 // ---------- Hero entrance: one choreographed timeline, each piece arriving in its own way ----------
 // Plays right after the intro (or on load for returning visitors). The grid draws outward, the
-// eyebrow decodes, the headline's letters rise and a highlighter sweeps behind USEFUL, the paragraph rises
+// eyebrow decodes, the headline's letters rise, the paragraph rises
 // line by line, the buttons spring up, the readout card boots like an instrument, and the scroll
 // cue arrives last.
 function heroEntrance() {
@@ -62,19 +62,15 @@ function heroEntrance() {
   const lines = SplitText.create(lead, { type: 'lines', mask: 'lines' });
   // Starting states go on before the hero is shown, so nothing is visible early for even a frame
   gsap.set(eyebrow, { autoAlpha: 0 });
-  // (the highlight's --u is set on the h2, which survives splitting; USEFUL's own element doesn't)
-  gsap.set(h2, { '--u': 0 });
   // The arrows have a CSS hover transition on transform, which would fight the tween (GSAP would read
   // a mid-transition value as their resting place), so it's off until they've arrived
   const arrows = buttons.map(b => $('.arr', b));
   gsap.set(arrows, { transition: 'none' });
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
-  tl.fromTo(hero, { '--grid': '0%' }, { '--grid': '80%', duration: 2, ease: 'power2.out' }, 0)
+  tl.fromTo(hero, { '--grid-size': '0%' }, { '--grid-size': '80%', duration: 2, ease: 'power2.out' }, 0)
     .add(() => decode(eyebrow, 0.9), 0.05)
     .from(letters.chars, { yPercent: 115, rotate: 6, transformOrigin: '0% 100%', duration: 1.1, stagger: 0.028 }, 0.15)
-    // The letters' line masks would clip the highlight, so it sweeps once they're done and unwrapped
     .add(() => letters.revert(), 1.6)
-    .to(h2, { '--u': 1, duration: 0.7, ease: 'power3.inOut' }, 1.6)
     .from(lines.lines, { yPercent: 105, duration: 1, stagger: 0.08 }, 0.55)
     .add(() => lines.revert(), 1.8)
     .from(buttons, { y: 26, autoAlpha: 0, scale: 0.92, duration: 0.9, ease: 'back.out(1.8)', stagger: 0.08 }, 0.85)

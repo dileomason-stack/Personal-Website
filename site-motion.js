@@ -124,6 +124,22 @@ $$('.proj').forEach(card => {
   if (media) gsap.fromTo(media, { scale: 1.14 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'center center', scrub: true } });
 });
 
+// ---------- Education: the logo for whichever school card is in view lights up (desktop, where it's sticky) ----------
+gsap.matchMedia().add('(min-width: 901px)', () => {
+  const marks = $('.marks'), logos = $$('.mark', marks);
+  marks.classList.add('linked');
+  const light = i => logos.forEach((m, k) => m.classList.toggle('on', k === i));
+  const cards = $$('.school');
+  // The card whose middle is closest to the middle of the window is the one being read
+  const pick = () => {
+    const mid = innerHeight / 2;
+    const dist = cards.map(c => { const r = c.getBoundingClientRect(); return Math.abs(r.top + r.height / 2 - mid); });
+    light(dist.indexOf(Math.min(...dist)));
+  };
+  const st = ScrollTrigger.create({ trigger: '.education', start: 'top bottom', end: 'bottom top', onUpdate: pick, onRefresh: pick });
+  return () => { st.kill(); marks.classList.remove('linked'); logos.forEach(m => m.classList.remove('on')); };
+});
+
 // ---------- Galleries: settle up to full size as they come into view ----------
 $$('.gallery-wrap').forEach(g => {
   gsap.fromTo(g, { scale: 0.9, y: 60 }, { scale: 1, y: 0, ease: 'none', scrollTrigger: { trigger: g, start: 'top bottom', end: 'top 35%', scrub: true } });

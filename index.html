@@ -239,8 +239,13 @@ dd{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em}
 /* ---------- Education ---------- */
 .education{background:var(--sage-soft)}
 .edu-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(40px,8vw,110px)}
+/* The heading and logos ride along beside the school cards instead of leaving a gap */
+@media(min-width:901px){.edu-grid>:first-child{position:sticky;top:120px;align-self:start}}
 .marks{display:flex;gap:16px;margin-top:44px}
-.mark{width:120px;height:120px;border-radius:20px;display:grid;place-items:center;box-shadow:0 16px 30px -14px #1f2c2966}
+.mark{width:120px;height:120px;border-radius:20px;display:grid;place-items:center;box-shadow:0 16px 30px -14px #1f2c2966;transition:opacity .5s var(--ease),transform .5s var(--ease),box-shadow .5s var(--ease)}
+/* With motion on (desktop), the logo for the school card in view is lit and the other steps back */
+.marks.linked .mark{opacity:.4;transform:scale(.92);box-shadow:0 8px 16px -12px #1f2c2966}
+.marks.linked .mark.on{opacity:1;transform:none;box-shadow:0 22px 40px -16px #1f2c2988}
 .mark.cp{background:#fff url('calpoly-logo.png') center/70% auto no-repeat}
 .mark.lse{background:#e73931;color:#fff;font-weight:800;font-size:38px;letter-spacing:-.08em}
 .school{padding:30px;border-radius:var(--radius);background:#ffffffa6;border:1px solid #cfdad4;margin-bottom:18px;transition:transform .3s var(--ease),box-shadow .3s}

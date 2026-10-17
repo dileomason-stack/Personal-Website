@@ -99,45 +99,19 @@ gsap.fromTo('.work', { clipPath: 'inset(0% 3.5% 0% 3.5% round 36px)' }, {
   scrollTrigger: { trigger: '.work', start: 'top bottom', end: 'top 20%', scrub: true },
 });
 
-// ---------- Hold This Thought: the phone steps through the app as you scroll ----------
-const showcase = $('.showcase');
-const steps = $$('.sc-step'), shots = $$('.phone-screen img'), bar = $('.sc-progress i'), phone = $('.phone-frame');
-let current = -1;
-function setStep(i) {
-  if (i === current) return;
-  current = i;
-  steps.forEach((s, k) => s.classList.toggle('is-active', k === i));
-  shots.forEach((s, k) => s.classList.toggle('is-active', k === i));
-}
-setStep(0);
+// ---------- Hold This Thought: the card rises in; on desktop the phone tilts toward the cursor ----------
+// (the step tabs themselves live in the page script, so they work without this file)
+const showcase = $('.showcase'), phone = $('.phone-frame');
 gsap.from(showcase, { y: 70, autoAlpha: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: showcase, start: 'top 85%', once: true } });
-const mm = gsap.matchMedia();
-// Big enough screens: pin the card and scrub through the four steps
-mm.add('(min-width: 901px) and (min-height: 700px)', () => {
-  const st = ScrollTrigger.create({
-    trigger: showcase, start: 'top top+=90', end: () => '+=' + innerHeight * 2.4,
-    pin: true, anticipatePin: 1, scrub: true,
-    onUpdate: self => {
-      setStep(Math.min(steps.length - 1, Math.floor(self.progress * steps.length)));
-      gsap.set(bar, { scaleX: Math.max(0.04, self.progress) });
-      gsap.set(phone, { rotateY: -8 + self.progress * 16, rotateX: 3 });
-    },
+if (finePointer) {
+  const tiltY = gsap.quickTo(phone, 'rotateY', { duration: 0.8, ease: 'power3' }), tiltX = gsap.quickTo(phone, 'rotateX', { duration: 0.8, ease: 'power3' });
+  showcase.addEventListener('pointermove', e => {
+    const r = showcase.getBoundingClientRect();
+    tiltY(((e.clientX - r.left) / r.width - 0.5) * 18);
+    tiltX(-((e.clientY - r.top) / r.height - 0.5) * 10);
   });
-  // Clicking a step scrolls to the middle of its stretch
-  steps.forEach((s, k) => { $('button', s).onclick = () => lenis.scrollTo(st.start + (st.end - st.start) * (k + 0.5) / steps.length); });
-  return () => steps.forEach(s => { $('button', s).onclick = null; });
-});
-// Phones and short windows: no pin; cycle while on screen, and tap a step to show it
-mm.add('(max-width: 900px), (max-height: 699px)', () => {
-  let i = 0, timer = null;
-  const show = k => { setStep(i = k); gsap.to(bar, { scaleX: (k + 1) / steps.length, duration: 0.5 }); };
-  const st = ScrollTrigger.create({
-    trigger: showcase, start: 'top 70%', end: 'bottom 30%',
-    onToggle: self => { clearInterval(timer); if (self.isActive) timer = setInterval(() => show((i + 1) % steps.length), 3200); },
-  });
-  steps.forEach((s, k) => { $('button', s).onclick = () => { show(k); clearInterval(timer); }; });
-  return () => { clearInterval(timer); st.kill(); steps.forEach(s => { $('button', s).onclick = null; }); };
-});
+  showcase.addEventListener('pointerleave', () => { tiltY(-6); tiltX(3); });
+}
 
 // ---------- Projects: the card lands, its screen wipes open, the copy follows ----------
 $$('.proj').forEach(card => {

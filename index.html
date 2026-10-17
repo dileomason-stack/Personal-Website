@@ -267,17 +267,22 @@ dd{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em}
 .sc-icon{width:40px;height:40px;filter:drop-shadow(0 6px 10px #0007)}
 .showcase h4{font-size:clamp(36px,3.8vw,56px);margin:16px 0 16px}
 .showcase p{font-size:16px;line-height:1.6;margin-bottom:20px}
-.sc-steps{list-style:none;margin:28px 0 0;padding:0;border-top:1px solid #2e3b38;counter-reset:step}
-.sc-step{border-bottom:1px solid #2e3b38;opacity:.42;transition:opacity .4s var(--ease)}
-.sc-step.is-active{opacity:1}
-.sc-step button{all:unset;display:block;width:100%;padding:14px 0;cursor:pointer}
-.sc-step button:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:6px}
+.sc-steps{display:grid;margin:26px 0 0;border-top:1px solid #2e3b38;counter-reset:step}
+.sc-step{all:unset;display:block;position:relative;padding:13px 0;border-bottom:1px solid #2e3b38;cursor:pointer;opacity:.45;transition:opacity .35s var(--ease)}
+.sc-step:hover,.sc-step.is-active{opacity:1}
+.sc-step:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:6px}
 .sc-step b{display:flex;gap:14px;align-items:baseline;font-size:19px;letter-spacing:-.02em}
 .sc-step b:before{counter-increment:step;content:counter(step,decimal-leading-zero);font:500 11px "DM Mono",monospace;color:var(--sage)}
-.sc-more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
-.sc-more>span{overflow:hidden;color:#bfcac7;font-size:15px;line-height:1.55;padding-left:31px}
-.sc-step.is-active .sc-more{grid-template-rows:1fr}
-.sc-step.is-active .sc-more>span{padding-bottom:16px}
+/* The active step's rule fills over the step's time; when it finishes, the next step comes up */
+.sc-bar{position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--sage);transform:scaleX(0);transform-origin:left}
+.sc-step.is-active .sc-bar{animation:sc-fill 4.5s linear forwards}
+.showcase.paused .sc-step.is-active .sc-bar{animation-play-state:paused}
+.showcase.manual .sc-step.is-active .sc-bar{animation:none;transform:none}
+@keyframes sc-fill{to{transform:scaleX(1)}}
+/* All captions share one grid cell, so the block is as tall as the longest and never jumps */
+.sc-captions{display:grid;margin-top:16px}
+.sc-cap{grid-area:1/1;margin:0!important;color:#bfcac7;font-size:15px!important;line-height:1.55;opacity:0;transform:translateY(8px);transition:opacity .45s var(--ease),transform .45s var(--ease)}
+.sc-cap.is-active{opacity:1;transform:none}
 .sc-device{display:grid;justify-items:center;gap:20px;perspective:1400px}
 .phone-frame{--w:min(290px,62vw,calc((100svh - 240px) * .46));width:var(--w);aspect-ratio:828/1800;border-radius:calc(var(--w) * .15);padding:calc(var(--w) * .035);position:relative;
   background:linear-gradient(145deg,#41454b,#16181b 60%);box-shadow:inset 0 0 0 1.5px #62666d,0 50px 90px -40px #000,0 0 0 1px #000a;transform:rotateY(-6deg) rotateX(3deg)}
@@ -285,8 +290,6 @@ dd{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em}
 .phone-screen{position:relative;width:100%;height:100%;border-radius:calc(var(--w) * .12);overflow:hidden;background:#f2f2ef}
 .phone-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.05) translateY(2%);transition:opacity .55s var(--ease),transform .9s var(--ease)}
 .phone-screen img.is-active{opacity:1;transform:none}
-.sc-progress{width:var(--w,260px);width:min(290px,62vw);height:2px;border-radius:2px;background:#2e3b38;overflow:hidden}
-.sc-progress i{display:block;height:100%;background:var(--sage);transform:scaleX(.25);transform-origin:left}
 @media(max-width:900px){.showcase{grid-template-columns:1fr}.sc-device{order:-1}}
 
 /* ---------- Skills marquee ---------- */
@@ -501,12 +504,18 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       <h4>Hold This Thought</h4>
       <p>Building a native Swift iOS reminder app that helps people capture passing thoughts before they disappear. The app turns spoken or typed ideas into helpful prompts based on time, location, calendar events, and saved places. I lead product direction, interface design, and iOS development, from concept testing through live iPhone demos.</p>
       <div class="pills"><span class="pill">Swift</span><span class="pill">Product</span><span class="pill">UX</span><span class="pill">iOS</span></div>
-      <ol class="sc-steps">
-        <li class="sc-step is-active"><button type="button"><b>Say it once.</b></button><span class="sc-more"><span>Tap the Action Button or a Home Screen widget and just talk. It works out when and where to remind you.</span></span></li>
-        <li class="sc-step"><button type="button"><b>At the right time.</b></button><span class="sc-more"><span>Home shows what went off, what’s due today, and what’s coming up.</span></span></li>
-        <li class="sc-step"><button type="button"><b>At the right place.</b></button><span class="sc-more"><span>Get reminded when you walk into home, the grocery store, or the gym.</span></span></li>
-        <li class="sc-step"><button type="button"><b>With the right people.</b></button><span class="sc-more"><span>Share a thought with a friend or a group. When one of you does it, it comes off both lists.</span></span></li>
-      </ol>
+      <div class="sc-steps" role="tablist" aria-label="How Hold This Thought works">
+        <button class="sc-step is-active" type="button" role="tab" aria-selected="true"><b>Say it once.</b><i class="sc-bar" aria-hidden="true"></i></button>
+        <button class="sc-step" type="button" role="tab" aria-selected="false"><b>At the right time.</b><i class="sc-bar" aria-hidden="true"></i></button>
+        <button class="sc-step" type="button" role="tab" aria-selected="false"><b>At the right place.</b><i class="sc-bar" aria-hidden="true"></i></button>
+        <button class="sc-step" type="button" role="tab" aria-selected="false"><b>With the right people.</b><i class="sc-bar" aria-hidden="true"></i></button>
+      </div>
+      <div class="sc-captions" aria-live="polite">
+        <p class="sc-cap is-active">Tap the Action Button or a Home Screen widget and just talk. It works out when and where to remind you.</p>
+        <p class="sc-cap">Home shows what went off, what’s due today, and what’s coming up.</p>
+        <p class="sc-cap">Get reminded when you walk into home, the grocery store, or the gym.</p>
+        <p class="sc-cap">Share a thought with a friend or a group. When one of you does it, it comes off both lists.</p>
+      </div>
     </div>
     <div class="sc-device">
       <div class="phone-frame">
@@ -517,7 +526,6 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
           <img src="app/htt-friends.webp" alt="Hold This Thought friends screen with shared thoughts and a group" width="828" height="1800" loading="lazy" decoding="async">
         </div>
       </div>
-      <div class="sc-progress" aria-hidden="true"><i></i></div>
     </div>
   </article>
 
@@ -743,6 +751,40 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
 
   if (deepLink) skipIntro(deepLink, false);
   else if (document.documentElement.classList.contains('intro-returning')) skipIntro(null, false);
+
+  // Hold This Thought showcase: four tabs that step the phone through the app. They advance on
+  // their own (when each step's rule finishes filling), pause on hover, focus, or off screen, and
+  // stop advancing once someone picks a step. With reduced motion they only change when picked.
+  const showcase = document.querySelector('.showcase');
+  if (showcase) {
+    const tabs = [...showcase.querySelectorAll('.sc-step')], caps = [...showcase.querySelectorAll('.sc-cap')], screens = [...showcase.querySelectorAll('.phone-screen img')];
+    let step = 0;
+    const show = i => {
+      step = (i + tabs.length) % tabs.length;
+      tabs.forEach((t, k) => { t.classList.toggle('is-active', k === step); t.setAttribute('aria-selected', String(k === step)); t.tabIndex = k === step ? 0 : -1; });
+      caps.forEach((c, k) => c.classList.toggle('is-active', k === step));
+      screens.forEach((s, k) => s.classList.toggle('is-active', k === step));
+    };
+    show(0);
+    if (reduce) showcase.classList.add('manual');
+    showcase.addEventListener('animationend', e => { if (e.target.classList.contains('sc-bar') && !showcase.classList.contains('manual')) show(step + 1); });
+    tabs.forEach((t, k) => t.addEventListener('click', () => { showcase.classList.add('manual'); show(k); }));
+    showcase.querySelector('.sc-steps').addEventListener('keydown', e => {
+      const d = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+      if (!d) return;
+      e.preventDefault();
+      showcase.classList.add('manual');
+      show(step + d);
+      tabs[step].focus();
+    });
+    let hovering = false, focused = false, onScreen = false;
+    const pause = () => showcase.classList.toggle('paused', hovering || focused || !onScreen);
+    showcase.addEventListener('pointerenter', () => { hovering = true; pause(); });
+    showcase.addEventListener('pointerleave', () => { hovering = false; pause(); });
+    showcase.addEventListener('focusin', () => { focused = true; pause(); });
+    showcase.addEventListener('focusout', () => { focused = false; pause(); });
+    new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; pause(); }, { threshold: .35 }).observe(showcase);
+  }
 
   // Email buttons: reveal and copy the address
   document.querySelectorAll('.email-btn').forEach(btn => {

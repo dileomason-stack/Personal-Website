@@ -26,7 +26,7 @@
   --inv-bg:#131311;--inv-surface:#1b1b19;--inv-surface-2:#232320;--inv-line:#2e2d29;
   --inv-text:#f3f0ea;--inv-text-2:#b7b3a9;--inv-muted:#8b877d;--inv-accent:#e9c9a3;
   --ok:#5fb26f;
-  --bar-bg:rgba(243,240,234,.82);--ok-ring:rgba(95,178,111,.2);--accent-haze:rgba(212,71,31,.09);--accent-shadow:rgba(212,71,31,.35);--inv-accent-haze:rgba(233,201,163,.07);--contact-haze:rgba(212,71,31,.22);
+  --bar-bg:rgba(243,240,234,.82);--ok-ring:rgba(95,178,111,.2);--accent-haze:rgba(212,71,31,.09);--heat-1:rgba(212,71,31,.26);--heat-2:rgba(212,71,31,.5);--heat-3:rgba(212,71,31,.75);--accent-shadow:rgba(212,71,31,.35);--inv-accent-haze:rgba(233,201,163,.07);--contact-haze:rgba(212,71,31,.22);
 }
 [data-theme="night"]{
   --bg:#0c0d0e;--bg-2:#151618;--surface:#131416;--tint:#101113;
@@ -36,7 +36,7 @@
   --inv-bg:#141517;--inv-surface:#1a1b1e;--inv-surface-2:#212226;--inv-line:#2a2c30;
   --inv-text:#ededea;--inv-text-2:#b3b3ad;--inv-muted:#85857f;--inv-accent:#c6f25b;
   --ok:#c6f25b;
-  --bar-bg:rgba(12,13,14,.78);--ok-ring:rgba(198,242,91,.2);--accent-haze:rgba(198,242,91,.06);--accent-shadow:rgba(198,242,91,.25);--inv-accent-haze:rgba(198,242,91,.05);--contact-haze:rgba(198,242,91,.14);
+  --bar-bg:rgba(12,13,14,.78);--ok-ring:rgba(198,242,91,.2);--accent-haze:rgba(198,242,91,.06);--heat-1:rgba(198,242,91,.22);--heat-2:rgba(198,242,91,.45);--heat-3:rgba(198,242,91,.7);--accent-shadow:rgba(198,242,91,.25);--inv-accent-haze:rgba(198,242,91,.05);--contact-haze:rgba(198,242,91,.14);
 }
 :root{
   /* Names the intro (and older rules) still use, mapped onto the tokens */
@@ -151,7 +151,7 @@ body.locked .hero .reveal{opacity:0}
 .nav a:hover{color:var(--text);background:var(--bg-2)}
 .nav a.active{background:var(--text);color:var(--bg)}
 .bar-end{display:flex;align-items:center;gap:16px}
-.bar .loc{color:var(--muted);display:flex;align-items:center;gap:8px}
+.bar .loc{color:var(--text-2);display:flex;align-items:center;gap:8px}
 /* Theme toggle: shows the mode it switches to (moon + Dark mode, or sun + Light mode) */
 .lights{all:unset;box-sizing:border-box;height:36px;display:inline-flex;align-items:center;gap:8px;padding:0 14px 0 11px;border-radius:40px;border:1px solid var(--line-strong);
   color:var(--text);font:600 12px Manrope,sans-serif;cursor:pointer;white-space:nowrap;transition:border-color .25s,background .25s}
@@ -163,7 +163,17 @@ body.locked .hero .reveal{opacity:0}
 @media(max-width:640px){.lights{width:40px;padding:0;justify-content:center}.lights-label{display:none}}
 /* Switching themes: the new one opens as a circle from the switch (View Transitions) */
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
-.bar .loc:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px var(--ok-ring)}
+.bar .loc:before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--dot,var(--ok));box-shadow:0 0 0 4px var(--dot-ring,var(--ok-ring))}
+/* Live status: Mason's local time, then what he's probably doing, rolling between the two */
+.bar .loc[data-mood="late"]{--dot:var(--accent);--dot-ring:var(--accent-shadow)}
+.bar .loc[data-mood="asleep"]{--dot:var(--muted);--dot-ring:transparent}
+.bar .loc[data-mood="late"]:before{animation:nowPulse 2.4s ease-in-out infinite}
+@keyframes nowPulse{50%{box-shadow:0 0 0 7px transparent}}
+.now-roll{display:inline-grid;overflow:hidden;white-space:nowrap}
+.now-roll>span{grid-area:1/1;transition:transform .7s var(--ease),opacity .7s var(--ease)}
+.now-b{transform:translateY(110%);opacity:0}
+.now-roll.flip .now-a{transform:translateY(-110%);opacity:0}
+.now-roll.flip .now-b{transform:none;opacity:1}
 
 /* ---------- Shared ---------- */
 section{padding:clamp(88px,11vw,144px) var(--pad-x);position:relative}
@@ -192,6 +202,25 @@ section{padding:clamp(88px,11vw,144px) var(--pad-x);position:relative}
 .eyebrow{color:var(--accent);margin:0 0 28px}
 .hero h2{font-size:clamp(54px,8.4vw,126px);line-height:.86;letter-spacing:-.06em;margin:0;font-weight:800}
 .hero h2 em{font-style:normal;color:var(--accent)}
+/* Grabbable headline (hero-physics.js): letters lift on hover; the note points at them until the first grab */
+.hero>div{position:relative}
+.grabbable{-webkit-user-select:none;user-select:none}
+.grabbable .ch{display:inline-block;cursor:grab;transition:translate .3s var(--ease)}
+.grabbable .ch:hover{translate:0 -.05em}
+.grabbable.live .ch{will-change:transform}
+.grabbable .ch.held{cursor:grabbing;position:relative;z-index:2;translate:none}
+.grab-note{position:absolute;width:0;height:0;pointer-events:none;color:var(--text)}
+.grab-note svg{position:absolute;left:0;top:-34px;width:70px;height:38px;overflow:visible}
+.grab-note path{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.grab-note.on .shaft{animation:note-draw .5s .1s var(--ease) forwards}
+.grab-note.on .head{animation:note-draw .2s .52s ease-out forwards}
+.grab-note span{position:absolute;left:78px;top:-40px;white-space:nowrap}
+.grab-note b{display:block;font:600 15px/1.2 Manrope,system-ui,sans-serif;letter-spacing:-.01em}
+.grab-note small{display:block;margin-top:3px;font-size:10px;color:var(--muted)}
+.grab-note b,.grab-note small{clip-path:inset(0 100% 0 0)}
+.grab-note.on b{animation:note-write .6s .35s var(--ease) forwards}
+.grab-note.on small{animation:note-write .6s .5s var(--ease) forwards}
+.grab-note:not(.on){opacity:0;transition:opacity .3s}
 .lead{max-width:600px;font-size:clamp(18px,1.6vw,21px);line-height:1.55;margin:36px 0 36px;color:var(--text-2)}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
 /* The readout: a quiet instrument panel rather than a sticker */
@@ -324,6 +353,40 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .phone-screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.05) translateY(2%);transition:opacity .55s var(--ease),transform .9s var(--ease)}
 .phone-screen img.is-active{opacity:1;transform:none}
 @media(max-width:900px){.showcase{grid-template-columns:1fr}.sc-device{order:-1}}
+/* Try the app: a real input over the screenshot's "Hold a thought…" bar, and a card that reads it */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.htt-try{position:absolute;left:18%;width:55%;top:84.2%;height:4.4%;z-index:1;transition:opacity .3s}
+.htt-input{all:unset;box-sizing:border-box;width:100%;height:100%;padding:0 4px;border-radius:8px;background:#f1f3f0;color:#141414;
+  font:500 calc(var(--w) * .039) Manrope,system-ui,sans-serif;letter-spacing:-.01em;cursor:text;caret-color:#2f7d34}
+.htt-input::placeholder{color:#8a8b88}
+.htt-input:focus-visible{outline:2px solid #2f7d34;outline-offset:2px}
+.phone-screen img:first-of-type:not(.is-active)~.htt-try,.phone-screen img:first-of-type:not(.is-active)~.htt-card{opacity:0;pointer-events:none}
+.htt-card{position:absolute;left:4%;right:4%;bottom:17%;z-index:1;padding:calc(var(--w) * .045);border-radius:calc(var(--w) * .06);background:#fff;color:#141414;
+  box-shadow:0 1px 2px rgb(0 0 0 / .08),0 18px 40px -12px rgb(0 0 0 / .35);font-family:Manrope,system-ui,sans-serif;
+  transform-origin:50% 100%;animation:cardIn .45s var(--ease) both}
+.htt-card[hidden]{display:none}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px) scale(.96)}}
+.showcase .htt-head{display:flex;justify-content:space-between;gap:8px;margin:0 0 .5em;max-width:none;line-height:1.2;font:500 calc(var(--w) * .03) "DM Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:#7a7b77}
+.htt-card.saved .htt-state{color:#2f7d34}
+.htt-card.saved .htt-state:before{content:"✓ "}
+.showcase .htt-title{margin:0 0 .55em;max-width:none;color:#141414;font-weight:800;font-size:calc(var(--w) * .056);line-height:1.2;letter-spacing:-.02em;overflow-wrap:anywhere}
+.htt-rows{list-style:none;margin:0;padding:0;display:grid;gap:.45em;font-size:calc(var(--w) * .041);font-weight:600;color:#2a2b29}
+.htt-rows li{display:flex;align-items:center;gap:.5em;animation:rowIn .35s var(--ease) both}
+.htt-rows li:nth-child(2){animation-delay:.05s}.htt-rows li:nth-child(3){animation-delay:.1s}
+@keyframes rowIn{from{opacity:0;transform:translateX(-6px)}}
+.htt-rows svg{flex:none;width:1.25em;height:1.25em;padding:.22em;border-radius:.35em;background:#e8f4dc;stroke:#2f7d34;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.htt-rows .none{color:#7a7b77;font-weight:500}
+.htt-rows .nearby{color:#2f7d34}
+.htt-rows .nearby svg{background:transparent;border:1px dashed #9fc98a}
+.sc-try{margin-top:22px;padding-top:20px;border-top:1px solid var(--inv-line)}
+.showcase .sc-try .mo{margin:0 0 12px;font-size:11px;color:var(--inv-muted)}
+.sc-try .mo b{color:var(--inv-text);font-weight:500}
+.try-chips{display:flex;flex-wrap:wrap;gap:8px}
+.try-chips button{all:unset;box-sizing:border-box;cursor:pointer;padding:8px 13px;border-radius:40px;border:1px solid var(--inv-line);background:var(--inv-surface-2);
+  color:var(--inv-text-2);font:500 13px Manrope,system-ui,sans-serif;transition:border-color .2s,color .2s,background .2s}
+.try-chips button:hover,.try-chips button.on{border-color:var(--inv-accent);color:var(--inv-text)}
+.try-chips button:focus-visible{outline:2px solid var(--inv-accent);outline-offset:2px}
+.showcase .try-note{margin:16px 0 0;font-size:13px;line-height:1.55;color:var(--inv-muted);max-width:52ch}
 
 /* ---------- Motion (site-motion.js): GSAP owns these, so CSS transitions step aside ---------- */
 html.lenis,html.lenis body{height:auto}
@@ -384,6 +447,63 @@ html.lenis{scroll-behavior:auto}
 .contact .btn:hover{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .contact .btn.ghost{background:transparent;color:var(--inv-text);border-color:var(--inv-line)}
 .contact .btn.ghost:hover{background:var(--inv-text);color:var(--inv-bg);border-color:var(--inv-text)}
+/* ---------- GitHub activity: a day-by-day grid of commits across every repo ---------- */
+.activity{margin-top:clamp(56px,7vw,88px);display:grid;grid-template-columns:minmax(240px,.8fr) 1.2fr;gap:clamp(28px,5vw,72px);align-items:start;
+  padding:clamp(24px,3vw,36px);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
+.act-label{margin:0 0 18px;color:var(--muted)}
+.act-total{margin:0;font-size:clamp(44px,5.2vw,72px);font-weight:800;letter-spacing:-.05em;line-height:.95}
+.act-total b{font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
+.act-sub{margin:10px 0 22px;color:var(--muted);font-size:15px}
+.act-legend{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.act-legend li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--text-2)}
+.act-legend li i{width:9px;height:9px;border-radius:3px;background:var(--c)}
+.act-legend li span{font:500 12px "DM Mono",monospace;color:var(--muted)}
+.act-legend li.dim{opacity:.35}
+.act-chart{min-width:0}
+.act-months{display:grid;grid-auto-flow:column;grid-auto-columns:var(--cell);gap:var(--gap);margin-bottom:8px;font:500 10px "DM Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);height:12px;white-space:nowrap}
+.act-chart{--cell:22px;--gap:6px}
+.act-grid{display:grid;grid-template-rows:repeat(7,var(--cell));grid-auto-flow:column;grid-auto-columns:var(--cell);gap:var(--gap)}
+.act-grid i{border-radius:clamp(3px,.4vw,6px);background:var(--line);outline:1px solid transparent;transition:outline-color .15s}
+.act-grid i[data-n]{cursor:default}
+.act-grid i.l1{background:var(--heat-1)}
+.act-grid i.l2{background:var(--heat-2)}
+.act-grid i.l3{background:var(--heat-3)}
+.act-grid i.l4{background:var(--accent)}
+.act-grid i.future{background:transparent;outline:1px dashed var(--line)}
+.act-grid i:hover,.act-grid i.hot{outline-color:var(--text)}
+.act-grid i.fade{opacity:.18}
+.act-tip{margin:14px 0 0;color:var(--muted);min-height:1.4em}
+.act-tip b{color:var(--text);font-weight:500}
+@media(max-width:900px){.activity{grid-template-columns:1fr}}
+
+/* ---------- Versions: scrub through the site's git history ---------- */
+.versions{background:var(--inv-bg);color:var(--inv-text);display:grid;grid-template-columns:minmax(260px,.7fr) 1.3fr;gap:clamp(32px,5vw,80px);align-items:center;border-top:1px solid var(--inv-line)}
+.ver-label{color:var(--inv-accent);margin:0 0 18px}
+.ver-title{font-weight:800;margin:0 0 14px;font-size:clamp(28px,3vw,40px);letter-spacing:-.04em;line-height:1.05}
+.ver-copy>p:not([class]){margin:0 0 26px;color:var(--inv-text-2);line-height:1.6;font-size:15px;max-width:40ch}
+.ver-meta{display:flex;gap:14px;margin:0 0 8px;color:var(--inv-muted)}
+.ver-sha{color:var(--inv-accent)}
+.ver-msg{margin:0;font-size:18px;font-weight:700;letter-spacing:-.02em;min-height:2.6em;line-height:1.3}
+.ver-frame{border-radius:14px;overflow:hidden;border:1px solid var(--inv-line);background:var(--inv-surface);box-shadow:0 40px 80px -40px rgb(0 0 0 / .7)}
+.ver-chrome{display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-bottom:1px solid var(--inv-line);background:var(--inv-surface-2)}
+.ver-chrome i{width:9px;height:9px;border-radius:50%;background:var(--inv-line)}
+.ver-chrome span{margin-left:12px;font:500 11px "DM Mono",monospace;color:var(--inv-text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ver-shots{position:relative;aspect-ratio:16/10;background:#111}
+.ver-shots img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+.ver-track{position:relative;margin-top:18px;padding-bottom:22px}
+.ver-range{-webkit-appearance:none;appearance:none;width:100%;height:28px;margin:0;background:transparent;cursor:grab;position:relative;z-index:1}
+.ver-range:active{cursor:grabbing}
+.ver-range::-webkit-slider-runnable-track{height:2px;background:var(--inv-line)}
+.ver-range::-moz-range-track{height:2px;background:var(--inv-line)}
+.ver-range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-8px;border-radius:50%;background:var(--inv-accent);box-shadow:0 0 0 6px rgb(0 0 0 / .35)}
+.ver-range::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:var(--inv-accent)}
+.ver-range:focus-visible{outline:none}
+.ver-range:focus-visible::-webkit-slider-thumb{outline:2px solid var(--inv-text);outline-offset:3px}
+.ver-ticks{position:absolute;left:9px;right:9px;top:13px;height:24px;pointer-events:none}
+.ver-ticks span{position:absolute;top:0;width:1px;height:8px;background:var(--inv-muted);translate:-.5px 0}
+.ver-ticks span.on{background:var(--inv-accent);height:12px;top:-2px}
+.ver-ticks b{position:absolute;top:16px;translate:-50% 0;font:500 10px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--inv-muted);white-space:nowrap}
+@media(max-width:900px){.versions{grid-template-columns:1fr}.ver-stage{order:-1}}
 footer{display:flex;justify-content:space-between;gap:12px;padding:26px var(--pad-x);background:var(--inv-bg);color:var(--inv-muted);font-size:12px;border-top:1px solid var(--inv-line)}
 footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{color:var(--inv-text)}
 
@@ -456,7 +576,8 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/",
   "html2canvas": "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js",
   "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js/+esm",
-  "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.mjs"
+  "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.mjs",
+  "matter-js": "https://cdn.jsdelivr.net/npm/matter-js@0.20.0/+esm"
 } }
 </script>
 <script type="module">
@@ -515,7 +636,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     <a href="#contact">Contact</a>
   </div>
   <div class="bar-end">
-    <span class="mo loc">Los Altos, CA</span>
+    <span class="mo loc" id="now" title="Mason’s local time in San Luis Obispo, CA"><span class="now-roll"><span class="now-a">San Luis Obispo</span><span class="now-b" aria-hidden="true"></span></span></span>
     <button class="lights" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">
       <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
       <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>
@@ -571,6 +692,17 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         <p class="sc-cap">Get reminded when you walk into home, the grocery store, or the gym.</p>
         <p class="sc-cap">Share a thought with a friend or a group. When one of you does it, it comes off both lists.</p>
       </div>
+      <div class="sc-try">
+        <p class="mo"><b>Try it.</b> Type on the phone, or tap one:</p>
+        <div class="try-chips">
+          <button type="button">call mom tmrw at 5</button>
+          <button type="button">buy batteries next time I’m at Costco</button>
+          <button type="button">MWF at 8am lift</button>
+          <button type="button">check the bread in 20</button>
+          <button type="button">pay rent on the 1st of every month</button>
+        </div>
+        <p class="try-note">The app’s own reminder reader, ported from Swift to JavaScript. It runs in your browser and passes all 295 of the app’s test cases.</p>
+      </div>
     </div>
     <div class="sc-device">
       <div class="phone-frame">
@@ -579,6 +711,15 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
           <img src="app/htt-capture.webp" alt="Hold This Thought screen listing one-tap ways to capture a thought" width="828" height="1800" loading="lazy" decoding="async">
           <img src="app/htt-places.webp" alt="Hold This Thought places screen with thoughts waiting at home, the grocery store, and the pharmacy" width="828" height="1800" loading="lazy" decoding="async">
           <img src="app/htt-friends.webp" alt="Hold This Thought friends screen with shared thoughts and a group" width="828" height="1800" loading="lazy" decoding="async">
+          <form class="htt-try" autocomplete="off" spellcheck="false">
+            <label class="sr-only" for="htt-input">Try the app: type a thought</label>
+            <input id="htt-input" class="htt-input" placeholder="Hold a thought…" maxlength="120" enterkeyhint="done">
+          </form>
+          <div class="htt-card" aria-live="polite" hidden>
+            <p class="htt-head"><span class="htt-state">Reading as you type</span><span class="htt-ms"></span></p>
+            <p class="htt-title"></p>
+            <ul class="htt-rows"></ul>
+          </div>
         </div>
       </div>
     </div>
@@ -645,6 +786,19 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
         </div>
       </div>
     </article>
+  </div>
+  <div class="activity reveal" id="activity">
+    <div class="act-copy">
+      <p class="mo act-label">GitHub activity / every commit, every repo</p>
+      <p class="act-total"><b data-count="0">0</b> commits</p>
+      <p class="act-sub">since <span class="act-since"></span>, across <span class="act-repos"></span> projects</p>
+      <ul class="act-legend"></ul>
+    </div>
+    <div class="act-chart">
+      <div class="act-months" aria-hidden="true"></div>
+      <div class="act-grid" role="img"></div>
+      <p class="act-tip mo" aria-hidden="true">Hover a day</p>
+    </div>
   </div>
 </section>
 
@@ -733,6 +887,25 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     <button class="btn email-btn" type="button">EMAIL ME <span class="arr">↗</span></button>
     <a class="btn ghost" href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LINKEDIN <span class="arr">↗</span></a>
       <a class="btn ghost" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GITHUB <span class="arr">↗</span></a>
+  </div>
+</section>
+<section class="versions" id="versions" aria-labelledby="versions-title">
+  <div class="ver-copy">
+    <p class="mo ver-label">This site, version by version</p>
+    <p class="ver-title" id="versions-title">Six weeks of git history.</p>
+    <p>Drag through it. Every frame is a real commit from this site’s repo, screenshotted as it looked that day, from a class starter page to what you’re reading now.</p>
+    <p class="ver-meta mo"><span class="ver-date"></span><span class="ver-sha"></span></p>
+    <p class="ver-msg"></p>
+  </div>
+  <div class="ver-stage">
+    <div class="ver-frame">
+      <div class="ver-chrome" aria-hidden="true"><i></i><i></i><i></i><span>dileomason-stack.github.io/Personal-Website</span></div>
+      <div class="ver-shots"></div>
+    </div>
+    <div class="ver-track">
+      <input class="ver-range" type="range" min="0" max="9" step="0.001" value="9" aria-label="Site version">
+      <div class="ver-ticks" aria-hidden="true"></div>
+    </div>
   </div>
 </section>
 <footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="?intro">Replay intro ↺</a></span><span>Cal Poly SLO / Business + IS</span></footer>
@@ -988,5 +1161,6 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   });
 })();
 </script>
+<script type="module" src="site-live.js"></script>
 </body>
 </html>

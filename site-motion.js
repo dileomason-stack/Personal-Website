@@ -83,6 +83,8 @@ function heroEntrance() {
     .from(rows.flatMap(r => [...r.children]), { autoAlpha: 0, y: 6, duration: 0.45, ease: 'power2.out', stagger: 0.05 }, 1.15)
     .add(scrambleReadout, 1.2)
     .from(cue, { autoAlpha: 0, y: -12, duration: 0.8, ease: 'power3.out' }, 1.9);
+  // Once the letters have landed, they become grabbable (desktop)
+  if (finePointer) tl.add(() => import('./hero-physics.js').then(m => m.initHeadline(h2)), 2.2);
   root.classList.remove('hero-wait');
 }
 

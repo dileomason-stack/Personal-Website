@@ -437,7 +437,8 @@ function start() {
 
     composer.render(dt);
   }
-  frame();
+  // Compile shaders in the background where the browser supports it, then start drawing
+  renderer.compileAsync(scene, camera).catch(() => {}).finally(() => frame());
 
   // ---------- Hero headline: letters rise in after the intro ----------
   const heroH = document.querySelector('.hero h2');
@@ -505,6 +506,8 @@ function start() {
           const bar = doc.getElementById('bar');
           bar.style.background = 'rgba(244,241,234,.82)';
           bar.style.backdropFilter = 'none';
+          // The live page keeps the hero hidden behind the intro; the snapshot shows it as it'll look after
+          doc.body.classList.remove('locked');
           // The headline letters rise in after the cut, so the snapshot leaves them out
           doc.querySelector('.hero h2').style.visibility = 'hidden';
           // html2canvas can't do the hero's masked grid or soft radial glow (it draws a muddy blob), so the
@@ -560,7 +563,11 @@ function start() {
     if (split) gsap.to(split.chars, { yPercent: 0, rotate: 0, duration: 1.1, ease: 'expo.out', stagger: 0.035, delay: 0.2, onComplete: () => split.revert() });
     window.siteIntro.finish();
     sound.stop();
-    if (destination) setTimeout(() => document.getElementById(destination)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 900);
+    if (destination) setTimeout(() => {
+      const el = document.getElementById(destination);
+      if (window.siteLenis) window.siteLenis.scrollTo(el, { offset: -72 });
+      else el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 900);
     setTimeout(teardown, 1200);
   }
   function teardown() {

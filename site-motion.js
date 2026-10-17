@@ -124,28 +124,6 @@ $$('.proj').forEach(card => {
   if (media) gsap.fromTo(media, { scale: 1.14 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'center center', scrub: true } });
 });
 
-// ---------- Skills marquee: drifts on its own, speeds up and leans with scroll speed, reverses with direction ----------
-const track = $('.marquee-track');
-track.innerHTML += track.innerHTML;
-let mx = 0, lean = 0, velocity = 0, dir = -1, marqueeOn = false;
-ScrollTrigger.create({
-  trigger: '.marquee', start: 'top bottom', end: 'bottom top',
-  onToggle: self => { marqueeOn = self.isActive; },
-  onUpdate: self => { velocity = self.getVelocity(); if (velocity) dir = velocity > 0 ? -1 : 1; },
-});
-const setX = gsap.quickSetter(track, 'x', 'px'), setLean = gsap.quickSetter(track, 'skewX', 'deg');
-gsap.ticker.add((time, dt) => {
-  if (!marqueeOn) return;
-  const half = track.scrollWidth / 2;
-  mx += dir * (60 + Math.min(900, Math.abs(velocity) * 0.6)) * dt / 1000;
-  if (mx <= -half) mx += half;
-  if (mx > 0) mx -= half;
-  lean += (gsap.utils.clamp(-10, 10, -velocity / 180) - lean) * 0.12;
-  velocity *= 0.9;
-  setX(mx);
-  setLean(lean);
-});
-
 // ---------- Galleries: settle up to full size as they come into view ----------
 $$('.gallery-wrap').forEach(g => {
   gsap.fromTo(g, { scale: 0.9, y: 60 }, { scale: 1, y: 0, ease: 'none', scrollTrigger: { trigger: g, start: 'top bottom', end: 'top 35%', scrub: true } });

@@ -199,12 +199,13 @@ function start() {
     // The desk keeps clear of the headline. The switch sits on the wall beside the laptop, or on
     // phones between the headline and the laptop, where the desk leaves room for the whole
     // switch block (switch and label) so the label never lands on the screen.
-    const narrow = w < 700;
     const copyBottom = copy.getBoundingClientRect().bottom, boxH = switchbox.offsetHeight;
-    room.layout({ screenToPlane, toScreen, w, h, pxPerUnit, topLimit: copyBottom + (narrow ? boxH + 26 : 28) });
-    const spot = room.switchSpot;
-    switchbox.style.setProperty('--swx', spot.x + 'px');
-    const boxTop = narrow ? copyBottom + Math.max(10, (spot.lidTop - copyBottom - boxH) / 2) : spot.y - sw.offsetHeight / 2;
+    const roomArgs = { screenToPlane, toScreen, w, h, pxPerUnit, topLimit: copyBottom + 28 };
+    room.layout(roomArgs);
+    const spot = room.switchSpot, stacked = spot.stacked;
+    if (stacked) room.layout({ ...roomArgs, topLimit: copyBottom + boxH + 56 });
+    switchbox.style.setProperty('--swx', (stacked ? w / 2 : spot.x) + 'px');
+    const boxTop = stacked ? copyBottom + Math.max(16, (spot.lidTop - copyBottom - boxH) / 2) : spot.y - sw.offsetHeight / 2;
     switchbox.style.setProperty('--swy', boxTop + 'px');
     const r = sw.getBoundingClientRect();
     const c = screenToPlane(r.left + r.width / 2, r.top + r.height / 2, 0, new THREE.Vector3());

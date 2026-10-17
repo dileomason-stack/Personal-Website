@@ -194,7 +194,7 @@ export function buildRoom(scene, renderer) {
 
   // ---------- Layout ----------
   let scale = 1;
-  const switchSpot = { x: 0, y: 0, lidTop: 0 };
+  const switchSpot = { x: 0, y: 0, lidTop: 0, stacked: false };
   function layout({ screenToPlane, toScreen, w, h, pxPerUnit, topLimit }) {
     const v = new THREE.Vector3();
     const narrow = w < 700;
@@ -213,7 +213,8 @@ export function buildRoom(scene, renderer) {
 
     // Desk sized so the laptop screen is a set share of the window, then shrunk if the
     // lid would reach up into the headline (short, wide windows)
-    const screenPx = narrow ? w * 0.42 : THREE.MathUtils.clamp(Math.min(w * 0.24, h * 0.36), 220, 420);
+    // (phones get a big laptop; split-screen widths a slightly smaller one, so the switch fits beside it)
+    const screenPx = w < 520 ? w * 0.42 : narrow ? w * 0.34 : THREE.MathUtils.clamp(Math.min(w * 0.24, h * 0.36), 220, 420);
     let s = screenPx / (SCREEN_W * pxPerUnit * 1.08);
     const lidTop = new THREE.Vector3(), deskEdge = new THREE.Vector3();
     let topY = 0;
@@ -222,21 +223,22 @@ export function buildRoom(scene, renderer) {
       desk.position.set(0, v.y, 0);
       desk.scale.setScalar(s);
       desk.updateMatrixWorld(true);
-      topY = toScreen(screen.localToWorld(lidTop.set(0, SCREEN_H / 2 + 0.04, 0))).y;
+      topY = toScreen(screen.localToWorld(lidTop.set(0, 0.315, 0))).y; // top edge of the lid
       const deskY = toScreen(desk.localToWorld(deskEdge.set(0, 0, 0.5))).y;
       if (!topLimit || topY >= topLimit) break;
       s *= Math.max(0.5, (deskY - topLimit) / (deskY - topY));
     }
     for (const leg of legs) leg.scale.y = Math.max(0.1, (v.y - floorY) / s - 0.07);
 
-    // Light switch: on the wall just left of the laptop, level with its screen. Phones have no
-    // room beside it, so there it goes in the open wall between the headline and the laptop
-    // (the caller sets its height there).
+    // Light switch: on the wall just left of the laptop, level with its screen. When there's
+    // no room for it and its label beside the laptop (phones), it's stacked in the open wall
+    // between the headline and the laptop instead, and the caller sets its height there.
     switchSpot.lidTop = topY;
-    if (narrow) switchSpot.x = w / 2;
+    const left = toScreen(laptop.localToWorld(new THREE.Vector3(-0.5, 0, 0)));
+    switchSpot.stacked = left.x < 170;
+    if (switchSpot.stacked) switchSpot.x = w / 2;
     else {
-      const left = toScreen(laptop.localToWorld(new THREE.Vector3(-0.5, 0, 0)));
-      switchSpot.x = Math.max(70, left.x - 90);
+      switchSpot.x = Math.max(80, left.x - 90);
       switchSpot.y = toScreen(screen.localToWorld(new THREE.Vector3(0, 0, 0))).y;
     }
 

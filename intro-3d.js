@@ -196,11 +196,16 @@ function start() {
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
     pxPerUnit = h / (2 * CAM.z * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
-    // The desk keeps clear of the headline, and the switch sits on the wall right beside the laptop
-    room.layout({ screenToPlane, toScreen, w, h, pxPerUnit, topLimit: copy.getBoundingClientRect().bottom + 28 });
+    // The desk keeps clear of the headline. The switch sits on the wall beside the laptop, or on
+    // phones between the headline and the laptop, where the desk leaves room for the whole
+    // switch block (switch and label) so the label never lands on the screen.
+    const narrow = w < 700;
+    const copyBottom = copy.getBoundingClientRect().bottom, boxH = switchbox.offsetHeight;
+    room.layout({ screenToPlane, toScreen, w, h, pxPerUnit, topLimit: copyBottom + (narrow ? boxH + 26 : 28) });
     const spot = room.switchSpot;
     switchbox.style.setProperty('--swx', spot.x + 'px');
-    switchbox.style.setProperty('--swy', spot.y - sw.offsetHeight / 2 + 'px');
+    const boxTop = narrow ? copyBottom + Math.max(10, (spot.lidTop - copyBottom - boxH) / 2) : spot.y - sw.offsetHeight / 2;
+    switchbox.style.setProperty('--swy', boxTop + 'px');
     const r = sw.getBoundingClientRect();
     const c = screenToPlane(r.left + r.width / 2, r.top + r.height / 2, 0, new THREE.Vector3());
     const top = screenToPlane(r.left + r.width / 2, r.top, 0, new THREE.Vector3());

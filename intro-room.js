@@ -194,7 +194,7 @@ export function buildRoom(scene, renderer) {
 
   // ---------- Layout ----------
   let scale = 1;
-  const switchSpot = { x: 0, y: 0 };
+  const switchSpot = { x: 0, y: 0, lidTop: 0 };
   function layout({ screenToPlane, toScreen, w, h, pxPerUnit, topLimit }) {
     const v = new THREE.Vector3();
     const narrow = w < 700;
@@ -218,7 +218,7 @@ export function buildRoom(scene, renderer) {
     const lidTop = new THREE.Vector3(), deskEdge = new THREE.Vector3();
     let topY = 0;
     for (let i = 0; i < 3; i++) {
-      screenToPlane(w / 2, h * (narrow ? 0.84 : 0.85), 0.5 * s, v);
+      screenToPlane(w / 2, h * (narrow ? 0.9 : 0.85), 0.5 * s, v);
       desk.position.set(0, v.y, 0);
       desk.scale.setScalar(s);
       desk.updateMatrixWorld(true);
@@ -230,17 +230,17 @@ export function buildRoom(scene, renderer) {
     for (const leg of legs) leg.scale.y = Math.max(0.1, (v.y - floorY) / s - 0.07);
 
     // Light switch: on the wall just left of the laptop, level with its screen. Phones have no
-    // room beside it, so there it goes in the open wall between the headline and the laptop.
-    if (narrow) {
-      switchSpot.x = w / 2;
-      switchSpot.y = ((topLimit ? topLimit - 28 : h * 0.5) + topY) / 2 - 14;
-    } else {
+    // room beside it, so there it goes in the open wall between the headline and the laptop
+    // (the caller sets its height there).
+    switchSpot.lidTop = topY;
+    if (narrow) switchSpot.x = w / 2;
+    else {
       const left = toScreen(laptop.localToWorld(new THREE.Vector3(-0.5, 0, 0)));
       switchSpot.x = Math.max(70, left.x - 90);
       switchSpot.y = toScreen(screen.localToWorld(new THREE.Vector3(0, 0, 0))).y;
     }
 
-    screenToPlane(w * (narrow ? 0.62 : 0.83), h * (narrow ? 0.47 : 0.6), 0, v);
+    screenToPlane(w * (narrow ? 0.16 : 0.83), h * (narrow ? 0.55 : 0.6), 0, v);
     shelf.position.set(v.x, v.y, 0);
     shelf.scale.setScalar(scale * (narrow ? 0.8 : 1));
   }

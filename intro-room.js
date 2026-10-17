@@ -1,18 +1,25 @@
 // The bedroom for the 3D intro: a desk where the laptop is running Claude Code on Hold This
-// Thought and the phone, plugged in over USB-C, picks up each build. Plus car posters,
-// a shelf with a football and a baseball, a bat in the corner, and a wood floor. Everything
-// is placed from screen positions in layout(), so it frames the headline at any window size.
+// Thought and the phone, plugged in over USB-C, picks up each build. Plus a car poster and
+// car photos taped to the wall, a shelf with a baseball, and a wood floor. Everything is
+// placed from screen positions in layout(), so it frames the headline at any window size.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createTerminal, INSTALL_AT } from './intro-terminal.js';
 
-// at / narrow: [x, y, height] as fractions of the window
+// One real poster, and the rest are Mason's own car photos printed out and taped up.
+// at / narrow: [x, y, height] as fractions of the window.
+// tape: [x, y, angle] per strip, x/y from -1 to 1 across the print (corners are ±1).
+// curl: how far the untaped bottom corners lift off the wall.
 const POSTERS = [
-  { src: 'car-917.jpeg', title: 'PORSCHE 917', no: '01', w: 1, h: 1.42, tilt: -0.04, at: [0.13, 0.36, 0.32], narrow: [0.04, 0.2, 0.2] },
-  { src: 'car-f40.jpeg', title: 'FERRARI F40', no: '02', w: 1.36, h: 1.08, tilt: 0.035, at: [0.23, 0.12, 0.2], narrow: [0.1, 0.06, 0.1] },
-  { src: 'car-heritage-1.jpeg', title: 'PORSCHE 962', no: '03', w: 1, h: 1.42, tilt: 0.05, at: [0.87, 0.24, 0.3], narrow: [0.96, 0.18, 0.2] },
-  { src: 'car-911.jpeg', title: 'PORSCHE 911', no: '04', w: 1, h: 1.42, tilt: -0.06, at: [0.75, 0.42, 0.19], narrow: [0.88, 0.4, 0.12] },
+  { src: 'car-917.jpeg', poster: true, title: 'PORSCHE 917', no: '01', w: 1, h: 1.42, tilt: -0.04, at: [0.13, 0.36, 0.34], narrow: [0.12, 0.24, 0.19],
+    tape: [[-1, 1, -0.7], [1, 1, 0.7], [-1, -1, 0.7], [1, -1, -0.7]], curl: 0 },
+  { src: 'car-f40.jpeg', w: 1.5, h: 1, tilt: 0.06, at: [0.23, 0.12, 0.15], narrow: [0.2, 0.06, 0.08],
+    tape: [[0, 1, 1.48]], curl: 1 },
+  { src: 'car-heritage-1.jpeg', w: 1, h: 1.333, tilt: 0.07, at: [0.87, 0.24, 0.24], narrow: [0.96, 0.18, 0.16],
+    tape: [[-1, 1, -0.75], [1, 1, 0.65]], curl: 0.8 },
+  { src: 'car-911.jpeg', w: 1, h: 1.333, tilt: -0.09, at: [0.81, 0.45, 0.17], narrow: [0.88, 0.4, 0.11],
+    tape: [[-1, 1, -0.7], [1, -1, -0.6]], curl: 0 },
 ];
 
 export function buildRoom(scene, renderer) {
@@ -28,40 +35,41 @@ export function buildRoom(scene, renderer) {
   const baseboard = shadowed(new THREE.Mesh(new THREE.BoxGeometry(60, 0.16, 0.04), new THREE.MeshStandardMaterial({ color: 0xe9e3d6, roughness: 0.5 })));
   scene.add(floor, baseboard);
 
-  // ---------- Posters ----------
+  // ---------- Poster and taped-up photos ----------
+  const tapeMat = new THREE.MeshStandardMaterial({ map: tapeTexture(), transparent: true, roughness: 0.75, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const tapeGeo = new THREE.PlaneGeometry(0.27, 0.08);
   const posters = POSTERS.map(p => {
     const group = new THREE.Group();
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.62 });
-    posterTexture(p, maxAniso).then(tex => { mat.map = tex; mat.needsUpdate = true; });
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: p.poster ? 0.62 : 0.35 });
+    (p.poster ? posterTexture : photoTexture)(p, maxAniso).then(tex => { mat.map = tex; mat.needsUpdate = true; });
     const geo = new THREE.PlaneGeometry(p.w, p.h, 10, 14);
-    // Paper that's been on the wall a while: the bottom corners lift off a little
+    // Paper that's been on the wall a while: untaped bottom corners lift off a little
     const v = geo.attributes.position;
     for (let i = 0; i < v.count; i++) {
       const nx = v.getX(i) / (p.w / 2), ny = v.getY(i) / (p.h / 2);
-      v.setZ(i, 0.006 + Math.max(0, -ny) ** 3 * (0.35 + Math.abs(nx) ** 2) * 0.05);
+      v.setZ(i, 0.006 + p.curl * Math.max(0, -ny) ** 3 * (0.35 + Math.abs(nx) ** 2) * 0.05);
     }
     geo.computeVertexNormals();
-    const sheet = shadowed(new THREE.Mesh(geo, mat));
-    group.add(sheet);
-    const tapeMat = new THREE.MeshStandardMaterial({ color: 0xefe6c6, roughness: 0.8, transparent: true, opacity: 0.82 });
-    for (const sx of [-1, 1]) {
-      const tape = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.065), tapeMat);
-      tape.position.set(sx * (p.w / 2 - 0.03), p.h / 2 - 0.02, 0.012);
-      tape.rotation.z = sx * -0.62;
+    group.add(shadowed(new THREE.Mesh(geo, mat)));
+    // Each strip sits across the edge it holds, half on the print and half on the wall
+    p.tape.forEach(([tx, ty, angle], i) => {
+      const tape = new THREE.Mesh(tapeGeo, tapeMat);
+      tape.position.set(tx * (p.w / 2 - 0.02), ty * (p.h / 2 - 0.02), 0.014);
+      tape.rotation.z = angle + (i % 2 ? 0.05 : -0.04);
       group.add(tape);
-    }
+    });
     group.rotation.z = p.tilt;
     scene.add(group);
     return { p, group };
   });
 
-  // ---------- Shelf with the football and baseball ----------
+  // ---------- Shelf with a baseball ----------
   const shelf = new THREE.Group();
-  const board = shadowed(new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.07, 0.42), new THREE.MeshStandardMaterial({ map: woodTexture(maxAniso), roughness: 0.6 })));
+  const board = shadowed(new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.07, 0.42), new THREE.MeshStandardMaterial({ map: woodTexture(maxAniso), roughness: 0.6 })));
   board.position.set(0, -0.035, 0.21);
   shelf.add(board);
   const bracketMat = new THREE.MeshStandardMaterial({ color: 0x22201d, roughness: 0.4, metalness: 0.7 });
-  for (const x of [-0.55, 0.55]) {
+  for (const x of [-0.32, 0.32]) {
     const arm = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 0.36), bracketMat));
     arm.position.set(x, -0.088, 0.19);
     const leg = shadowed(new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.26, 0.03), bracketMat));
@@ -127,8 +135,9 @@ export function buildRoom(scene, renderer) {
   // ---------- Phone on a stand, showing the app ----------
   const phoneUI = createPhoneScreen(maxAniso);
   const phone = new THREE.Group();
-  phone.position.set(0.76, 0, 0.5);
+  phone.position.set(0.74, 0, 0.5);
   phone.rotation.y = -0.3;
+  phone.scale.setScalar(0.85);
   const stand = new THREE.Group();
   const standBase = shadowed(new THREE.Mesh(new RoundedBoxGeometry(0.3, 0.025, 0.26, 2, 0.008), bracketMat));
   standBase.position.set(0, 0.0125, 0);
@@ -177,32 +186,10 @@ export function buildRoom(scene, renderer) {
   const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 8), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xff9a5c, emissiveIntensity: 0 }));
   desk.add(pulse);
 
-  // ---------- Bat leaning on the wall ----------
-  const batHolder = new THREE.Group();
-  scene.add(batHolder);
-
-  const loader = new GLTFLoader();
-  const load = (name, size) => loader.loadAsync(`models/${name}/${name}.gltf`).then(g => normalize(g.scene, size));
-  load('american_football', 0.62).then(ball => {
-    ball.rotation.set(0, 0.5, 0);
-    ball.position.set(-0.3, 0, 0.22);
+  new GLTFLoader().loadAsync('models/baseball_01/baseball_01.gltf').then(g => {
+    const ball = normalize(g.scene, 0.2);
+    ball.position.set(0, 0, 0.2);
     shelf.add(ball);
-  });
-  load('baseball_01', 0.2).then(ball => {
-    ball.position.set(0.42, 0, 0.2);
-    shelf.add(ball);
-  });
-  load('baseball_bat', 1.9).then(bat => {
-    // Stand it up along its longest axis, then lean the top against the wall
-    const box = new THREE.Box3().setFromObject(bat), size = box.getSize(new THREE.Vector3());
-    const upright = new THREE.Group();
-    if (size.x >= size.y && size.x >= size.z) bat.rotation.z = Math.PI / 2;
-    else if (size.z >= size.y) bat.rotation.x = Math.PI / 2;
-    upright.add(bat);
-    const b2 = new THREE.Box3().setFromObject(upright);
-    bat.position.y -= b2.min.y;
-    upright.rotation.set(-0.16, 0.3, 0.13);
-    batHolder.add(upright);
   });
 
   // ---------- Layout ----------
@@ -224,20 +211,16 @@ export function buildRoom(scene, renderer) {
     }
 
     // Desk sized so the laptop screen is a set share of the window
-    const screenPx = narrow ? w * 0.42 : THREE.MathUtils.clamp(w * 0.27, 240, 460);
+    const screenPx = narrow ? w * 0.42 : THREE.MathUtils.clamp(Math.min(w * 0.24, h * 0.36), 220, 420);
     const s = screenPx / (SCREEN_W * pxPerUnit * 1.08);
-    screenToPlane(w / 2, h * (narrow ? 0.84 : 0.81), 0.5 * s, v);
+    screenToPlane(w / 2, h * (narrow ? 0.84 : 0.85), 0.5 * s, v);
     desk.position.set(0, v.y, 0);
     desk.scale.setScalar(s);
     for (const leg of legs) leg.scale.y = Math.max(0.1, (v.y - floorY) / s - 0.07);
 
-    screenToPlane(w * (narrow ? 0.84 : 0.83), h * (narrow ? 0.6 : 0.6), 0, v);
+    screenToPlane(w * (narrow ? 0.62 : 0.83), h * (narrow ? 0.47 : 0.6), 0, v);
     shelf.position.set(v.x, v.y, 0);
     shelf.scale.setScalar(scale * (narrow ? 0.8 : 1));
-
-    screenToPlane(w * (narrow ? 0.93 : 0.94), h * 0.5, 0, v);
-    batHolder.position.set(v.x, floorY, 0.32 * scale);
-    batHolder.scale.setScalar(scale);
   }
 
   // t: seconds since the coding session started
@@ -273,6 +256,49 @@ function shadowed(mesh) {
   mesh.castShadow = true;
   mesh.receiveShadow = true;
   return mesh;
+}
+
+// A photo printed at home: the picture with a thin white border
+async function photoTexture(p, maxAniso) {
+  const img = new Image();
+  img.src = p.src;
+  await img.decode();
+  const W = 900, H = Math.round(W * p.h / p.w);
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  g.fillStyle = '#fbfaf6';
+  g.fillRect(0, 0, W, H);
+  const m = W * 0.035, aw = W - m * 2, ah = H - m * 2;
+  const k = Math.max(aw / img.width, ah / img.height);
+  const sw = aw / k, sh = ah / k;
+  g.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, m, m, aw, ah);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = maxAniso;
+  return tex;
+}
+
+// A strip of masking tape: see-through cream with torn ends
+function tapeTexture() {
+  const c = document.createElement('canvas');
+  c.width = 270; c.height = 80;
+  const g = c.getContext('2d');
+  g.beginPath();
+  g.moveTo(8, 0);
+  for (let y = 0; y <= 80; y += 8) g.lineTo(4 + Math.random() * 9, y);
+  for (let y = 80; y >= 0; y -= 8) g.lineTo(262 - Math.random() * 9, y);
+  g.closePath();
+  g.fillStyle = 'rgba(233, 222, 188, 0.86)';
+  g.fill();
+  g.globalCompositeOperation = 'source-atop';
+  for (let i = 0; i < 260; i++) {
+    g.fillStyle = `rgba(${Math.random() < 0.5 ? '255,250,235' : '170,150,110'},${Math.random() * 0.12})`;
+    g.fillRect(Math.random() * 270, Math.random() * 80, 2 + Math.random() * 30, 1);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 // A printed poster: the photo, then a title band in the site's own type

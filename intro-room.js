@@ -20,6 +20,9 @@ const POSTERS = [
     tape: [[-1, 1, -0.75], [1, 1, 0.65]], curl: 0.8 },
   { src: 'intro/car-911.jpg', w: 1, h: 1.333, tilt: -0.09, at: [0.81, 0.45, 0.17], narrow: [0.88, 0.4, 0.11],
     tape: [[-1, 1, -0.7], [1, -1, -0.6]], curl: 0 },
+  // Mason and his girlfriend; links to the "Off the clock" photos instead of the cars
+  { src: 'intro/us.jpg', w: 1, h: 1.315, tilt: 0.05, at: [0.2, 0.66, 0.19], narrow: [0.84, 0.6, 0.11],
+    tape: [[0, 1, 1.52]], curl: 0.9, note: ['Off the clock', 'Me, outside the work'], target: 'photos' },
 ];
 
 export function buildRoom(scene, renderer) {
@@ -274,7 +277,7 @@ export function buildRoom(scene, renderer) {
       edges: [edge(screen, -SCREEN_W / 2 + 0.06, SCREEN_H / 2 + 0.05), edge(screen, SCREEN_W / 2 - 0.06, SCREEN_H / 2 + 0.05)] },
     { obj: phone, title: 'Hold This Thought', sub: 'My iPhone app', target: 'work', prefer: 1,
       edges: [edge(handset, -0.2, 0.6), edge(handset, 0.2, 0.6)] },
-    ...posters.map(({ p, group }) => ({ obj: group, title: 'About me', sub: 'Cars and photos', target: 'cars', prefer: 0,
+    ...posters.map(({ p, group }) => ({ obj: group, title: p.note?.[0] || 'About me', sub: p.note?.[1] || 'Cars and photos', target: p.target || 'cars', prefer: 0,
       edges: [edge(group, -p.w / 2 - 0.02, p.h * 0.15), edge(group, p.w / 2 + 0.02, p.h * 0.15)] })),
   ];
 

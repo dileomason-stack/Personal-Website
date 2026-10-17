@@ -27,7 +27,7 @@ if (!intro.classList.contains('done')) {
     lenis.scrollTo(0, { immediate: true, force: true });
     lenis.start();
     ScrollTrigger.refresh();
-    scrambleReadout();
+    heroEntrance();
   }, { once: true });
 }
 document.fonts.ready.then(() => ScrollTrigger.refresh());
@@ -50,6 +50,63 @@ gsap.to('.hero > div', { yPercent: -14, ease: 'none', scrollTrigger: hero });
 gsap.to('.quick', { y: -70, rotate: -2, ease: 'none', scrollTrigger: hero });
 gsap.to('.scroll-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140', scrub: true } });
 
+// ---------- Hero entrance: one choreographed timeline, each piece arriving in its own way ----------
+// Plays right after the intro (or on load for returning visitors). The grid draws outward, the
+// eyebrow decodes, the headline's letters rise and a highlighter sweeps behind USEFUL, the paragraph rises
+// line by line, the buttons spring up, the readout card boots like an instrument, and the scroll
+// cue arrives last.
+function heroEntrance() {
+  const hero = $('.hero'), eyebrow = $('.eyebrow', hero), h2 = $('h2', hero), lead = $('.lead', hero);
+  const buttons = $$('.hero-actions .btn', hero), card = $('.quick'), rows = $$('dl > div', card), cue = $('.scroll-cue');
+  const letters = SplitText.create(h2, { type: 'lines,chars', mask: 'lines' });
+  const lines = SplitText.create(lead, { type: 'lines', mask: 'lines' });
+  // Starting states go on before the hero is shown, so nothing is visible early for even a frame
+  gsap.set(eyebrow, { autoAlpha: 0 });
+  // (the highlight's --u is set on the h2, which survives splitting; USEFUL's own element doesn't)
+  gsap.set(h2, { '--u': 0 });
+  // The arrows have a CSS hover transition on transform, which would fight the tween (GSAP would read
+  // a mid-transition value as their resting place), so it's off until they've arrived
+  const arrows = buttons.map(b => $('.arr', b));
+  gsap.set(arrows, { transition: 'none' });
+  const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+  tl.fromTo(hero, { '--grid': '0%' }, { '--grid': '80%', duration: 2, ease: 'power2.out' }, 0)
+    .add(() => decode(eyebrow, 0.9), 0.05)
+    .from(letters.chars, { yPercent: 115, rotate: 6, transformOrigin: '0% 100%', duration: 1.1, stagger: 0.028 }, 0.15)
+    // The letters' line masks would clip the highlight, so it sweeps once they're done and unwrapped
+    .add(() => letters.revert(), 1.6)
+    .to(h2, { '--u': 1, duration: 0.7, ease: 'power3.inOut' }, 1.6)
+    .from(lines.lines, { yPercent: 105, duration: 1, stagger: 0.08 }, 0.55)
+    .add(() => lines.revert(), 1.8)
+    .from(buttons, { y: 26, autoAlpha: 0, scale: 0.92, duration: 0.9, ease: 'back.out(1.8)', stagger: 0.08 }, 0.85)
+    .from(arrows, { x: -8, y: 8, autoAlpha: 0, duration: 0.5, ease: 'power2.out', stagger: 0.08, clearProps: 'transform,transition,opacity,visibility' }, 1.15)
+    // The readout card wipes open from the right, then lights up row by row
+    .fromTo(card, { clipPath: 'inset(0% 0% 0% 100% round 18px)' }, { clipPath: 'inset(0% 0% 0% 0% round 18px)', duration: 1.1, ease: 'expo.inOut' }, 0.45)
+    .set(card, { clearProps: 'clipPath' })
+    .from($('.status', card), { autoAlpha: 0, duration: 0.08, repeat: 4, yoyo: true, ease: 'none' }, 1.15)
+    .fromTo(rows, { '--rule': 0 }, { '--rule': 1, duration: 0.7, ease: 'power2.inOut', stagger: 0.1 }, 1.05)
+    .from(rows.flatMap(r => [...r.children]), { autoAlpha: 0, y: 6, duration: 0.45, ease: 'power2.out', stagger: 0.05 }, 1.15)
+    .add(scrambleReadout, 1.2)
+    .from(cue, { autoAlpha: 0, y: -12, duration: 0.8, ease: 'power3.out' }, 1.9);
+  root.classList.remove('hero-wait');
+}
+
+// Mono text types itself out, with a short run of scrambled characters ahead of what's settled
+function decode(el, seconds) {
+  const text = el.textContent, glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/+';
+  el.setAttribute('aria-label', text);
+  gsap.set(el, { autoAlpha: 1 });
+  const state = { p: 0 };
+  gsap.to(state, {
+    p: 1, duration: seconds, ease: 'power1.inOut',
+    onUpdate: () => {
+      const n = Math.floor(state.p * text.length);
+      const ahead = text.slice(n, n + 7).replace(/[^ ]/g, () => glyphs[(Math.random() * glyphs.length) | 0]);
+      el.textContent = text.slice(0, n) + ahead;
+    },
+    onComplete: () => { el.textContent = text; el.removeAttribute('aria-label'); },
+  });
+}
+
 // The readout's numbers flicker through digits before settling, like an instrument powering on
 function scrambleReadout() {
   $$('.quick dd').forEach((dd, i) => {
@@ -57,13 +114,13 @@ function scrambleReadout() {
     let n = 0;
     setTimeout(() => {
       const id = setInterval(() => {
-        dd.textContent = ++n > 12 ? final : final.replace(/\d/g, () => (Math.random() * 10) | 0);
-        if (n > 12) clearInterval(id);
+        dd.textContent = ++n > 10 ? final : final.replace(/\d/g, () => (Math.random() * 10) | 0);
+        if (n > 10) clearInterval(id);
       }, 45);
-    }, 500 + i * 120);
+    }, i * 110);
   });
 }
-if (intro.classList.contains('done')) scrambleReadout();
+if (root.classList.contains('hero-wait')) document.fonts.ready.then(heroEntrance);
 
 // ---------- Section headings: each line rises out of its own mask ----------
 $$('.display').forEach(el => {

@@ -14,7 +14,6 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { gsap } from 'gsap';
 import { buildRoom } from './intro-room.js';
 import { INSTALL_AT } from './intro-terminal.js';
-import { SplitText } from 'gsap/SplitText.js';
 import { createSound } from './intro-sound.js';
 
 const root = document.documentElement;
@@ -33,7 +32,6 @@ if (!root.classList.contains('intro-3d-pending') || intro.classList.contains('on
 function start() {
   // Set first so the switch is already in its 3D-mode spot when layout() measures it
   root.classList.add('intro-3d');
-  gsap.registerPlugin(SplitText);
   const copy = intro.querySelector('.intro-copy');
   const lit = [...intro.querySelectorAll('.lit')];
   const switchbox = intro.querySelector('.switchbox');
@@ -440,15 +438,7 @@ function start() {
   // Compile shaders in the background where the browser supports it, then start drawing
   renderer.compileAsync(scene, camera).catch(() => {}).finally(() => frame());
 
-  // ---------- Hero headline: letters rise in after the intro ----------
-  const heroH = document.querySelector('.hero h2');
-  let split = null;
-  document.fonts.ready.then(() => {
-    if (entered) return;
-    heroH.classList.remove('reveal', 'd1');
-    split = SplitText.create(heroH, { type: 'lines,chars', mask: 'lines' });
-    gsap.set(split.chars, { yPercent: 115, rotate: 6, transformOrigin: '0% 100%' });
-  });
+  // (the hero's entrance after the cut is choreographed by site-motion.js on 'intro:done')
 
   // ---------- Switch ----------
   sw.addEventListener('pointerenter', () => { if (!entered) gsap.to(leverPivot.rotation, { x: OFF - 0.12, duration: 0.3, ease: 'power2.out' }); });
@@ -511,8 +501,8 @@ function start() {
           bar.style.backdropFilter = 'none';
           // The live page keeps the hero hidden behind the intro; the snapshot shows it as it'll look after
           doc.body.classList.remove('locked');
-          // The headline letters rise in after the cut, so the snapshot leaves them out
-          doc.querySelector('.hero h2').style.visibility = 'hidden';
+          // The hero builds itself in after the cut, so the snapshot is the empty page (nav and paper)
+          doc.querySelectorAll('.hero > div, .hero .quick, .scroll-cue').forEach(el => { el.style.visibility = 'hidden'; });
           // html2canvas can't do the hero's masked grid or soft radial glow (it draws a muddy blob), so the
           // snapshot leaves those decorations to the real page, which fades them in right after the cut
           doc.querySelectorAll('.hero > html2canvaspseudoelement').forEach(el => { el.style.display = 'none'; });
@@ -563,7 +553,6 @@ function start() {
   }
 
   function finish() {
-    if (split) gsap.to(split.chars, { yPercent: 0, rotate: 0, duration: 1.1, ease: 'expo.out', stagger: 0.035, delay: 0.2, onComplete: () => split.revert() });
     window.siteIntro.finish();
     sound.stop();
     if (destination) setTimeout(() => {
@@ -583,24 +572,18 @@ function start() {
     renderer.dispose();
     canvas.remove();
   }
-  function restoreHeadline() {
-    if (split) { split.revert(); split = null; }
-    heroH.classList.add('reveal', 'd1', 'in');
-  }
   // Skip button, Esc, or a returning visitor
   addEventListener('intro:skip', () => {
     entered = true;
     sound.stop();
-    restoreHeadline();
     teardown();
   });
   // If the GPU drops the context, hand over to the CSS intro (or just finish, if already on the way out)
   canvas.addEventListener('webglcontextlost', e => {
     e.preventDefault();
-    if (entered) { restoreHeadline(); window.siteIntro.finish(); teardown(); return; }
+    if (entered) { window.siteIntro.finish(); teardown(); return; }
     entered = true;
     sound.stop();
-    restoreHeadline();
     teardown();
     root.classList.remove('intro-3d');
     delete intro.dataset.mode;

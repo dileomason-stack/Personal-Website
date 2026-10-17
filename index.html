@@ -147,11 +147,13 @@ section{padding:clamp(80px,11vw,150px) var(--gutter);position:relative}
 .hero:before{content:"";position:absolute;inset:0;z-index:-1;background:
   linear-gradient(#e4dfd4 1px,transparent 1px) 0 0/44px 44px,
   linear-gradient(90deg,#e4dfd4 1px,transparent 1px) 0 0/44px 44px;
-  -webkit-mask:radial-gradient(ellipse 80% 70% at 30% 40%,#000 30%,transparent 80%);mask:radial-gradient(ellipse 80% 70% at 30% 40%,#000 30%,transparent 80%)}
+  -webkit-mask:radial-gradient(ellipse var(--grid,80%) calc(var(--grid,80%) * .875) at 30% 40%,#000 30%,transparent 80%);mask:radial-gradient(ellipse var(--grid,80%) calc(var(--grid,80%) * .875) at 30% 40%,#000 30%,transparent 80%)}
 .hero:after{content:"";position:absolute;z-index:-1;right:-10vw;top:-10vw;width:55vw;height:55vw;border-radius:50%;background:radial-gradient(circle,#dfe8e2 0,transparent 65%)}
 .eyebrow{color:var(--accent);margin:0 0 26px}
 .hero h2{font-size:clamp(62px,10vw,150px);line-height:.82;letter-spacing:-.085em;margin:0;font-weight:800}
 .hero h2 em{font-style:normal;color:var(--accent);position:relative}
+/* A highlighter stroke behind the lower half of USEFUL (the entrance sweeps it across) */
+.hero h2 em:after{content:"";position:absolute;z-index:-1;left:-.04em;right:.06em;top:.62em;bottom:.3em;border-radius:.06em;background:var(--accent-soft);transform:rotate(-1deg) scaleX(var(--u,1));transform-origin:left}
 .lead{max-width:640px;font-size:clamp(18px,1.8vw,23px);line-height:1.5;margin:40px 0 36px;color:#2b3634}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
 .quick{background:var(--ink);color:#eef2ec;padding:30px;border-radius:var(--radius);box-shadow:0 30px 60px -20px #121a1966,12px 12px 0 var(--sage);position:relative}
@@ -305,6 +307,11 @@ html.lenis{scroll-behavior:auto}
 .motion .btn:hover{transform:none}
 .motion .num:before{transform:scaleX(0);transform-origin:left;transition:transform 1s var(--ease)}
 .motion .num.drawn:before{transform:none}
+/* The readout's rules are drawn so the entrance can run them across */
+.motion .quick dl div{border-top-color:transparent;position:relative}
+.motion .quick dl div:before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:#34413e;transform:scaleX(var(--rule,1));transform-origin:left}
+/* Returning visitors: the hero waits (briefly) for its entrance instead of flashing in first */
+.hero-wait .hero{visibility:hidden}
 .bar-progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;pointer-events:none}
 .nav{position:relative}
 .nav-pill{position:absolute;top:0;left:0;height:100%;width:0;border-radius:40px;background:var(--ink);opacity:0;pointer-events:none}
@@ -394,6 +401,10 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     try { seen = +localStorage.getItem('mdl-intro-seen') || 0; } catch (e) {}
     if (!new URLSearchParams(location.search).has('intro') && Date.now() - seen < 14 * 864e5) {
       root.classList.add('intro-returning');
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        root.classList.add('hero-wait');
+        setTimeout(() => root.classList.remove('hero-wait'), 2000);
+      }
       return;
     }
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -424,8 +435,10 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     (window.requestIdleCallback || (cb => setTimeout(cb, 200)))(() => import('./intro-3d.js'), { timeout: 1200 });
   }
   // Smooth scroll and scroll-linked animation for the site itself (skipped entirely for reduced motion)
+  // (returning visitors load it right away: their hero is waiting on it, and the files are cached)
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    (window.requestIdleCallback || (cb => setTimeout(cb, 200)))(() => import('./site-motion.js'), { timeout: 1500 });
+    if (document.documentElement.classList.contains('hero-wait')) import('./site-motion.js');
+    else (window.requestIdleCallback || (cb => setTimeout(cb, 200)))(() => import('./site-motion.js'), { timeout: 1500 });
   }
 </script>
 </head>

@@ -46,7 +46,9 @@ export function createTerminal() {
   const g = canvas.getContext('2d');
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 16;
+  // Drawn at about the size it appears on screen (see setResolution), so no mipmap blur
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
   const MONO = '"DM Mono", Menlo, monospace';
   // Big type so it stays readable at the laptop's size on screen
   const FS = 32, LH = 46, PAD = 40, TOP = 58;
@@ -90,6 +92,8 @@ export function createTerminal() {
     const key = [shown, t < 3.6 ? typed : -1, cursorOn, spinning ? spinFrame : -1].join('|');
     if (key === lastKey) return;
     lastKey = key;
+    // Everything below is laid out on a 2048-wide page and scaled to the canvas
+    g.setTransform(canvas.width / W, 0, 0, canvas.width / W, 0, 0);
 
     g.fillStyle = C.bg;
     g.fillRect(0, 0, W, H);
@@ -225,6 +229,17 @@ export function createTerminal() {
     texture.needsUpdate = true;
   }
 
+  // Resize the canvas to px wide (the screen's size on the display, in device pixels); the text is
+  // then rendered crisply at that size instead of being shrunk from 2048 on the GPU
+  function setResolution(px) {
+    const w = Math.round(THREE.MathUtils.clamp(px, 480, W));
+    if (Math.abs(w - canvas.width) < 8) return;
+    canvas.width = w;
+    canvas.height = Math.round(w * H / W);
+    texture.dispose();
+    lastKey = '';
+  }
+
   update(0);
-  return { texture, update };
+  return { texture, update, setResolution };
 }

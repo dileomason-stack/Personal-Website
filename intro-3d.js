@@ -203,7 +203,7 @@ function start() {
         g += mix(vec3(.02, .009, -.006), vec3(-.006, 0., .008), smoothstep(.2, .8, l));
         g = mix(g, g * g * (3. - 2. * g), .16);
         g *= mix(1., smoothstep(1.2, .35, length(vUv - .5) * 1.3), .5);
-        g += (hash(gl_FragCoord.xy + fract(uTime * 13.) * 91.) - .5) * .04;
+        g += (hash(gl_FragCoord.xy + fract(uTime * 13.) * 91.) - .5) * .02;
         gl_FragColor = vec4(mix(c.rgb, g, uAmount), c.a);
       }`,
   });
@@ -328,11 +328,12 @@ function start() {
 
   const clock = new THREE.Clock();
   let running = true;
-  // Adaptive quality: if the first seconds run under ~45fps, step down resolution, then shadows and bloom
+  // Adaptive quality: if it keeps running under ~40fps (two windows in a row, after startup's shader
+  // compiles have settled), step down resolution, then shadows and bloom
   const perf = { frames: 0, time: 0, level: 0 };
   function degrade() {
     perf.level++;
-    const pr = perf.level === 1 ? Math.min(devicePixelRatio, 1.25) : 1;
+    const pr = perf.level === 1 ? Math.min(devicePixelRatio, 1.5) : 1;
     renderer.setPixelRatio(pr);
     composer.setPixelRatio(pr);
     dustMat.uniforms.uPR.value = pr;
@@ -344,11 +345,12 @@ function start() {
     if (!running) return;
     requestAnimationFrame(frame);
     const raw = clock.getDelta(), dt = Math.min(raw, 0.05);
-    if (perf.level < 2 && !entered && clock.elapsedTime > 1.5 && !document.hidden) {
+    if (perf.level < 2 && !entered && clock.elapsedTime > 3 && !document.hidden) {
       perf.frames++;
       perf.time += raw;
       if (perf.frames === 60) {
-        if (perf.frames / perf.time < 45) degrade();
+        perf.slow = perf.frames / perf.time < 40 ? (perf.slow || 0) + 1 : 0;
+        if (perf.slow === 2) { degrade(); perf.slow = 0; }
         perf.frames = perf.time = 0;
       }
     }
@@ -548,6 +550,7 @@ function start() {
     flight.curve = new THREE.CatmullRomCurve3([from, mid, to]);
     flight.lookFrom.copy(look);
     flight.lookTo.copy(center);
+    room.highRes();
     const visH = 2 * d * tan;
     snap.frac = [visH * camera.aspect / (sw0 * s), visH / (sh0 * s)];
     composeSnapshot();

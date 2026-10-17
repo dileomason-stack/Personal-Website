@@ -242,6 +242,13 @@ export function buildRoom(scene, renderer) {
       switchSpot.y = toScreen(screen.localToWorld(new THREE.Vector3(0, 0, 0))).y;
     }
 
+    // Draw both screens at their size on the display (with a little headroom for the angle)
+    desk.updateMatrixWorld(true);
+    const pr = renderer.getPixelRatio(), widthOnScreen = (mesh, half) =>
+      Math.abs(toScreen(mesh.localToWorld(new THREE.Vector3(half, 0, 0))).x - toScreen(mesh.localToWorld(new THREE.Vector3(-half, 0, 0))).x);
+    terminal.setResolution(widthOnScreen(screen, SCREEN_W / 2) * pr * 1.3);
+    phoneUI.setResolution(widthOnScreen(phoneScreen, 0.1675) * pr * 1.3);
+
     screenToPlane(w * (narrow ? 0.16 : 0.83), h * (narrow ? 0.55 : 0.6), 0, v);
     shelf.position.set(v.x, v.y, 0);
     shelf.scale.setScalar(scale * (narrow ? 0.8 : 1));
@@ -271,7 +278,10 @@ export function buildRoom(scene, renderer) {
       edges: [edge(group, -p.w / 2 - 0.02, p.h * 0.15), edge(group, p.w / 2 + 0.02, p.h * 0.15)] })),
   ];
 
-  return { layout, update, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot, hotspots };
+  // Full resolution for the camera's dive into the laptop
+  const highRes = () => terminal.setResolution(2048);
+
+  return { layout, update, highRes, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot, hotspots };
 }
 
 // Center a loaded model on x/z, sit it on y = 0, and scale its longest side to `size`
@@ -377,7 +387,10 @@ function createPhoneScreen(maxAniso) {
   const g = canvas.getContext('2d');
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = maxAniso;
+  // Drawn at about its size on screen (see setResolution), so no mipmap blur
+  texture.generateMipmaps = false;
+  texture.minFilter = THREE.LinearFilter;
+  g.imageSmoothingQuality = 'high';
   // The App Store screenshot, with its sample name swapped for Mason
   const img = document.createElement('canvas');
   img.width = W; img.height = H;
@@ -424,6 +437,16 @@ function createPhoneScreen(maxAniso) {
   }
 
   // dt: seconds since the install
+  function setResolution(px) {
+    const w = Math.round(THREE.MathUtils.clamp(px, 240, W));
+    if (Math.abs(w - canvas.width) < 6) return;
+    canvas.width = w;
+    canvas.height = Math.round(w * H / W);
+    g.imageSmoothingQuality = 'high';
+    texture.dispose();
+    lastKey = '';
+  }
+
   function update(dt) {
     if (!ready) return;
     const blank = dt >= 0 && dt < 0.35;
@@ -431,6 +454,7 @@ function createPhoneScreen(maxAniso) {
     const key = blank ? 'blank' : p.toFixed(3);
     if (key === lastKey) return;
     lastKey = key;
+    g.setTransform(canvas.width / W, 0, 0, canvas.width / W, 0, 0);
     if (blank) {
       // The app relaunching with the new build
       g.fillStyle = '#2e8b47';
@@ -439,7 +463,7 @@ function createPhoneScreen(maxAniso) {
     texture.needsUpdate = true;
   }
 
-  return { texture, update };
+  return { texture, update, setResolution };
 }
 
 function roundedRectGeometry(w, h, r) {

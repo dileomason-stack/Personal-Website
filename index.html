@@ -65,6 +65,19 @@ a{color:inherit}
 .intro.on .flash{animation:flash 1.1s .25s cubic-bezier(.7,0,.3,1) forwards}
 .intro.done{opacity:0;visibility:hidden;pointer-events:none}
 @keyframes flash{to{transform:scale(90)}}
+/* 3D intro (intro-3d.js). Until it loads the CSS switch is hidden; if it fails, the class comes off and the CSS intro shows. */
+.intro-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity 1.4s var(--ease)}
+.intro-canvas.in{opacity:1}
+.intro-wash{position:absolute;inset:0;z-index:3;background:var(--paper);opacity:0;pointer-events:none}
+:is(.intro-3d-pending,.intro-3d) .intro:before,:is(.intro-3d-pending,.intro-3d) .switch:before,:is(.intro-3d-pending,.intro-3d) .switch:after,
+:is(.intro-3d-pending,.intro-3d) .plate,.intro-3d .flash{display:none}
+:is(.intro-3d-pending,.intro-3d) .switch{background:none;box-shadow:none}
+.intro-3d .intro-copy{--hi:#fff;--base:#7c8784;--r:1px;margin-bottom:30vh}
+/* In the room the switch sits on the wall left of the desk */
+.intro-3d .switchbox{left:var(--swx,9%);right:auto;top:var(--swy,64%);bottom:auto;translate:-50% -50%}
+@media (max-width:700px){.intro-3d .switchbox{--swx:17%;--swy:64%}.intro-3d .switch{width:64px;height:102px}}
+.intro-3d .intro-copy .lit{color:transparent;-webkit-background-clip:text;background-clip:text;
+  background-image:radial-gradient(circle var(--r) at var(--x,-999px) var(--y,-999px),var(--hi) 15%,var(--base) 100%)}
 @keyframes rise{to{opacity:1;transform:none}}
 
 /* ---------- Nav ---------- */
@@ -286,14 +299,33 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   .reveal{opacity:1;transform:none}
 }
 </style>
+<script>
+  // Try the 3D intro only with WebGL and motion allowed; give up after 6s and keep the CSS one
+  (() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try { if (!document.createElement('canvas').getContext('webgl2')) return; } catch (e) { return; }
+    const root = document.documentElement;
+    root.classList.add('intro-3d-pending');
+    setTimeout(() => root.classList.remove('intro-3d-pending'), 6000);
+  })();
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
+  "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js",
+  "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/"
+} }
+</script>
+<script type="module" src="intro-3d.js"></script>
 </head>
 <body class="locked">
 
 <section class="intro" id="intro" aria-label="Introduction">
   <div class="intro-copy">
-    <p class="mo">Mason Di Leo / personal portfolio</p>
-    <h1><span>AFTER</span><span>HOURS LAB.</span></h1>
-    <p>There’s more to see. Turn on the lights.</p>
+    <p class="mo lit">Mason Di Leo / personal portfolio</p>
+    <h1><span class="lit">AFTER</span><span class="lit">HOURS LAB.</span></h1>
+    <p class="lit">There’s more to see. Turn on the lights.</p>
   </div>
   <div class="flash"></div>
   <div class="switchbox">
@@ -532,16 +564,18 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   const intro = document.getElementById('intro');
   const sw = document.getElementById('switch');
   const label = intro.querySelector('.switch-label');
+  function finishIntro() {
+    scrollTo(0, 0);
+    intro.classList.add('done');
+    document.body.classList.remove('locked');
+    revealVisible();
+  }
+  window.siteIntro = { finish: finishIntro };
   sw.addEventListener('click', () => {
-    if (intro.classList.contains('on')) return;
+    if (intro.classList.contains('on') || intro.dataset.mode === '3d') return;
     intro.classList.add('on');
     label.textContent = 'Lights / on';
-    setTimeout(() => {
-      scrollTo(0, 0);
-      intro.classList.add('done');
-      document.body.classList.remove('locked');
-      revealVisible();
-    }, reduce ? 50 : 1150);
+    setTimeout(finishIntro, reduce ? 50 : 1150);
   });
 
   if (deepLink) {

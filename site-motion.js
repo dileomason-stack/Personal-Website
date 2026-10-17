@@ -220,3 +220,6 @@ if (finePointer) {
     b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.35)' }));
   });
 }
+
+// ---------- Lab: blueprint lens, dark-mode flashlight, car speed blur ----------
+import('./site-lab.js');

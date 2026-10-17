@@ -3,11 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mason Di Leo — Portfolio</title>
-<meta name="description" content="Mason Di Leo — builder, operator, and Cal Poly Business + Information Systems student.">
-<meta property="og:title" content="Mason Di Leo — Portfolio">
-<meta property="og:description" content="Cal Poly Business + Information Systems student building useful things.">
-<meta property="og:image" content="hold-this-thought-logo-transparent.png">
+<title>Mason Di Leo · Portfolio</title>
+<meta name="description" content="Business major at heart, builder in progress. Cal Poly Business + Information Systems student shipping real projects: an iPhone app and live web apps.">
+<link rel="canonical" href="https://dileomason-stack.github.io/Personal-Website/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mason Di Leo">
+<meta property="og:url" content="https://dileomason-stack.github.io/Personal-Website/">
+<meta property="og:title" content="Mason Di Leo · Learning by building">
+<meta property="og:description" content="Business major at heart, builder in progress. Projects that solve real problems, from an iPhone app to live web apps.">
+<meta property="og:image" content="https://dileomason-stack.github.io/Personal-Website/og/site.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="Mason Di Leo: Learning by building. Projects: Hold This Thought, Homeroom, WhenWorks.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#f3f0ea">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121a19'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='800' font-size='26' fill='%23f4f1ea' text-anchor='middle'%3EMD%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -160,7 +169,8 @@ body.locked .hero .reveal{opacity:0}
 .lights svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .lights .sun,[data-theme="night"] .lights .moon{display:none}
 [data-theme="night"] .lights .sun{display:block}
-@media(max-width:640px){.lights{width:40px;padding:0;justify-content:center}.lights-label{display:none}}
+@media(max-width:1100px){.bar .loc{display:none}}
+@media(max-width:900px){.lights{width:40px;padding:0;justify-content:center}.lights-label{display:none}}
 /* Switching themes: the new one opens as a circle from the switch (View Transitions) */
 ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
 .bar .loc:before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--dot,var(--ok));box-shadow:0 0 0 4px var(--dot-ring,var(--ok-ring))}
@@ -723,7 +733,8 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   footer{flex-direction:column}
   .dot{width:20px}.dot.active{width:34px}
 }
-@media(min-width:641px){.bar .btn{display:none}}
+@media(min-width:701px){.bar .btn{display:none}}
+@media(max-width:700px){.nav{display:none}.bar .btn{height:40px;padding:0 16px}}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .reveal{opacity:1;transform:none}

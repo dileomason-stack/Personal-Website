@@ -195,6 +195,12 @@ function start() {
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
+    pxPerUnit = h / (2 * CAM.z * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
+    // The desk keeps clear of the headline, and the switch sits on the wall right beside the laptop
+    room.layout({ screenToPlane, toScreen, w, h, pxPerUnit, topLimit: copy.getBoundingClientRect().bottom + 28 });
+    const spot = room.switchSpot;
+    switchbox.style.setProperty('--swx', spot.x + 'px');
+    switchbox.style.setProperty('--swy', spot.y - sw.offsetHeight / 2 + 'px');
     const r = sw.getBoundingClientRect();
     const c = screenToPlane(r.left + r.width / 2, r.top + r.height / 2, 0, new THREE.Vector3());
     const top = screenToPlane(r.left + r.width / 2, r.top, 0, new THREE.Vector3());
@@ -202,8 +208,10 @@ function start() {
     sw3.scale.setScalar((top.y - c.y) * 2 * 0.92);
     const b = screenToPlane(w / 2, h * 0.11, 1.2, new THREE.Vector3());
     pendant.position.set(b.x, b.y + CORD + 0.34, 1.2);
-    pxPerUnit = h / (2 * CAM.z * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
-    room.layout({ screenToPlane, w, h, pxPerUnit });
+  }
+  function toScreen(world) {
+    const p = world.clone().project(camera);
+    return { x: (p.x + 1) / 2 * innerWidth, y: (1 - p.y) / 2 * innerHeight };
   }
   layout();
   addEventListener('resize', layout);

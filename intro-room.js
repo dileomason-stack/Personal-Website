@@ -194,7 +194,8 @@ export function buildRoom(scene, renderer) {
 
   // ---------- Layout ----------
   let scale = 1;
-  function layout({ screenToPlane, w, h, pxPerUnit }) {
+  const switchSpot = { x: 0, y: 0 };
+  function layout({ screenToPlane, toScreen, w, h, pxPerUnit, topLimit }) {
     const v = new THREE.Vector3();
     const narrow = w < 700;
     scale = THREE.MathUtils.clamp(w / h / 1.6, 0.6, 1);
@@ -210,13 +211,34 @@ export function buildRoom(scene, renderer) {
       group.scale.setScalar(h * fh / pxPerUnit / p.h);
     }
 
-    // Desk sized so the laptop screen is a set share of the window
+    // Desk sized so the laptop screen is a set share of the window, then shrunk if the
+    // lid would reach up into the headline (short, wide windows)
     const screenPx = narrow ? w * 0.42 : THREE.MathUtils.clamp(Math.min(w * 0.24, h * 0.36), 220, 420);
-    const s = screenPx / (SCREEN_W * pxPerUnit * 1.08);
-    screenToPlane(w / 2, h * (narrow ? 0.84 : 0.85), 0.5 * s, v);
-    desk.position.set(0, v.y, 0);
-    desk.scale.setScalar(s);
+    let s = screenPx / (SCREEN_W * pxPerUnit * 1.08);
+    const lidTop = new THREE.Vector3(), deskEdge = new THREE.Vector3();
+    let topY = 0;
+    for (let i = 0; i < 3; i++) {
+      screenToPlane(w / 2, h * (narrow ? 0.84 : 0.85), 0.5 * s, v);
+      desk.position.set(0, v.y, 0);
+      desk.scale.setScalar(s);
+      desk.updateMatrixWorld(true);
+      topY = toScreen(screen.localToWorld(lidTop.set(0, SCREEN_H / 2 + 0.04, 0))).y;
+      const deskY = toScreen(desk.localToWorld(deskEdge.set(0, 0, 0.5))).y;
+      if (!topLimit || topY >= topLimit) break;
+      s *= Math.max(0.5, (deskY - topLimit) / (deskY - topY));
+    }
     for (const leg of legs) leg.scale.y = Math.max(0.1, (v.y - floorY) / s - 0.07);
+
+    // Light switch: on the wall just left of the laptop, level with its screen. Phones have no
+    // room beside it, so there it goes in the open wall between the headline and the laptop.
+    if (narrow) {
+      switchSpot.x = w / 2;
+      switchSpot.y = ((topLimit ? topLimit - 28 : h * 0.5) + topY) / 2 - 14;
+    } else {
+      const left = toScreen(laptop.localToWorld(new THREE.Vector3(-0.5, 0, 0)));
+      switchSpot.x = Math.max(70, left.x - 90);
+      switchSpot.y = toScreen(screen.localToWorld(new THREE.Vector3(0, 0, 0))).y;
+    }
 
     screenToPlane(w * (narrow ? 0.62 : 0.83), h * (narrow ? 0.47 : 0.6), 0, v);
     shelf.position.set(v.x, v.y, 0);
@@ -235,7 +257,7 @@ export function buildRoom(scene, renderer) {
     }
   }
 
-  return { layout, update, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat };
+  return { layout, update, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot };
 }
 
 // Center a loaded model on x/z, sit it on y = 0, and scale its longest side to `size`

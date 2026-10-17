@@ -58,6 +58,8 @@ a{color:inherit}
   background:linear-gradient(90deg,#d8d2c2,#fdfbf5 45%,#e3ddce);box-shadow:inset 0 -3px 2px #0000001c,0 5px 5px #0000002e;transition:transform .28s cubic-bezier(.5,0,.3,1.4)}
 .led{display:none}
 .switch-label{display:block;margin-top:16px;color:#8d9a97;transition:color .4s}
+.switch-hint{display:block;margin-top:6px;font-size:10px;color:#5f6a68}
+@media (hover:none){.switch-hint{display:none}}
 .flash{position:absolute;left:50%;bottom:clamp(100px,16vh,140px);width:40px;height:40px;margin:-20px;border-radius:50%;background:var(--paper);transform:scale(0);pointer-events:none;z-index:1}
 .intro.on .lever{transform:scaleY(-1)}
 .intro.on .switch{box-shadow:inset 0 1px #fff,inset 0 -2px 3px #0000001f,0 2px 0 #b9b2a0,0 0 60px #fff4ce66,0 18px 40px #000c}
@@ -74,8 +76,8 @@ a{color:inherit}
 :is(.intro-3d-pending,.intro-3d) .switch{background:none;box-shadow:none}
 .intro-3d .intro-copy{--hi:#fff;--base:#7c8784;--r:1px;margin-bottom:30vh}
 /* In the room the switch sits on the wall left of the desk */
-.intro-3d .switchbox{left:var(--swx,9%);right:auto;top:var(--swy,64%);bottom:auto;translate:-50% -50%}
-@media (max-width:700px){.intro-3d .switchbox{--swx:17%;--swy:64%}.intro-3d .switch{width:64px;height:102px}}
+.intro-3d .switchbox{left:var(--swx,9%);right:auto;top:var(--swy,64%);bottom:auto;translate:-50% 0;white-space:nowrap}
+@media (max-width:700px){.intro-3d .switch{width:64px;height:102px}}
 .intro-3d .intro-copy .lit{color:transparent;-webkit-background-clip:text;background-clip:text;
   background-image:radial-gradient(circle var(--r) at var(--x,-999px) var(--y,-999px),var(--hi) 15%,var(--base) 100%)}
 @keyframes rise{to{opacity:1;transform:none}}
@@ -325,12 +327,12 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   <div class="intro-copy">
     <p class="mo lit">Mason Di Leo / personal portfolio</p>
     <h1><span class="lit">AFTER</span><span class="lit">HOURS LAB.</span></h1>
-    <p class="lit">There’s more to see. Turn on the lights.</p>
   </div>
   <div class="flash"></div>
   <div class="switchbox">
     <button class="switch" id="switch" type="button" aria-label="Turn on the lights"><span class="plate"><span class="lever"></span><span class="led"></span></span></button>
     <span class="switch-label mo">Lights / off</span>
+    <span class="switch-hint mo">or press any key</span>
   </div>
 </section>
 
@@ -571,6 +573,14 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     revealVisible();
   }
   window.siteIntro = { finish: finishIntro };
+  // Any key flips the switch too (the button already handles Enter and Space when focused)
+  addEventListener('keydown', e => {
+    if (intro.classList.contains('done') || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (['Tab', 'Shift', 'Meta', 'Control', 'Alt', 'CapsLock', 'Escape'].includes(e.key)) return;
+    if (document.activeElement === sw && (e.key === 'Enter' || e.key === ' ')) return;
+    e.preventDefault();
+    sw.click();
+  });
   sw.addEventListener('click', () => {
     if (intro.classList.contains('on') || intro.dataset.mode === '3d') return;
     intro.classList.add('on');

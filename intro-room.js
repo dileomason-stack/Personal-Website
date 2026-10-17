@@ -12,13 +12,13 @@ import { createTerminal, INSTALL_AT } from './intro-terminal.js';
 // tape: [x, y, angle] per strip, x/y from -1 to 1 across the print (corners are ±1).
 // curl: how far the untaped bottom corners lift off the wall.
 const POSTERS = [
-  { src: 'car-917.jpeg', poster: true, title: 'PORSCHE 917', no: '01', w: 1, h: 1.42, tilt: -0.04, at: [0.13, 0.36, 0.34], narrow: [0.12, 0.24, 0.19],
+  { src: 'intro/car-917.jpg', poster: true, title: 'PORSCHE 917', no: '01', w: 1, h: 1.42, tilt: -0.04, at: [0.13, 0.36, 0.34], narrow: [0.12, 0.24, 0.19],
     tape: [[-1, 1, -0.7], [1, 1, 0.7], [-1, -1, 0.7], [1, -1, -0.7]], curl: 0 },
-  { src: 'car-f40.jpeg', w: 1.5, h: 1, tilt: 0.06, at: [0.23, 0.12, 0.15], narrow: [0.2, 0.06, 0.08],
+  { src: 'intro/car-f40.jpg', w: 1.5, h: 1, tilt: 0.06, at: [0.23, 0.12, 0.15], narrow: [0.2, 0.06, 0.08],
     tape: [[0, 1, 1.48]], curl: 1 },
-  { src: 'car-heritage-1.jpeg', w: 1, h: 1.333, tilt: 0.07, at: [0.87, 0.24, 0.24], narrow: [0.96, 0.18, 0.16],
+  { src: 'intro/car-heritage-1.jpg', w: 1, h: 1.333, tilt: 0.07, at: [0.87, 0.24, 0.24], narrow: [0.96, 0.18, 0.16],
     tape: [[-1, 1, -0.75], [1, 1, 0.65]], curl: 0.8 },
-  { src: 'car-911.jpeg', w: 1, h: 1.333, tilt: -0.09, at: [0.81, 0.45, 0.17], narrow: [0.88, 0.4, 0.11],
+  { src: 'intro/car-911.jpg', w: 1, h: 1.333, tilt: -0.09, at: [0.81, 0.45, 0.17], narrow: [0.88, 0.4, 0.11],
     tape: [[-1, 1, -0.7], [1, -1, -0.6]], curl: 0 },
 ];
 
@@ -259,7 +259,14 @@ export function buildRoom(scene, renderer) {
     }
   }
 
-  return { layout, update, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot };
+  // Things in the room that link to parts of the site
+  const hotspots = [
+    { obj: laptop, label: 'Projects →', target: 'projects' },
+    { obj: phone, label: 'Hold This Thought →', target: 'work' },
+    ...posters.map(({ group }) => ({ obj: group, label: 'About me →', target: 'cars' })),
+  ];
+
+  return { layout, update, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot, hotspots };
 }
 
 // Center a loaded model on x/z, sit it on y = 0, and scale its longest side to `size`

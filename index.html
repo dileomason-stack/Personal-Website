@@ -12,6 +12,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121a19'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='800' font-size='26' fill='%23f4f1ea' text-anchor='middle'%3EMD%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -76,6 +77,17 @@ a{color:inherit}
 :is(.intro-3d-pending,.intro-3d) .plate,.intro-3d .flash{display:none}
 :is(.intro-3d-pending,.intro-3d) .switch{background:none;box-shadow:none}
 .intro-3d .intro-copy{--hi:#fff;--base:#7c8784;--r:1px;margin-bottom:30vh}
+/* Skip and sound controls, top right of the intro */
+.intro-tools{position:absolute;top:18px;right:18px;z-index:4;display:flex;gap:8px;opacity:0;animation:rise .9s 1.2s var(--ease) forwards}
+.intro-tools button{font:inherit;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8d9a97;background:#ffffff0d;border:1px solid #ffffff1f;border-radius:40px;padding:8px 14px;cursor:pointer;transition:color .25s,border-color .25s,background .25s}
+.intro-tools button:hover{color:#fff;border-color:#ffffff55}
+.intro-sound{display:none}.intro-3d .intro-sound{display:inline-block}
+/* Label for room objects the visitor points at */
+.intro-tip{position:absolute;z-index:4;pointer-events:none;padding:7px 12px;border-radius:40px;background:#0b0f0fdd;color:#f4f1ea;border:1px solid #ffffff22;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;opacity:0;translate:-50% -140%;transition:opacity .2s}
+.intro-tip.on{opacity:1}
+/* While the match-cut snapshot of the homepage is taken */
+.snap .reveal{transition:none!important}
 /* In the room the switch sits on the wall left of the desk */
 .intro-3d .switchbox{left:var(--swx,9%);right:auto;top:var(--swy,64%);bottom:auto;translate:-50% 0;white-space:nowrap}
 @media (max-width:700px){.intro-3d .switch{width:56px;height:89px}.intro-3d .switch-label{margin-top:10px}}
@@ -303,24 +315,42 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
 }
 </style>
 <script>
-  // Try the 3D intro only with WebGL and motion allowed; give up after 6s and keep the CSS one
+  // Visitors who've seen the intro in the last two weeks go straight to the site (?intro replays it).
+  // Otherwise try the 3D intro, only with WebGL and motion allowed; give up after 6s and keep the CSS one.
   (() => {
+    const root = document.documentElement;
+    let seen = 0;
+    try { seen = +localStorage.getItem('mdl-intro-seen') || 0; } catch (e) {}
+    if (!new URLSearchParams(location.search).has('intro') && Date.now() - seen < 14 * 864e5) {
+      root.classList.add('intro-returning');
+      return;
+    }
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try { if (!document.createElement('canvas').getContext('webgl2')) return; } catch (e) { return; }
-    const root = document.documentElement;
     root.classList.add('intro-3d-pending');
     setTimeout(() => root.classList.remove('intro-3d-pending'), 6000);
   })();
 </script>
 <script type="importmap">
 { "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js",
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/",
-  "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js",
-  "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/"
+  "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/+esm",
+  "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/",
+  "html2canvas": "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js"
 } }
 </script>
-<script type="module" src="intro-3d.js"></script>
+<script type="module">
+  // Only visitors who'll see the 3D intro download it (returning visitors and reduced motion don't);
+  // the libraries start downloading right away, alongside the module itself
+  if (document.documentElement.classList.contains('intro-3d-pending')) {
+    for (const href of ['https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.13.0/+esm']) {
+      document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'modulepreload', href, crossOrigin: 'anonymous' }));
+    }
+    // Boot the 3D once the page has painted, so the headline and switch appear first
+    (window.requestIdleCallback || (cb => setTimeout(cb, 200)))(() => import('./intro-3d.js'), { timeout: 1200 });
+  }
+</script>
 </head>
 <body class="locked">
 
@@ -330,6 +360,11 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     <h1><span class="lit">AFTER</span><span class="lit">HOURS LAB.</span></h1>
   </div>
   <div class="flash"></div>
+  <div class="intro-tools">
+    <button class="intro-sound mo" type="button" aria-pressed="false">Sound off</button>
+    <button class="intro-skip mo" type="button">Skip intro →</button>
+  </div>
+  <span class="intro-tip mo" aria-hidden="true"></span>
   <div class="switchbox">
     <button class="switch" id="switch" type="button" aria-label="Turn on the lights"><span class="plate"><span class="lever"></span><span class="led"></span></span></button>
     <span class="switch-label mo">Lights / off</span>
@@ -387,7 +422,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       <p>Building a native Swift iOS reminder app that helps people capture passing thoughts before they disappear. The app turns spoken or typed ideas into helpful prompts based on time, location, calendar events, and saved places. I lead product direction, interface design, and iOS development, from concept testing through live iPhone demos.</p>
       <div class="pills"><span class="pill">Swift</span><span class="pill">Product</span><span class="pill">UX</span><span class="pill">iOS</span></div>
     </div>
-    <div class="app-tile"><img src="hold-this-thought-logo-transparent.png" alt="Hold This Thought app icon" width="560" height="560"></div>
+    <div class="app-tile"><img src="hold-this-thought-logo-transparent.webp" alt="Hold This Thought app icon" width="560" height="560" loading="lazy" decoding="async"></div>
   </article>
 
   <details class="more-work reveal" id="experience">
@@ -545,7 +580,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       <a class="btn ghost" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GITHUB <span class="arr">↗</span></a>
   </div>
 </section>
-<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span><span>Cal Poly SLO / Business + IS</span></footer>
+<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="?intro">Replay intro ↺</a></span><span>Cal Poly SLO / Business + IS</span></footer>
 </main>
 
 <script>
@@ -567,18 +602,36 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   const intro = document.getElementById('intro');
   const sw = document.getElementById('switch');
   const label = intro.querySelector('.switch-label');
+  function rememberIntro() {
+    try { localStorage.setItem('mdl-intro-seen', String(Date.now())); } catch (e) {}
+  }
   function finishIntro() {
     scrollTo(0, 0);
     intro.classList.add('done');
     document.body.classList.remove('locked');
     revealVisible();
+    rememberIntro();
   }
-  window.siteIntro = { finish: finishIntro };
+  // Straight to the site with no animation: the Skip button, Esc, returning visitors and project links
+  function skipIntro(target, remember = true) {
+    if (intro.classList.contains('done')) return;
+    intro.style.transition = 'none';
+    intro.classList.add('on', 'done');
+    label.textContent = 'Lights / on';
+    document.body.classList.remove('locked');
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+    if (remember) rememberIntro();
+    dispatchEvent(new Event('intro:skip'));
+    if (target) requestAnimationFrame(() => target.scrollIntoView({ block: 'center' }));
+  }
+  window.siteIntro = { finish: finishIntro, skip: skipIntro };
+  intro.querySelector('.intro-skip').addEventListener('click', e => { e.stopPropagation(); skipIntro(); });
   // Any key flips the switch too (the button already handles Enter and Space when focused)
   addEventListener('keydown', e => {
     if (intro.classList.contains('done') || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
-    if (['Tab', 'Shift', 'Meta', 'Control', 'Alt', 'CapsLock', 'Escape'].includes(e.key)) return;
-    if (document.activeElement === sw && (e.key === 'Enter' || e.key === ' ')) return;
+    if (e.key === 'Escape') return skipIntro();
+    if (['Tab', 'Shift', 'Meta', 'Control', 'Alt', 'CapsLock'].includes(e.key)) return;
+    if (document.activeElement?.closest('#intro button') && (e.key === 'Enter' || e.key === ' ')) return;
     e.preventDefault();
     sw.click();
   });
@@ -589,14 +642,8 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     setTimeout(finishIntro, reduce ? 50 : 1150);
   });
 
-  if (deepLink) {
-    intro.style.transition = 'none';
-    intro.classList.add('on', 'done');
-    label.textContent = 'Lights / on';
-    document.body.classList.remove('locked');
-    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
-    requestAnimationFrame(() => deepLink.scrollIntoView({ block: 'center' }));
-  }
+  if (deepLink) skipIntro(deepLink, false);
+  else if (document.documentElement.classList.contains('intro-returning')) skipIntro(null, false);
 
   // Email buttons: reveal and copy the address
   document.querySelectorAll('.email-btn').forEach(btn => {
@@ -678,10 +725,10 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       f.querySelector('img').src = f.dataset.src;
       f.querySelector('.bg').style.backgroundImage = 'url("' + f.dataset.src + '")';
     };
-    let n = 0, timer = null, visible = false, hover = false;
+    let n = 0, timer = null, visible = false, hover = false, near = false;
     const show = i => {
       n = (i + slides.length) % slides.length;
-      load(n); load(n + 1);
+      if (near) { load(n); load(n + 1); }
       slides.forEach((f, k) => f.classList.toggle('active', k === n));
       dots.forEach((d, k) => {
         d.classList.remove('active');
@@ -711,6 +758,14 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
       sx = null;
     });
     new IntersectionObserver(([en]) => { visible = en.isIntersecting; setPaused(); }, { threshold: .3 }).observe(g);
+    // Photos load once the gallery is within a screen or so of view, not with the page
+    const nearObs = new IntersectionObserver(([en]) => {
+      if (!en.isIntersecting) return;
+      near = true;
+      load(n); load(n + 1);
+      nearObs.disconnect();
+    }, { rootMargin: '800px 0px' });
+    nearObs.observe(g);
     show(0);
   });
 })();

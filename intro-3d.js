@@ -1,16 +1,21 @@
 // 3D "lights off" intro: a dark room lit by a flashlight that follows the cursor.
-// Flipping the switch flickers the bulb on, floods the room, and flies the camera into
-// the laptop screen on the desk, which becomes the site. If anything here fails, the CSS intro still works.
+// Flipping the switch flickers the bulb on, floods the room, and flies the camera into the
+// laptop screen, which by then is showing a snapshot of the real homepage, so the camera lands
+// on the site itself (a match cut). Objects in the room are links. If WebGL fails or the GPU
+// is lost, the CSS intro takes over.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { gsap } from 'gsap';
 import { buildRoom } from './intro-room.js';
 import { INSTALL_AT } from './intro-terminal.js';
 import { SplitText } from 'gsap/SplitText.js';
+import { createSound } from './intro-sound.js';
 
 const root = document.documentElement;
 const intro = document.getElementById('intro');
@@ -33,6 +38,8 @@ function start() {
   const lit = [...intro.querySelectorAll('.lit')];
   const switchbox = intro.querySelector('.switchbox');
   const label = intro.querySelector('.switch-label');
+  const tip = intro.querySelector('.intro-tip');
+  const sound = createSound(intro.querySelector('.intro-sound'));
 
   // ---------- Renderer ----------
   const canvas = document.createElement('canvas');
@@ -54,10 +61,14 @@ function start() {
   // ---------- Wall ----------
   const wall = new THREE.Mesh(
     new THREE.PlaneGeometry(60, 40),
-    new THREE.MeshStandardMaterial({ map: gridTexture(renderer), bumpMap: plasterTexture(), bumpScale: 0.35, roughness: 0.92 })
+    new THREE.MeshStandardMaterial({ map: paintTexture(renderer), bumpMap: plasterTexture(), bumpScale: 0.35, roughness: 0.92 })
   );
   wall.receiveShadow = true;
   scene.add(wall);
+  // A soft studio environment for reflections on the laptop, phone and screws; it brightens with the room
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0;
   const room = buildRoom(scene, renderer);
 
   // ---------- Light switch ----------
@@ -176,6 +187,27 @@ function start() {
   const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.55, 1.3);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
+  // Film finish: warm shadows, a gentle S-curve, vignette and grain. Fades out for the match cut.
+  const grade = new ShaderPass({
+    uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uAmount: { value: 1 } },
+    vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
+    fragmentShader: `
+      uniform sampler2D tDiffuse;
+      uniform float uTime, uAmount;
+      varying vec2 vUv;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+      void main() {
+        vec4 c = texture2D(tDiffuse, vUv);
+        vec3 g = c.rgb;
+        float l = dot(g, vec3(.299, .587, .114));
+        g += mix(vec3(.02, .009, -.006), vec3(-.006, 0., .008), smoothstep(.2, .8, l));
+        g = mix(g, g * g * (3. - 2. * g), .16);
+        g *= mix(1., smoothstep(1.2, .35, length(vUv - .5) * 1.3), .5);
+        g += (hash(gl_FragCoord.xy + fract(uTime * 13.) * 91.) - .5) * .04;
+        gl_FragColor = vec4(mix(c.rgb, g, uAmount), c.a);
+      }`,
+  });
+  composer.addPass(grade);
 
   // ---------- Layout: the 3D switch sits exactly under the real <button> ----------
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
@@ -221,15 +253,40 @@ function start() {
   }
   layout();
   addEventListener('resize', layout);
+  addEventListener('resize', () => { litRects = null; });
 
   // ---------- Pointer ----------
   let pointerSeen = false, px = innerWidth / 2, py = innerHeight * 0.4;
   intro.addEventListener('pointermove', e => { pointerSeen = true; px = e.clientX; py = e.clientY; });
   intro.addEventListener('pointerdown', e => { pointerSeen = true; px = e.clientX; py = e.clientY; });
   intro.addEventListener('pointerleave', () => { pointerSeen = false; });
+  let hovered = null, destination = null;
+  const hotspots = room.hotspots.map(h => h.obj);
+  function pick(x, y) {
+    ndc.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObjects(hotspots, true)[0];
+    if (!hit) return null;
+    for (let o = hit.object; o; o = o.parent) {
+      const h = room.hotspots.find(h => h.obj === o);
+      if (h) return h;
+    }
+    return null;
+  }
+  // Clicking an object flips the lights like the switch does, then lands on that part of the site
+  intro.addEventListener('click', e => {
+    if (entered || e.target.closest('button')) return;
+    const h = pick(e.clientX, e.clientY);
+    if (!h) return;
+    destination = h.target;
+    sw.click();
+  });
 
   // ---------- Animated state ----------
   const S = { bulb: 0, room: 0, torch: 0, swing: 0.035, led: 1, fly: 0, paper: 0 };
+  let entered = false, litRects = null;
+  // The match cut: a snapshot of the homepage, and how much of the laptop screen the window shows at the end
+  const snap = { image: null, frac: null, texture: null };
   // The coding session on the laptop runs in real time until the switch is flipped
   const session = { t: 0, auto: true };
   const flight = { curve: null, lookFrom: new THREE.Vector3(), lookTo: new THREE.Vector3() };
@@ -239,12 +296,35 @@ function start() {
 
   const clock = new THREE.Clock();
   let running = true;
+  // Adaptive quality: if the first seconds run under ~45fps, step down resolution, then shadows and bloom
+  const perf = { frames: 0, time: 0, level: 0 };
+  function degrade() {
+    perf.level++;
+    const pr = perf.level === 1 ? Math.min(devicePixelRatio, 1.25) : 1;
+    renderer.setPixelRatio(pr);
+    composer.setPixelRatio(pr);
+    dustMat.uniforms.uPR.value = pr;
+    bulbLight.castShadow = false;
+    if (perf.level === 2) { torch.castShadow = false; bloom.enabled = false; }
+    layout();
+  }
   function frame() {
     if (!running) return;
     requestAnimationFrame(frame);
-    const dt = Math.min(clock.getDelta(), 0.05);
+    const raw = clock.getDelta(), dt = Math.min(raw, 0.05);
+    if (perf.level < 2 && !entered && clock.elapsedTime > 1.5 && !document.hidden) {
+      perf.frames++;
+      perf.time += raw;
+      if (perf.frames === 60) {
+        if (perf.frames / perf.time < 45) degrade();
+        perf.frames = perf.time = 0;
+      }
+    }
+    // On the slowest devices, draw every other frame (30fps) to leave the main thread some room
+    if (perf.level === 2 && (skipFrame = !skipFrame)) return;
     draw(dt, clock.elapsedTime);
   }
+  let skipFrame = false;
   function draw(dt, t) {
     const k = 1 - Math.exp(-dt * 5);
 
@@ -264,6 +344,18 @@ function start() {
     camera.lookAt(look);
     camera.updateMatrixWorld();
 
+    // Room objects under the cursor get a label and act as links
+    if (pointerSeen && !entered) {
+      const h = pick(px, py);
+      if (h !== hovered) {
+        hovered = h;
+        tip.textContent = h ? h.label : '';
+        tip.classList.toggle('on', !!h);
+        intro.style.cursor = h ? 'pointer' : '';
+      }
+      if (h) tip.style.left = px + 'px', tip.style.top = py + 'px';
+    }
+
     // Flashlight follows the cursor, or wanders around the headline
     if (pointerSeen) screenToPlane(px, py, 0, aimTarget);
     else aimTarget.set(Math.sin(t * 0.45) * 1.8, 0.55 + Math.sin(t * 0.7) * 0.5, 0);
@@ -277,18 +369,20 @@ function start() {
     const sx = (proj.x + 1) / 2 * innerWidth, sy = (1 - proj.y) / 2 * innerHeight;
     const radius = Math.tan(torch.angle) * torch.position.distanceTo(aim) * pxPerUnit * 1.15 * S.torch;
     copy.style.setProperty('--r', Math.max(1, radius).toFixed(1) + 'px');
-    for (const el of lit) {
-      const r = el.getBoundingClientRect();
-      el.style.setProperty('--x', (sx - r.left).toFixed(1) + 'px');
-      el.style.setProperty('--y', (sy - r.top).toFixed(1) + 'px');
-    }
+    // (the headline only moves while it rises in or on resize, so its boxes are re-measured only then)
+    if (t < 2.5 || !litRects) litRects = lit.map(el => el.getBoundingClientRect());
+    lit.forEach((el, i) => {
+      el.style.setProperty('--x', (sx - litRects[i].left).toFixed(1) + 'px');
+      el.style.setProperty('--y', (sy - litRects[i].top).toFixed(1) + 'px');
+    });
 
     // Lights
     pendant.rotation.z = Math.sin(t * 1.3) * S.swing;
     pendant.rotation.x = Math.cos(t * 0.9) * S.swing * 0.4;
     torch.intensity = S.torch * 11;
-    ambient.intensity = 0.02 + S.room * 0.75;
-    hemi.intensity = 0.03 + S.room * 0.5;
+    ambient.intensity = 0.02 + S.room * 0.5;
+    hemi.intensity = 0.03 + S.room * 0.3;
+    scene.environmentIntensity = 0.01 + S.room * 0.12;
     bulbLight.intensity = S.bulb * 6;
     bulbMat.emissiveIntensity = S.bulb * 5;
     filamentMat.emissiveIntensity = S.bulb * 14;
@@ -299,6 +393,14 @@ function start() {
     room.paperMat.opacity = S.paper;
     if (session.auto) session.t = Math.max(0, t - 1.2);
     room.update(session.t);
+    sound.hum(S.bulb * (S.room < 0.95 ? 1 : 0.2) * (1 - S.fly));
+    // On the last frames the screen fills the window: drop tone mapping and the film finish so the
+    // snapshot shows in its true colors and hands off to the real page without a shift
+    const landed = snap.texture && S.fly > 0.999 && S.paper > 0.999;
+    renderer.toneMapping = landed ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+    if (snap.texture) room.paperMat.color.setScalar(landed ? 1 : 1.15);
+    grade.uniforms.uAmount.value = 1 - S.paper;
+    grade.uniforms.uTime.value = t;
 
     composer.render(dt);
   }
@@ -306,7 +408,7 @@ function start() {
 
   // ---------- Hero headline: letters rise in after the intro ----------
   const heroH = document.querySelector('.hero h2');
-  let split = null, entered = false;
+  let split = null;
   document.fonts.ready.then(() => {
     if (entered) return;
     heroH.classList.remove('reveal', 'd1');
@@ -317,38 +419,89 @@ function start() {
   // ---------- Switch ----------
   sw.addEventListener('pointerenter', () => { if (!entered) gsap.to(leverPivot.rotation, { x: OFF - 0.12, duration: 0.3, ease: 'power2.out' }); });
   sw.addEventListener('pointerleave', () => { if (!entered) gsap.to(leverPivot.rotation, { x: OFF, duration: 0.4, ease: 'power2.out' }); });
+  let tl = null;
   sw.addEventListener('click', () => {
     if (entered) return;
     entered = true;
     label.textContent = 'Lights / on';
-    gsap.set(switchbox, { animation: 'none', opacity: 1 });
+    tip.classList.remove('on');
+    intro.style.cursor = '';
+    gsap.set([switchbox, intro.querySelector('.intro-tools')], { animation: 'none', opacity: 1 });
+    sound.click();
+    takeSnapshot();
 
     // Time-lapse the rest of the session so the phone gets the build before the camera dives in
     session.auto = false;
-    if (session.t < INSTALL_AT + 1.2) gsap.to(session, { t: INSTALL_AT + 1.2, duration: 1.6, ease: 'power1.inOut' });
+    if (session.t < INSTALL_AT + 1.2) gsap.to(session, { t: INSTALL_AT + 1.2, duration: 1.25, ease: 'power1.inOut' });
 
-    const tl = gsap.timeline();
+    tl = gsap.timeline();
     tl.to(leverPivot.rotation, { x: ON, duration: 0.3, ease: 'back.out(3)' }, 0)
       .to(shake, { keyframes: [{ y: -0.035 }, { y: 0.015 }, { y: 0 }], duration: 0.3 }, 0.04)
       .to(S, { swing: 0.13, duration: 0.25, ease: 'power2.out' }, 0.1)
       .to(S, { swing: 0.03, duration: 3, ease: 'power2.inOut' }, 0.35)
-      .set(S, { led: 0 }, 0.18);
+      .set(S, { led: 0 }, 0.14);
 
     // A fluorescent-style stutter before it catches
-    [[0.18, 1], [0.22, 0], [0.34, 0.8], [0.37, 0.05], [0.62, 1], [0.66, 0.2], [0.72, 0.9], [0.78, 0.35]]
+    [[0.14, 1], [0.17, 0], [0.26, 0.8], [0.29, 0.05], [0.46, 1], [0.5, 0.2], [0.54, 0.9], [0.58, 0.35]]
       .forEach(([at, v]) => tl.set(S, { bulb: v, room: v * 0.3 }, at));
 
-    tl.to(S, { bulb: 1, room: 1, torch: 0, duration: 1, ease: 'power2.out' }, 0.85)
-      .to(copy, { '--hi': '#121a19', '--base': '#121a19', duration: 0.8 }, 0.9)
-      .to(label, { color: '#121a19', duration: 0.8 }, 0.9)
-      // Into the laptop
-      .to(copy, { y: -innerHeight * 0.25, opacity: 0, filter: 'blur(6px)', duration: 0.9, ease: 'power2.in' }, 1.7)
-      .to(switchbox, { opacity: 0, duration: 0.5, ease: 'power2.in' }, 1.7)
-      .to(S, { fly: 1, duration: 2.1, ease: 'power3.inOut' }, 1.75)
-      .to(S, { paper: 1, duration: 0.45, ease: 'power1.in' }, 3.35)
-      .to(wash, { opacity: 1, duration: 0.15 }, 3.8)
-      .add(finish, 3.95);
+    tl.to(S, { bulb: 1, room: 1, torch: 0, duration: 0.8, ease: 'power2.out' }, 0.62)
+      .to(copy, { '--hi': '#121a19', '--base': '#121a19', duration: 0.6 }, 0.64)
+      .to(label, { color: '#121a19', duration: 0.6 }, 0.64)
+      // Into the laptop, which switches from the terminal to the homepage on the way in
+      .to(copy, { y: -innerHeight * 0.25, opacity: 0, filter: 'blur(6px)', duration: 0.8, ease: 'power2.in' }, 1.3)
+      .to([switchbox, intro.querySelector('.intro-tools')], { opacity: 0, duration: 0.45, ease: 'power2.in' }, 1.3)
+      .add(() => sound.whoosh(2), 1.4)
+      .to(S, { fly: 1, duration: 2, ease: 'power3.inOut' }, 1.4)
+      .to(S, { paper: 1, duration: 0.6, ease: 'power1.inOut' }, 2.3)
+      .add(() => { if (!snap.texture) gsap.to(wash, { opacity: 1, duration: 0.15 }); }, 3.25)
+      .add(finish, 3.45);
   });
+
+  // Snapshot of the homepage as it looks once the intro is gone, to put on the laptop screen
+  async function takeSnapshot() {
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      root.classList.add('snap');
+      document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('in'));
+      snap.image = await html2canvas(document.body, {
+        x: 0, y: 0, width: innerWidth, height: innerHeight, windowWidth: innerWidth, windowHeight: innerHeight,
+        scrollX: 0, scrollY: 0, scale: Math.min(devicePixelRatio, 2), backgroundColor: '#f4f1ea', logging: false,
+        ignoreElements: el => el.id === 'intro',
+        onclone: doc => {
+          const bar = doc.getElementById('bar');
+          bar.style.background = 'rgba(244,241,234,.82)';
+          bar.style.backdropFilter = 'none';
+          // The headline letters rise in after the cut, so the snapshot leaves them out
+          doc.querySelector('.hero h2').style.visibility = 'hidden';
+          // html2canvas can't do the hero's masked grid or soft radial glow (it draws a muddy blob), so the
+          // snapshot leaves those decorations to the real page, which fades them in right after the cut
+          doc.querySelectorAll('.hero > html2canvaspseudoelement').forEach(el => { el.style.display = 'none'; });
+        },
+      });
+      composeSnapshot();
+    } catch (err) {
+      console.warn('Homepage snapshot failed; the intro ends on a plain fade', err);
+    } finally {
+      root.classList.remove('snap');
+    }
+  }
+  // Lay the snapshot on a screen-shaped canvas, sized to exactly the part of the screen the window will show
+  function composeSnapshot() {
+    if (!snap.image || !snap.frac || snap.texture) return;
+    const c = document.createElement('canvas');
+    c.width = 2048; c.height = 1152;
+    const g = c.getContext('2d');
+    g.fillStyle = '#f4f1ea';
+    g.fillRect(0, 0, c.width, c.height);
+    const w = c.width * snap.frac[0], h = c.height * snap.frac[1];
+    g.drawImage(snap.image, (c.width - w) / 2, (c.height - h) / 2, w, h);
+    snap.texture = new THREE.CanvasTexture(c);
+    snap.texture.colorSpace = THREE.SRGBColorSpace;
+    snap.texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    room.paperMat.map = snap.texture;
+    room.paperMat.needsUpdate = true;
+  }
 
   // Fly from where the camera is now to square in front of the screen, close enough to fill the window
   function planFlight() {
@@ -364,19 +517,52 @@ function start() {
     flight.curve = new THREE.CatmullRomCurve3([from, mid, to]);
     flight.lookFrom.copy(look);
     flight.lookTo.copy(center);
+    const visH = 2 * d * tan;
+    snap.frac = [visH * camera.aspect / (sw0 * s), visH / (sh0 * s)];
+    composeSnapshot();
   }
 
   function finish() {
     if (split) gsap.to(split.chars, { yPercent: 0, rotate: 0, duration: 1.1, ease: 'expo.out', stagger: 0.035, delay: 0.2, onComplete: () => split.revert() });
     window.siteIntro.finish();
-    setTimeout(() => {
-      running = false;
-      removeEventListener('resize', layout);
-      composer.dispose();
-      renderer.dispose();
-      canvas.remove();
-    }, 1200);
+    sound.stop();
+    if (destination) setTimeout(() => document.getElementById(destination)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 900);
+    setTimeout(teardown, 1200);
   }
+  function teardown() {
+    if (!running) return;
+    running = false;
+    removeEventListener('resize', layout);
+    tl?.kill();
+    composer.dispose();
+    pmrem.dispose();
+    renderer.dispose();
+    canvas.remove();
+  }
+  function restoreHeadline() {
+    if (split) { split.revert(); split = null; }
+    heroH.classList.add('reveal', 'd1', 'in');
+  }
+  // Skip button, Esc, or a returning visitor
+  addEventListener('intro:skip', () => {
+    entered = true;
+    sound.stop();
+    restoreHeadline();
+    teardown();
+  });
+  // If the GPU drops the context, hand over to the CSS intro (or just finish, if already on the way out)
+  canvas.addEventListener('webglcontextlost', e => {
+    e.preventDefault();
+    if (entered) { restoreHeadline(); window.siteIntro.finish(); teardown(); return; }
+    entered = true;
+    sound.stop();
+    restoreHeadline();
+    teardown();
+    root.classList.remove('intro-3d');
+    delete intro.dataset.mode;
+    copy.removeAttribute('style');
+    switchbox.removeAttribute('style');
+  });
 
   // ---------- Go ----------
   const wash = document.createElement('div');
@@ -394,19 +580,30 @@ function shadowed(mesh) {
   return mesh;
 }
 
-// The same faint grid as the CSS intro, painted on the wall
-function gridTexture(renderer) {
+// Warm painted wall: soft mottling and faint vertical roller marks
+function paintTexture(renderer) {
   const c = document.createElement('canvas');
-  c.width = c.height = 512;
+  c.width = c.height = 1024;
   const g = c.getContext('2d');
-  g.fillStyle = '#f4f1ea';
-  g.fillRect(0, 0, 512, 512);
-  g.fillStyle = '#e4dfd3';
-  for (let i = 0; i < 512; i += 128) { g.fillRect(i, 0, 2, 512); g.fillRect(0, i, 512, 2); }
+  g.fillStyle = '#e7dfd1';
+  g.fillRect(0, 0, 1024, 1024);
+  for (let i = 0; i < 60; i++) {
+    const x = Math.random() * 1024, y = Math.random() * 1024, r = 80 + Math.random() * 260;
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    const tone = Math.random() < 0.5 ? '255,250,240' : '205,192,170';
+    grad.addColorStop(0, `rgba(${tone},${0.05 + Math.random() * 0.05})`);
+    grad.addColorStop(1, `rgba(${tone},0)`);
+    g.fillStyle = grad;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  for (let i = 0; i < 140; i++) {
+    g.fillStyle = `rgba(${Math.random() < 0.5 ? '255,252,245' : '190,178,155'},${Math.random() * 0.035})`;
+    g.fillRect(Math.random() * 1024, 0, 6 + Math.random() * 40, 1024);
+  }
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(60 / (4 * 0.42), 40 / (4 * 0.42));
+  tex.repeat.set(6, 4);
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
   return tex;
 }

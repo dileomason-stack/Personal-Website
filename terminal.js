@@ -73,6 +73,7 @@ and learn whatever skills they need. Open to internships and co-ops.`,
   Matter.js          the letters you can grab
   View Transitions   case studies opening out of their cards
   a JS port of my iOS app’s reminder parser (295/295 tests)
+3D car model: “CarConcept” by Eric Chadwick (CC BY 4.0).
 Built with Claude Code. Source: ${link('https://github.com/dileomason-stack/Personal-Website', 'github.com/dileomason-stack/Personal-Website')}`,
   // The ones help doesn't list
   sudo: async (args) => {

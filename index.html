@@ -512,11 +512,13 @@ html.lenis{scroll-behavior:auto}
 .hero-wait .hero{visibility:hidden}
 .bar-progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;pointer-events:none}
 /* A little Gulf-style race car drives along the progress line as you scroll (site-motion.js) */
-.bar-car{position:absolute;left:0;bottom:-3px;width:56px;height:17px;pointer-events:none;opacity:0;transition:opacity .3s;will-change:transform}
+/* The car (a render of a 3D model, CC BY: see car/CREDITS.txt); its wheels are separate images that turn */
+.bar-car{position:absolute;left:0;bottom:0;width:64px;aspect-ratio:320/92;container-type:inline-size;pointer-events:none;opacity:0;transition:opacity .3s;will-change:transform}
 .bar-car.on{opacity:1}
-.bar-car svg{display:block;width:100%;height:100%;overflow:visible}
-.car-shadow{fill:rgb(0 0 0 / .28);filter:blur(1.2px)}
-.car-num{font:800 6px Manrope,sans-serif;fill:#151513;text-anchor:middle}
+.bar-car img{position:absolute;display:block;max-width:none}
+.car-body{left:0;top:0;width:100%;height:auto}
+.bar-car .wheel{height:auto}
+.car-shadow{position:absolute;left:6%;right:6%;bottom:-6%;height:16%;border-radius:50%;background:rgb(0 0 0 / .3);filter:blur(2px);z-index:-1}
 @media(prefers-reduced-motion:reduce){.bar-car{display:none}}
 .nav-pill{position:absolute;top:0;left:0;height:100%;width:0;border-radius:40px;background:var(--text);opacity:0;pointer-events:none}
 .motion .nav a.active{background:transparent}
@@ -963,29 +965,7 @@ footer a{text-decoration:none}
 <main class="site">
 <nav class="bar" id="bar">
   <i class="bar-progress" aria-hidden="true"></i>
-  <span class="bar-car" aria-hidden="true"><svg viewBox="0 0 120 36">
-    <defs>
-      <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe6f5"/><stop offset=".45" stop-color="#8fcde6"/><stop offset="1" stop-color="#5e9fbb"/></linearGradient>
-      <linearGradient id="carGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a4d58"/><stop offset=".55" stop-color="#121b21"/><stop offset="1" stop-color="#26343c"/></linearGradient>
-      <radialGradient id="carRim"><stop offset="0" stop-color="#e9ecee"/><stop offset=".7" stop-color="#9aa3a8"/><stop offset="1" stop-color="#5d666b"/></radialGradient>
-      <clipPath id="carShape"><path d="M3 26.5V21.6c0-2.4 1.6-3.7 5.6-4.2L27 15.6c6.5-.6 11.5-2 16.7-5.4 4.6-3 10.5-3.9 17-3.6 6.8.3 12.2 2.4 16.7 5.6l23.3 1.9c6.3.5 10.4 0 13.3-1.3l.9 7.2c.4 3.7-1 6.5-3.6 6.5H102a9.5 9.5 0 0 0-17.6 0H36a9.5 9.5 0 0 0-17.6 0H4.8c-1 0-1.8-.8-1.8-1.8z"/></clipPath>
-    </defs>
-    <ellipse class="car-shadow" cx="60" cy="33.6" rx="56" ry="2.4"/>
-    <g clip-path="url(#carShape)">
-      <rect width="120" height="36" fill="url(#carBody)"/>
-      <path d="M0 19.2h120v4.6H0z" fill="#f47a26"/>
-      <path d="M0 23.8h120v.8H0z" fill="#1d3a52" opacity=".55"/>
-      <path d="M44.6 11.4c4.4-2.8 9.9-3.7 16-3.4 6 .3 11 2 15 4.7L71 12.6l-26.4-1.2z" fill="url(#carGlass)"/>
-      <path d="M60.6 8.2l-1 4" stroke="#8fcde6" stroke-width=".9"/>
-      <path d="M3 17h120" stroke="#fff" stroke-opacity=".35" stroke-width=".6"/>
-    </g>
-    <circle cx="66" cy="20.6" r="4.3" fill="#fbfaf7" stroke="#1d3a52" stroke-width=".5"/>
-    <text class="car-num" x="66" y="22.7">2</text>
-    <path d="M5 19.4c1.4-.9 3.3-1.2 5-.9" stroke="#fff6cf" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-    <path d="M113.8 18.4h2.4" stroke="#c4271b" stroke-width="1.6" stroke-linecap="round"/>
-    <g class="wheel" style="transform-origin:27.2px 27.4px"><circle cx="27.2" cy="27.4" r="7.4" fill="#141414"/><circle cx="27.2" cy="27.4" r="4.6" fill="url(#carRim)"/><path d="M27.2 23.4v8M23.2 27.4h8M24.4 24.6l5.6 5.6M30 24.6l-5.6 5.6" stroke="#59626a" stroke-width=".9"/><circle cx="27.2" cy="27.4" r="1.2" fill="#3a4045"/></g>
-    <g class="wheel" style="transform-origin:93.2px 27.4px"><circle cx="93.2" cy="27.4" r="7.4" fill="#141414"/><circle cx="93.2" cy="27.4" r="4.6" fill="url(#carRim)"/><path d="M93.2 23.4v8M89.2 27.4h8M90.4 24.6l5.6 5.6M96 24.6l-5.6 5.6" stroke="#59626a" stroke-width=".9"/><circle cx="93.2" cy="27.4" r="1.2" fill="#3a4045"/></g>
-  </svg></span>
+  <span class="bar-car" aria-hidden="true"><img class="car-body" src="car/car-body.webp" alt="" width="320" height="92"><img class="wheel" src="car/car-wheel-front.webp" alt="" style="left:71.14%;top:calc(65.85% - 10.01cqw);width:20.01%"><img class="wheel" src="car/car-wheel-rear.webp" alt="" style="left:3.02%;top:calc(65.85% - 10.08cqw);width:20.15%"><i class="car-shadow"></i></span>
   <a class="brand" href="#top">MASON DI LEO</a>
   <div class="nav">
     <span class="nav-pill" aria-hidden="true"></span>
@@ -1267,7 +1247,7 @@ footer a{text-decoration:none}
   </div>
   </div>
 </section>
-<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗︎</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗︎</a><a href="?intro">Replay intro ↺</a><button class="foot-term" type="button" aria-label="Open the terminal">&gt;_</button></span><span>Cal Poly SLO / Business + IS</span></footer>
+<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗︎</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗︎</a><a href="?intro">Replay intro ↺</a><a href="car/CREDITS.txt">Credits</a><button class="foot-term" type="button" aria-label="Open the terminal">&gt;_</button></span><span>Cal Poly SLO / Business + IS</span></footer>
 </main>
 
 <!-- Case studies (case-study.js): each card's screenshot and title morph into the page (View Transitions) -->

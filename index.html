@@ -207,7 +207,7 @@ section{padding:clamp(72px,8vw,112px) var(--pad-x);position:relative}
 .num:before{content:"";width:24px;height:1px;background:currentColor}
 .display{font-size:clamp(44px,6vw,84px);line-height:.92;letter-spacing:-.045em;margin:0;font-weight:800}
 /* A faint paper grain on cards, like the photos taped up in the intro */
-.school,.proj,.exp,.activity,.details .block,.case-meta{background-image:var(--grain)}
+.school,.proj,.activity,.case-meta{background-image:var(--grain)}
 .pill{display:inline-flex;align-items:center;padding:7px 12px;border:1px solid var(--line-strong);border-radius:40px;font:12px "DM Mono",monospace;color:var(--text-2);transition:border-color .25s,color .25s}
 .pill:hover{border-color:var(--text);color:var(--text)}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
@@ -283,15 +283,29 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .more-work summary::-webkit-details-marker{display:none}
 .more-work summary .plus{width:34px;height:34px;border-radius:50%;border:1px solid var(--inv-line);display:grid;place-items:center;font-size:18px;transition:transform .35s var(--ease),background .25s}
 .more-work[open] summary .plus{transform:rotate(45deg);background:var(--inv-accent);color:var(--inv-bg);border-color:var(--inv-accent)}
-.more-list{padding:0 clamp(24px,4vw,40px) 28px}
-.exp-group{padding-top:26px}
-.exp-group>.mo{color:var(--inv-accent);margin:0 0 14px}
-.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.exp{padding:22px;border-radius:var(--r-md);background:var(--inv-surface);border:1px solid var(--inv-line);transition:transform .3s var(--ease),border-color .3s}
-.exp:hover{transform:translateY(-3px);border-color:var(--inv-muted)}
-.exp time{color:var(--inv-accent)}
-.exp h4{font-size:18px;letter-spacing:-.02em;line-height:1.25;margin:12px 0 8px}
-.exp p{color:var(--inv-text-2);font-size:14px;line-height:1.55;margin:0}
+/* More experience: one timeline, newest first; a dot on the rail for each role, a stat where there is one */
+.more-meta{margin-left:auto;margin-right:18px;color:var(--inv-muted)}
+.xp-list{list-style:none;margin:0;padding:6px clamp(24px,4vw,40px) 30px;position:relative}
+.xp{position:relative;display:grid;grid-template-columns:150px 1fr auto;gap:12px 32px;align-items:start;padding:22px 0 22px 26px;border-top:1px solid var(--inv-line)}
+.xp:first-child{border-top:0}
+.xp:before{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--inv-line)}
+.xp:after{content:"";position:absolute;left:-4px;top:28px;width:9px;height:9px;border-radius:50%;background:var(--inv-bg);box-shadow:inset 0 0 0 1.5px var(--inv-muted)}
+.xp.now:after{background:var(--inv-accent);box-shadow:0 0 0 4px rgba(233,201,163,.15)}
+.xp time{color:var(--inv-accent);padding-top:4px}
+.xp h4{margin:0 0 6px;font-size:20px;letter-spacing:-.025em;line-height:1.25;color:var(--inv-text)}
+.xp h4 span{display:block;margin-top:2px;font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--inv-text-2)}
+.xp p{margin:0;max-width:62ch;color:var(--inv-text-2);font-size:15px;line-height:1.55}
+.xp-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right;min-width:96px}
+.xp-side b{font-size:30px;font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--inv-text)}
+.xp-side .mo{color:var(--inv-muted)}
+.xp-side .xp-tag{margin-top:6px;padding:4px 9px;border:1px solid var(--inv-line);border-radius:30px;color:var(--inv-text-2);font-size:10px}
+.xp.now .xp-tag{border-color:var(--inv-accent);color:var(--inv-accent)}
+.xp{transition:background .25s}
+.xp:hover{background:linear-gradient(90deg,transparent,rgba(255,255,255,.025) 30%,transparent)}
+.more-work[open] .xp{animation:xpIn .5s var(--ease) both}
+.more-work[open] .xp:nth-child(2){animation-delay:.04s}.more-work[open] .xp:nth-child(3){animation-delay:.08s}.more-work[open] .xp:nth-child(4){animation-delay:.12s}.more-work[open] .xp:nth-child(5){animation-delay:.16s}.more-work[open] .xp:nth-child(6){animation-delay:.2s}
+@keyframes xpIn{from{opacity:0;transform:translateY(10px)}}
+@media(max-width:760px){.xp{grid-template-columns:1fr auto;grid-template-areas:"time side" "body body";gap:8px 12px}.xp time{grid-area:time;padding:0}.xp-body{grid-area:body}.xp-side{grid-area:side;flex-direction:row;align-items:baseline;gap:6px;min-width:0}.xp-side .xp-tag{margin:0 4px 0 0;order:-1}.xp-side b{font-size:20px}.more-meta{display:none}}
 
 /* ---------- Projects ---------- */
 .projects{background:var(--bg)}
@@ -342,15 +356,6 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .school .pills{margin-top:20px}
 
 /* ---------- About ---------- */
-.details{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,7vw,100px);background:var(--bg);padding-top:clamp(56px,6vw,88px);padding-bottom:clamp(32px,4vw,48px)}
-.details h4{font-size:30px;letter-spacing:-.035em;margin:0 0 22px}
-.details p.body{color:var(--text-2);line-height:1.7;font-size:16px;margin:0}
-.block+.block{margin-top:48px}
-.looking{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
-.looking li{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 0;border-bottom:1px solid var(--line);font-size:19px;font-weight:600;letter-spacing:-.015em;transition:padding .3s var(--ease),color .3s}
-.looking li:after{content:"→";color:var(--accent);transition:transform .3s var(--ease)}
-.looking li:hover{padding-left:8px;color:var(--accent)}
-.looking li:hover:after{transform:translateX(4px)}
 
 /* ---------- Hold This Thought showcase ---------- */
 .showcase{grid-template-columns:1.05fr .95fr}
@@ -544,6 +549,7 @@ html.lenis{scroll-behavior:auto}
 .contact .num{justify-content:center;color:#d4471f}
 .contact h3{font-size:clamp(44px,6.2vw,96px);line-height:.86;letter-spacing:-.06em;margin:0 0 18px;font-weight:800}
 .contact h3 em{font-style:normal;color:#d4471f}
+.contact p b{color:#151513;font-weight:700}
 .contact p{color:#3d3c37;font-size:17px;margin:0 auto 24px;max-width:440px;line-height:1.5}
 .contact .hero-actions{justify-content:center;position:relative}
 .contact .btn{background:#151513;color:#f3f0ea;border-color:#151513}
@@ -786,8 +792,7 @@ footer a{text-decoration:none}
 
 /* ---------- Responsive ---------- */
 @media(max-width:900px){
-  .hero,.edu-grid,.details,.feature{grid-template-columns:1fr}
-  .exp-grid{grid-template-columns:1fr 1fr}
+  .hero,.edu-grid,.feature{grid-template-columns:1fr}
   .scroll-cue{display:none}
 }
 @media(max-width:640px){
@@ -795,9 +800,8 @@ footer a{text-decoration:none}
   .bar .loc{display:none}
   .bar .btn{height:40px;padding:0 16px}
   section{padding:56px 22px}
-  .education{padding-top:56px;padding-bottom:56px}.details{padding-top:48px;padding-bottom:32px}
+  .education{padding-top:56px;padding-bottom:56px}
   .hero{padding-top:48px;min-height:auto}
-  .exp-grid{grid-template-columns:1fr}
   .personal-head{display:block}.personal-head p.body{margin-top:18px}
   .marks{margin-top:28px}.mark{width:84px;height:84px;border-radius:var(--r-md)}.mark.lse{font-size:27px}
   footer{flex-direction:column}
@@ -938,6 +942,7 @@ footer a{text-decoration:none}
       <div><dt>Cumulative GPA</dt><dd>3.85 / 4.0</dd></div>
       <div><dt>Expected graduation</dt><dd>2028</dd></div>
       <div><dt>Based in</dt><dd>California</dd></div>
+      <div><dt>Looking for</dt><dd>Summer 2027 internship</dd></div>
     </dl>
   </aside>
   <span class="scroll-cue mo"><i></i>Scroll</span>
@@ -1017,31 +1022,39 @@ footer a{text-decoration:none}
   </article>
 
   <details class="more-work reveal" id="experience">
-    <summary><span class="mo">More experience</span><span class="plus" aria-hidden="true">+</span></summary>
-    <div class="more-list">
-
-      <div class="exp-group">
-        <p class="mo">Current work</p>
-        <div class="exp-grid">
-          <article class="exp"><time class="mo">2026 — Present</time><h4>Instructional Student Assistant, Statistics</h4><p>Supporting Cal Poly students through tutoring, grading, and weekly office hours.</p></article>
-        </div>
-      </div>
-      <div class="exp-group">
-        <p class="mo">Past work</p>
-        <div class="exp-grid">
-          <article class="exp"><time class="mo">2025</time><h4>Product Innovation Intern, Shockproof Training</h4><p>Modernized digital training modules and developed an AI-integration product pitch for the board.</p></article>
-          <article class="exp"><time class="mo">2021 — 2024</time><h4>Operations Manager, NBA.Downtown</h4><p>Grew the brand to 160K+ followers and secured sponsorships including UFC and DraftKings.</p></article>
-          <article class="exp"><time class="mo">2022 — 2025</time><h4>Founder, Mason’s Pool Cleaning</h4><p>Ran a service business covering technical repairs, client relationships, invoicing, and operations.</p></article>
-        </div>
-      </div>
-      <div class="exp-group">
-        <p class="mo">Volunteering + mentoring</p>
-        <div class="exp-grid">
-          <article class="exp"><time class="mo">2024</time><h4>Camp Counselor, Golden Eagle Summer Sports Camp</h4><p>Led sports and team-building activities while mentoring campers in a fast-paced environment.</p></article>
-          <article class="exp"><time class="mo">2023 — 2025</time><h4>Peer Tutor, AVID Program</h4><p>Provided one-on-one and group support across math, science, English, and foreign language for 30 students.</p></article>
-        </div>
-      </div>
-    </div>
+    <summary><span class="mo">More experience</span><span class="more-meta mo">6 roles since 2021</span><span class="plus" aria-hidden="true">+</span></summary>
+    <ol class="xp-list">
+      <li class="xp now">
+        <time class="mo">2026 — Present</time>
+        <div class="xp-body"><h4>Instructional Student Assistant <span>Statistics · Cal Poly</span></h4><p>Supporting Cal Poly students through tutoring, grading, and weekly office hours.</p></div>
+        <div class="xp-side"><span class="xp-tag mo">Current</span></div>
+      </li>
+      <li class="xp">
+        <time class="mo">2025</time>
+        <div class="xp-body"><h4>Product Innovation Intern <span>Shockproof Training</span></h4><p>Modernized digital training modules and developed an AI-integration product pitch for the board.</p></div>
+        <div class="xp-side"><span class="xp-tag mo">Work</span></div>
+      </li>
+      <li class="xp">
+        <time class="mo">2022 — 2025</time>
+        <div class="xp-body"><h4>Founder <span>Mason’s Pool Cleaning</span></h4><p>Ran a service business covering technical repairs, client relationships, invoicing, and operations.</p></div>
+        <div class="xp-side"><span class="xp-tag mo">Founder</span></div>
+      </li>
+      <li class="xp">
+        <time class="mo">2023 — 2025</time>
+        <div class="xp-body"><h4>Peer Tutor <span>AVID Program</span></h4><p>One-on-one and group support across math, science, English, and foreign language.</p></div>
+        <div class="xp-side"><b>30</b><span class="mo">students</span><span class="xp-tag mo">Volunteer</span></div>
+      </li>
+      <li class="xp">
+        <time class="mo">2024</time>
+        <div class="xp-body"><h4>Camp Counselor <span>Golden Eagle Summer Sports Camp</span></h4><p>Led sports and team-building activities while mentoring campers in a fast-paced environment.</p></div>
+        <div class="xp-side"><span class="xp-tag mo">Volunteer</span></div>
+      </li>
+      <li class="xp">
+        <time class="mo">2021 — 2024</time>
+        <div class="xp-body"><h4>Operations Manager <span>NBA.Downtown</span></h4><p>Grew the brand and secured sponsorships including UFC and DraftKings.</p></div>
+        <div class="xp-side"><b>160K+</b><span class="mo">followers</span><span class="xp-tag mo">Work</span></div>
+      </li>
+    </ol>
   </details>
 </section>
 
@@ -1112,29 +1125,10 @@ footer a{text-decoration:none}
   </div>
 </section>
 
-<section class="details" id="about">
-  <div class="reveal">
-    <div class="block">
-      <p class="num mo">04 / Outside work</p>
-      <h4>Outside work.</h4>
-      <p class="body">Weightlifting, San Francisco Giants baseball, ice cream, and cars — especially the Porsche 962 and 1960s Ford GT40.</p>
-    </div>
-  </div>
-  <div class="reveal d1">
-    <p class="num mo">05 / What I’m looking for</p>
-    <h4>What I’m looking for.</h4>
-    <ul class="looking">
-      <li>Summer 2027 internship</li>
-      <li>Co-op during the school year</li>
-      <li>Remote internship</li>
-    </ul>
-  </div>
-</section>
-
 <section class="personal" id="cars">
   <div class="personal-head reveal">
-    <div><p class="num mo">06 / Passions</p><h3 class="display">CARS.</h3></div>
-    <p class="body">These are some of my favorite cars that I have seen in person.</p>
+    <div><p class="num mo">04 / Passions</p><h3 class="display">CARS.</h3></div>
+    <p class="body">Every photo here is one I took myself: a few favorites from the cars I’ve tracked down in person.</p>
   </div>
   <div class="gallery-wrap reveal" data-slides='[
     ["photos/car-dino.webp","Blue classic sports car","Classic Italian design",1000,667],
@@ -1151,7 +1145,7 @@ footer a{text-decoration:none}
 
 <section class="personal" id="photos">
   <div class="personal-head reveal">
-    <div><p class="num mo">07 / Off the clock</p><h3 class="display">ME, OUTSIDE<br>THE WORK.</h3></div>
+    <div><p class="num mo">05 / Off the clock</p><h3 class="display">ME, OUTSIDE<br>THE WORK.</h3></div>
     <p class="body">Beyond study and work, here is a glimpse of my travel, training, and the people that keep me going.</p>
   </div>
   <div class="gallery-wrap reveal" data-slides='[
@@ -1172,9 +1166,9 @@ footer a{text-decoration:none}
   <div class="room-dark" aria-hidden="true"></div>
   <button class="room-switch" type="button" aria-label="Light switch" aria-pressed="true"></button>
   <div class="room-copy">
-  <p class="num mo reveal">08 / Contact</p>
+  <p class="num mo reveal">06 / Contact</p>
   <h3 class="reveal d1">LET’S BUILD<br><em>SOMETHING.</em></h3>
-  <p class="reveal d2">Open to internships, co-ops, and interesting projects. The fastest way to reach me is email.</p>
+  <p class="reveal d2">Looking for a <b>Summer 2027 internship</b>, a <b>co-op</b>, or <b>remote</b> work. Email is the fastest way to reach me.</p>
   <div class="hero-actions reveal d3">
     <button class="btn email-btn" type="button">EMAIL ME <span class="arr">↗</span></button>
     <a class="btn ghost" href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LINKEDIN <span class="arr">↗</span></a>

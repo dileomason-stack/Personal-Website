@@ -121,15 +121,52 @@ function scrambleReadout() {
 if (root.classList.contains('hero-wait')) (window.fontsReady || document.fonts.ready).then(heroEntrance);
 
 // ---------- Section headings: each line rises out of its own mask ----------
+// On desktop the letters also react to the cursor: Manrope is a variable font, so letters near the
+// pointer thin out (800 down to 300) like a lens passing over them, and fill back in behind it.
+const lensed = [];
 $$('.display').forEach(el => {
+  let first = true;
   SplitText.create(el, {
-    type: 'lines', mask: 'lines', autoSplit: true,
-    onSplit: self => gsap.from(self.lines, {
-      yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09,
-      scrollTrigger: { trigger: el, start: 'top 86%', once: true },
-    }),
+    type: 'lines,chars', mask: 'lines', autoSplit: true,
+    onSplit: self => {
+      const entry = lensed.find(l => l.el === el) || (lensed.push({ el, chars: [] }), lensed.at(-1));
+      entry.chars = self.chars.map(c => ({ c, w: 800 }));
+      if (!first) return;
+      first = false;
+      return gsap.from(self.lines, {
+        yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09,
+        scrollTrigger: { trigger: el, start: 'top 86%', once: true },
+      });
+    },
   });
 });
+if (finePointer) {
+  const R = 150, MIN = 300, MAX = 800;
+  let px = -1e4, py = -1e4, raf = 0;
+  const step = () => {
+    raf = 0;
+    let moving = false;
+    for (const { el, chars } of lensed) {
+      const box = el.getBoundingClientRect();
+      const near = px > box.left - R && px < box.right + R && py > box.top - R && py < box.bottom + R;
+      for (const ch of chars) {
+        let target = MAX;
+        if (near) {
+          const r = ch.c.getBoundingClientRect(), d = Math.hypot(px - (r.left + r.width / 2), py - (r.top + r.height / 2));
+          if (d < R) target = MAX - (MAX - MIN) * (1 - d / R) ** 2;
+        }
+        const w = ch.w + (target - ch.w) * 0.18;
+        if (Math.abs(w - ch.w) > 0.5) { ch.w = w; ch.c.style.fontWeight = Math.round(w); moving = true; }
+        else if (ch.w !== target) { ch.w = target; ch.c.style.fontWeight = target === MAX ? '' : target; }
+      }
+    }
+    if (moving) raf = requestAnimationFrame(step);
+  };
+  addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(step); }, { passive: true });
+  // Scrolling moves the letters under a still cursor too
+  lenis.on('scroll', () => { if (px > -1e4 && !raf) raf = requestAnimationFrame(step); });
+  document.addEventListener('pointerleave', () => { px = py = -1e4; if (!raf) raf = requestAnimationFrame(step); });
+}
 // The short rule before each section number draws itself in
 ScrollTrigger.batch('.num', { start: 'top 92%', once: true, onEnter: batch => batch.forEach(n => n.classList.add('drawn')) });
 
@@ -156,14 +193,21 @@ gsap.fromTo('.work', { clipPath: 'inset(0% 3.5% 0% 3.5% round 36px)' }, {
 
 // ---------- Hold This Thought: the card rises in; on desktop the phone tilts toward the cursor ----------
 // (the step tabs themselves live in the page script, so they work without this file)
-const showcase = $('.showcase'), phone = $('.phone-frame');
+const showcase = $('.showcase'), phone = $('.phone-tilt'), phone3d = $('.phone-3d'), glare = $('.phone-glare');
 gsap.from(showcase, { y: 70, autoAlpha: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: showcase, start: 'top 85%', once: true } });
+// The phone arrives turned away (its back and edge showing) and turns to face you as the section scrolls in,
+// the light sliding across its glass as it goes
+gsap.fromTo(phone3d, { rotationY: -160, y: 50 }, {
+  rotationY: 0, y: 0, ease: 'none',
+  scrollTrigger: { trigger: showcase, start: 'top 95%', end: 'top 20%', scrub: 0.8, onUpdate: st => glare.style.setProperty('--glare', `${100 - st.progress * 100}%`) },
+});
 if (finePointer) {
   const tiltY = gsap.quickTo(phone, 'rotateY', { duration: 0.8, ease: 'power3' }), tiltX = gsap.quickTo(phone, 'rotateX', { duration: 0.8, ease: 'power3' });
   showcase.addEventListener('pointermove', e => {
     const r = showcase.getBoundingClientRect();
-    tiltY(((e.clientX - r.left) / r.width - 0.5) * 18);
-    tiltX(-((e.clientY - r.top) / r.height - 0.5) * 10);
+    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    tiltY(x * 18); tiltX(-y * 10);
+    glare.style.setProperty('--glare', `${50 - x * 60}%`);
   });
   showcase.addEventListener('pointerleave', () => { tiltY(-6); tiltX(3); });
 }
@@ -200,15 +244,6 @@ $$('.gallery-wrap').forEach(g => {
   gsap.fromTo(g, { scale: 0.9, y: 60 }, { scale: 1, y: 0, ease: 'none', scrollTrigger: { trigger: g, start: 'top bottom', end: 'top 35%', scrub: true } });
 });
 
-// ---------- Contact: the headline fills in letter by letter as you scroll to it ----------
-const ask = $('.contact h3');
-if (ask) {
-  const split = SplitText.create(ask, { type: 'words,chars' });
-  gsap.fromTo(split.chars, { opacity: 0.12 }, {
-    opacity: 1, ease: 'none', stagger: 0.06,
-    scrollTrigger: { trigger: ask, start: 'top 85%', end: 'top 35%', scrub: true },
-  });
-}
 
 // ---------- Buttons lean toward the cursor, then spring back ----------
 if (finePointer) {

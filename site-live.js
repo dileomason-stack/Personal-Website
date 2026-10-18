@@ -233,3 +233,139 @@ if (linked) {
   if (document.getElementById('intro')?.classList.contains('done') || document.documentElement.classList.contains('intro-returning')) setTimeout(go, 300);
   else addEventListener('intro:done', () => setTimeout(go, 600), { once: true });
 }
+
+// ---------- Photos: a pile of polaroids on the desk ----------
+// The top photo can be dragged; flick it far or fast enough and it flies off, then tucks back in at the
+// bottom of the pile. Arrow buttons and the keyboard do the same. Photos load as they near the top.
+$$('.gallery-wrap').forEach(wrap => {
+  const data = JSON.parse(wrap.dataset.slides);
+  const title = wrap.closest('section')?.querySelector('.display')?.textContent.replace(/\s+/g, ' ').trim() || 'Photos';
+  wrap.innerHTML = `<div class="pile" tabindex="0" role="group" aria-roledescription="photo pile" aria-label="${title} photos. Use the arrow keys to flip through."></div>
+    <div class="pile-side"><p class="cap" aria-live="polite"></p><p class="count mo"></p>
+    <div class="pile-btns"><button type="button" class="prev" aria-label="Previous photo">←</button><button type="button" class="next" aria-label="Next photo">→</button></div>
+    <p class="pile-hint">Drag or flick the top photo.</p></div>`;
+  const pile = $('.pile', wrap), cap = $('.cap', wrap), count = $('.count', wrap);
+  // Random but stable scatter for each photo
+  const rand = (i, k) => { const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+  const scatter = (card, i, spin = 0) => {
+    card.style.setProperty('--r', `${(rand(i, 1 + spin) - 0.5) * 14}deg`);
+    card.style.setProperty('--x', `${(rand(i, 2 + spin) - 0.5) * 36}px`);
+    card.style.setProperty('--y', `${(rand(i, 3 + spin) - 0.5) * 24}px`);
+  };
+  const cards = data.map(([src, alt, label, w, h], i) => {
+    const f = document.createElement('figure');
+    f.className = `pol ${w > h ? 'wide' : 'tall'}`;
+    f.style.setProperty('--ar', `${w} / ${h}`);
+    f.innerHTML = `<img alt="${alt}" width="${w}" height="${h}" decoding="async" draggable="false"><figcaption>${label}</figcaption>`;
+    f.dataset.src = src;
+    scatter(f, i);
+    return f;
+  });
+  // order: indexes from the bottom of the pile to the top
+  let order = data.map((_, i) => i).reverse(), near = false, spins = 0;
+  const load = i => { const img = cards[i].querySelector('img'); if (!img.src) img.src = cards[i].dataset.src; };
+  function sync() {
+    order.forEach(i => pile.appendChild(cards[i]));
+    const top = order.at(-1);
+    cap.textContent = data[top][2];
+    count.textContent = `${String(top + 1).padStart(2, '0')} / ${String(data.length).padStart(2, '0')}`;
+    if (near) order.slice(-3).forEach(load);
+  }
+  sync();
+  new IntersectionObserver(([en], io) => { if (en.isIntersecting) { near = true; sync(); io.disconnect(); } }, { rootMargin: '800px 0px' }).observe(pile);
+  // Each polaroid as big as fits in the pile (with room for its tilt): the photo, a 3.2% border, and the caption
+  const fit = () => {
+    const W = pile.clientWidth, H = pile.clientHeight, capH = Math.min(Math.max(innerWidth * 0.02, 20), 28) * 1.6;
+    cards.forEach((c, i) => {
+      const ar = data[i][3] / data[i][4];
+      c.style.width = `${Math.min(W * 0.84, 600, (H * 0.86 - capH) / (0.936 / ar + 0.032))}px`;
+    });
+  };
+  fit();
+  new ResizeObserver(fit).observe(pile);
+
+  const off = (card, dir, vy = 0) => `translate(-50%,-50%) translate(${dir * (innerWidth * 0.7)}px, ${vy}px) rotate(${dir * 28}deg)`;
+  let busy = false;
+  // The top photo flies off, then slides back in at the bottom
+  function next(dir = 1, vy = 0) {
+    if (busy) return;
+    busy = true;
+    const card = cards[order.at(-1)];
+    card.style.transform = off(card, dir, vy);
+    setTimeout(() => {
+      card.style.transition = 'none';
+      order.unshift(order.pop());
+      scatter(card, order[0], ++spins);
+      for (const p of ['--dx', '--dy', '--dr']) card.style.removeProperty(p);
+      sync();
+      card.offsetWidth;
+      card.style.transition = '';
+      card.style.transform = '';
+      busy = false;
+    }, reduce ? 0 : 380);
+  }
+  // The bottom photo comes back from the side onto the top
+  function prev() {
+    if (busy) return;
+    busy = true;
+    const card = cards[order[0]];
+    card.style.transition = 'none';
+    card.style.transform = off(card, -1);
+    order.push(order.shift());
+    sync();
+    card.offsetWidth;
+    card.style.transition = '';
+    card.style.transform = '';
+    setTimeout(() => (busy = false), reduce ? 0 : 400);
+  }
+  $('.next', wrap).addEventListener('click', () => next(1));
+  $('.prev', wrap).addEventListener('click', prev);
+  pile.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); next(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+  });
+
+  pile.addEventListener('pointerdown', e => {
+    const card = e.target.closest('.pol');
+    if (busy || !card || card !== pile.lastElementChild || e.button > 0) return;
+    const sx = e.clientX, sy = e.clientY;
+    let dx = 0, dy = 0, vx = 0, vy = 0, lx = sx, ly = sy, lt = performance.now(), dragging = false;
+    card.setPointerCapture(e.pointerId);
+    const move = ev => {
+      dx = ev.clientX - sx; dy = ev.clientY - sy;
+      // On touch screens, mostly-vertical moves are left to scrolling
+      if (!dragging && Math.hypot(dx, dy) > 6) dragging = true;
+      if (!dragging) return;
+      const now = performance.now(), dt = Math.max(1, now - lt);
+      vx = (ev.clientX - lx) / dt; vy = (ev.clientY - ly) / dt; lx = ev.clientX; ly = ev.clientY; lt = now;
+      card.classList.add('held');
+      card.style.setProperty('--dx', `${dx}px`); card.style.setProperty('--dy', `${dy}px`); card.style.setProperty('--dr', `${dx * 0.06}deg`);
+    };
+    const up = () => {
+      card.removeEventListener('pointermove', move);
+      card.classList.remove('held');
+      if (Math.abs(dx) > pile.clientWidth * 0.22 || Math.abs(vx) > 0.6) {
+        track(`photos/${wrap.closest('section').id}`, 'Flicked through the photos');
+        next(Math.sign(dx || vx), dy + vy * 200);
+      } else for (const p of ['--dx', '--dy', '--dr']) card.style.removeProperty(p);
+    };
+    card.addEventListener('pointermove', move);
+    card.addEventListener('pointerup', up, { once: true });
+    card.addEventListener('pointercancel', up, { once: true });
+  });
+});
+
+// ---------- Contact: the room from the intro, dark until the bulb flickers on ----------
+const room = $('.contact .room-dark');
+if (room) {
+  const on = () => {
+    if (reduce) { room.style.opacity = 0; return; }
+    // The same uneven flicker as the intro's bulb, then steady
+    room.animate([
+      { opacity: 0.94 }, { opacity: 0.94, offset: 0.12 }, { opacity: 0.3, offset: 0.16 }, { opacity: 0.9, offset: 0.24 },
+      { opacity: 0.85, offset: 0.4 }, { opacity: 0.15, offset: 0.45 }, { opacity: 0.7, offset: 0.52 }, { opacity: 0.05, offset: 0.62 }, { opacity: 0 },
+    ], { duration: 1700, easing: 'linear', fill: 'forwards' });
+    track('contact/lights', 'Reached the contact room');
+  };
+  new IntersectionObserver(([en], io) => { if (en.isIntersecting) { io.disconnect(); setTimeout(on, 250); } }, { threshold: 0.45 }).observe(room.parentElement);
+}

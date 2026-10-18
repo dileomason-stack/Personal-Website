@@ -278,30 +278,14 @@ $$('.gallery-wrap').forEach(wrap => {
   // order: indexes from the bottom of the pile to the top
   let order = data.map((_, i) => i).reverse(), near = false, spins = 0;
   const load = i => { const img = cards[i].querySelector('img'); if (!img.src) img.src = cards[i].dataset.src; };
-  // A photo that comes to the top develops like an instant photo: milky and pale, then the picture
-  // comes up through it (once it's loaded, and only once the pile is on screen)
-  let lastTop = -1, seen = false;
-  const develop = i => {
-    if (reduce) return;
-    const img = cards[i].querySelector('img');
-    const run = () => img.animate([
-      { filter: 'grayscale(1) sepia(.25) brightness(1.55) contrast(.35) blur(1.5px)', opacity: .55 },
-      { filter: 'grayscale(.6) sepia(.35) brightness(1.25) contrast(.6) blur(.6px)', opacity: .8, offset: .35 },
-      { filter: 'none', opacity: 1 },
-    ], { duration: 3000, easing: 'cubic-bezier(.35,.55,.35,1)' });
-    img.complete && img.naturalWidth ? run() : img.addEventListener('load', run, { once: true });
-  };
   function sync() {
     order.forEach(i => pile.appendChild(cards[i]));
     const top = order.at(-1);
     cap.textContent = data[top][2];
     count.textContent = `${String(top + 1).padStart(2, '0')} / ${String(data.length).padStart(2, '0')}`;
     if (near) order.slice(-3).forEach(load);
-    if (seen && top !== lastTop) develop(top);
-    lastTop = top;
   }
   sync();
-  whenSeen(pile, () => { seen = true; develop(order.at(-1)); });
   new IntersectionObserver(([en], io) => { if (en.isIntersecting) { near = true; sync(); io.disconnect(); } }, { rootMargin: '800px 0px' }).observe(pile);
   // Each polaroid as big as fits in the pile (with room for its tilt): the photo, a 3.2% border, and the caption
   const fit = () => {
@@ -482,6 +466,9 @@ if (room) {
     ballOnFloor = !ballOnFloor;
   });
 }
+
+// ---------- The smart cursor (cursor.js), on desktops with a mouse ----------
+if (!reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) import('./cursor.js').then(m => m.init()).catch(() => {});
 
 // ---------- A hidden terminal: press ` anywhere (or the >_ link in the footer) ----------
 const terminal = () => import('./terminal.js').then(m => m.openTerminal());

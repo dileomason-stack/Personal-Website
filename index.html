@@ -837,6 +837,18 @@ footer a{text-decoration:none}
   .contact h3{font-size:clamp(40px,12vw,56px)}
 }
 @media(max-width:700px){.nav{display:none}.bar .btn{height:40px;padding:0 16px}}
+/* The smart cursor (cursor.js, desktop with a mouse only): a dot that grows into a labeled pill */
+.smart-cursor,.smart-cursor *{cursor:none!important}
+.smart-cursor :is(input,textarea,select,[contenteditable="true"]){cursor:text!important}
+.cursor{position:fixed;left:0;top:0;z-index:100;pointer-events:none;opacity:0;transition:opacity .2s}
+.cursor.on{opacity:1}
+.cursor[data-mode=hide]{opacity:0}
+.cursor span{position:absolute;left:0;top:0;translate:-50% -50%;display:grid;place-items:center;box-sizing:border-box;min-width:10px;height:10px;padding:0;border-radius:40px;
+  background:var(--accent);box-shadow:0 0 0 1.5px var(--bg);color:#fff;font:500 0/1 "DM Mono",monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+  transition:min-width .35s var(--ease),height .35s var(--ease),padding .35s var(--ease),font-size .2s,background .2s,box-shadow .2s,scale .15s}
+.cursor[data-mode=ring] span{min-width:36px;height:36px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--accent)}
+.cursor[data-mode=label] span{min-width:62px;height:62px;padding:0 14px;font-size:11px}
+.cursor.down span{scale:.82}
 /* Printing the homepage prints the resume (site-live.js copies it in from resume/) */
 .print-resume{display:none}
 @media print{

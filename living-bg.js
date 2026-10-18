@@ -24,6 +24,8 @@ void main(){
   gl_FragColor = vec4(col, 1.);
 }`;
 
+// For comparing: ?glow=strong shows a much stronger version
+const BOOST = new URLSearchParams(location.search).get('glow') === 'strong' ? 3 : 1;
 const hex = h => { h = h.trim().replace('#', ''); if (h.length === 3) h = [...h].map(c => c + c).join(''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255); };
 
 export function init(hero) {
@@ -56,7 +58,7 @@ export function init(hero) {
     gl.uniform3fv(uBg, hex(cs.getPropertyValue('--bg')));
     gl.uniform3fv(uA, hex(cs.getPropertyValue('--accent')));
     gl.uniform3fv(uB, night ? [.16, .2, .12] : [.98, .78, .6]);
-    gl.uniform1f(uGain, night ? .7 : .6);
+    gl.uniform1f(uGain, (night ? .7 : .6) * BOOST);
   };
   colors();
   new MutationObserver(colors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

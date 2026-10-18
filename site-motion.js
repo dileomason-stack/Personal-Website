@@ -35,6 +35,20 @@ $('#experience')?.addEventListener('toggle', () => ScrollTrigger.refresh());
 
 // ---------- Nav: reading progress, and an ink pill that slides to the active section ----------
 gsap.to('.bar-progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: 0.3 } });
+// The little race car rides the front of the line, wheels turning with the distance, and parks at the end
+const car = $('.bar-car'), wheels = $$('.wheel', car || document.createElement('i'));
+if (car) {
+  const state = { p: 0 };
+  const place = () => {
+    const bar = $('.bar').clientWidth, x = state.p * bar - car.offsetWidth * state.p;
+    car.style.transform = `translateX(${x.toFixed(1)}px)`;
+    const turn = `rotate(${(x * 9) % 360}deg)`;
+    wheels.forEach(w => (w.style.transform = turn));
+    car.classList.toggle('on', state.p > 0.004);
+  };
+  gsap.to(state, { p: 1, ease: 'none', onUpdate: place, scrollTrigger: { start: 0, end: 'max', scrub: 0.3 } });
+  addEventListener('resize', place);
+}
 const nav = $('.nav'), pill = $('.nav-pill');
 function movePill() {
   const a = $('a.active', nav);
@@ -105,18 +119,9 @@ function decode(el, seconds) {
   });
 }
 
-// The readout's numbers flicker through digits before settling, like an instrument powering on
+// The readout's numbers roll up like an odometer (rollNumber lives in site-live.js)
 function scrambleReadout() {
-  $$('.quick dd').forEach((dd, i) => {
-    const final = dd.textContent;
-    let n = 0;
-    setTimeout(() => {
-      const id = setInterval(() => {
-        dd.textContent = ++n > 10 ? final : final.replace(/\d/g, () => (Math.random() * 10) | 0);
-        if (n > 10) clearInterval(id);
-      }, 45);
-    }, i * 110);
-  });
+  import('./site-live.js').then(m => $$('.quick dd').forEach((dd, i) => m.rollNumber(dd, i * 110)));
 }
 if (root.classList.contains('hero-wait')) (window.fontsReady || document.fonts.ready).then(heroEntrance);
 

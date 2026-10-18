@@ -224,13 +224,8 @@ if (activity) whenNear(activity, async () => {
       c.style.transform = '';
       c.animate({ transform: ['scaleY(0)', 'scaleY(1)'] }, { duration: 600, delay: i * 18, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
     });
-    const t0 = performance.now(), length = cells.length * 18 + 500;
-    const step = now => {
-      const p = Math.min(1, (now - t0) / length);
-      counter.textContent = Math.round(total * (1 - (1 - p) ** 3));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
+    counter.textContent = total;
+    rollNumber(counter, 150);
   });
 });
 
@@ -487,3 +482,68 @@ const loadResume = () => fetch('resume/').then(r => r.text()).then(html => {
 }).catch(() => {});
 (window.requestIdleCallback || (cb => setTimeout(cb, 2000)))(loadResume, { timeout: 4000 });
 addEventListener('beforeprint', () => track('resume/print', 'Printed the resume'));
+
+// ---------- Numbers roll into place like an odometer ----------
+// Each digit becomes a little column of 0-9 that spins (a full turn and a bit) and stops on its digit,
+// the leftmost first. Other characters (".", "/", "K+") stay put. Afterwards the plain text comes back.
+export function rollNumber(el, delay = 0) {
+  if (!el || reduce || el.dataset.rolling) return;
+  const text = el.textContent;
+  if (!/\d/.test(text)) return;
+  el.dataset.rolling = '1';
+  el.setAttribute('aria-label', text);
+  const digits = '0123456789';
+  let n = 0;
+  el.innerHTML = [...text].map(ch => {
+    if (!/\d/.test(ch)) return `<span class="odo-fixed" aria-hidden="true">${ch === ' ' ? '&nbsp;' : ch}</span>`;
+    const i = n++;
+    return `<span class="odo" aria-hidden="true"><span class="odo-col" data-d="${ch}" style="--i:${i}">${(digits + digits).split('').map(d => `<span>${d}</span>`).join('')}</span></span>`;
+  }).join('');
+  const cols = [...el.querySelectorAll('.odo-col')];
+  let left = cols.length;
+  cols.forEach((col, i) => {
+    const target = 10 + +col.dataset.d;
+    col.animate([{ transform: 'translateY(0)' }, { transform: `translateY(${-target * 1.25}em)` }],
+      { duration: 900 + i * 160, delay: delay + i * 40, easing: 'cubic-bezier(.2,.75,.25,1)', fill: 'forwards' })
+      .finished.then(() => { if (--left === 0) { el.textContent = text; el.removeAttribute('aria-label'); delete el.dataset.rolling; } });
+  });
+}
+// The big numbers in More experience roll when it's opened
+$('#experience')?.addEventListener('toggle', e => {
+  if (e.target.open) $$('.xb-stat b', e.target).forEach((b, i) => rollNumber(b, 250 + i * 150));
+});
+
+// ---------- The pull chain on the dark mode switch ----------
+// Pull it down past a little resistance and let go: the lights flicker over to the other theme and the
+// chain springs back. A plain click on it works too.
+const cord = $('.lights .cord');
+if (cord) {
+  let startY = 0, pulled = 0, down = false, moved = false;
+  const base = () => parseFloat(getComputedStyle(cord).getPropertyValue('--len')) || 20;
+  cord.addEventListener('pointerdown', e => {
+    e.preventDefault(); e.stopPropagation();
+    down = true; moved = false; startY = e.clientY; pulled = 0;
+    cord.setPointerCapture(e.pointerId);
+    cord.classList.add('pulling');
+  });
+  cord.addEventListener('pointermove', e => {
+    if (!down) return;
+    pulled = Math.max(0, Math.min(46, e.clientY - startY));
+    if (pulled > 3) moved = true;
+    cord.style.height = `${base() + pulled}px`;
+  });
+  const release = () => {
+    if (!down) return;
+    down = false;
+    cord.classList.remove('pulling');
+    const from = cord.offsetHeight;
+    cord.style.height = '';
+    if (!reduce) cord.animate([{ height: `${from}px` }, { height: `${base() - 4}px` }, { height: `${base() + 2}px` }, { height: `${base()}px` }], { duration: 500, easing: 'ease-out' });
+    // A real pull, or just a tap on the chain
+    if (pulled > 14 || !moved) { window.toggleTheme?.('flicker'); track('egg/pull-chain', 'Pulled the light chain'); }
+  };
+  cord.addEventListener('pointerup', release);
+  cord.addEventListener('pointercancel', release);
+  // The button's own click (from this press) shouldn't toggle a second time
+  cord.addEventListener('click', e => e.stopPropagation());
+}

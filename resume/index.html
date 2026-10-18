@@ -27,13 +27,14 @@ h1{margin:0 0 6pt;text-align:center;font-size:23pt;font-weight:700;line-height:1
 .info{margin:0 0 10pt;text-align:center;font-size:10.5pt}
 .info span+span:before{content:"|";margin:0 .45em;font-weight:700}
 .info a{color:inherit;text-decoration:none}
-h2{margin:8pt 0 2pt;padding-bottom:1pt;border-bottom:1px solid #000;font-size:10.5pt;font-weight:700;text-transform:uppercase}
+h2{margin:7pt 0 2pt;padding-bottom:1pt;border-bottom:1px solid #000;font-size:10.5pt;font-weight:700;text-transform:uppercase}
 h2 span{text-transform:none;font-weight:400}
 .row{display:flex;justify-content:space-between;gap:12pt}
-.org{font-weight:700;margin-top:4pt}
+.org{font-weight:700;margin-top:3pt}
 h2+.org,h2+.row{margin-top:1pt}
 h2+.tight{margin-top:2pt}
 .role{font-style:italic}
+.url{font-weight:400}
 ul{margin:0;padding-left:.38in;list-style:disc}
 li{padding-left:.06in}
 p{margin:0}
@@ -68,7 +69,7 @@ p{margin:0}
   <div class="row"><i>Bachelor of Science in Business Administration, Information Systems</i><b>Expected Graduation: 2028</b></div>
   <ul>
     <li><b>Relevant Coursework:</b> Business Law, Statistics, Financial + Managerial Accounting</li>
-    <li><b>Cumulative GPA:</b> 3.85 <b>|</b> <b>Major GPA:</b> 4.0 <b>|</b> Dean’s List</li>
+    <li><b>Cumulative GPA:</b> 3.85 <b>|</b> <b>Major GPA:</b> 4.0</li>
   </ul>
   <p class="gap"><b>London School of Economics (Summer Course) –</b> AI in Business: Machine Learning + Data Strategy</p>
 
@@ -76,15 +77,16 @@ p{margin:0}
   <p class="org">Hold This Thought</p>
   <div class="row"><span class="role">Founder &amp; iOS Developer</span><span>August 2026 – Present</span></div>
   <ul>
-    <li>Building a native iOS reminder app in Swift that turns spoken or typed thoughts into time, location, calendar, and event aware reminders; now in beta with testers on TestFlight</li>
-    <li>Wrote a natural-language reader that understands phrases like “every weekday at 9” or “next time I’m at Costco,” verified by 295 automated test cases</li>
-    <li>Shipped Home Screen widgets, Action Button and Control Center capture, location reminders, and shared lists for friends and groups through iCloud, with no backend server</li>
+    <li>Building a native iOS app in Swift that turns spoken or typed thoughts into reminders; in beta on TestFlight</li>
+    <li>Wrote a reader for phrases like “every weekday at 9” or “next time I’m at Costco,” verified by 295 automated tests</li>
+    <li>Shipped widgets, Action Button capture, location reminders, and shared lists for friends and groups through iCloud</li>
   </ul>
   <p class="org">California Polytechnic State University</p>
   <div class="row"><span class="role">Instructional Student Assistant - Statistics</span><span>Jan 2026 – Present</span></div>
   <ul>
     <li>Tutor 80+ students by explaining statistical concepts and guiding problem-solving</li>
-    <li>Grade 6 weekly assignments, labs, and quizzes, and host weekly office hours</li>
+    <li>Guided students' learning by grading 6 weekly assignments, labs, and quizzes</li>
+    <li>Provided academic support by hosting weekly office hours</li>
   </ul>
   <p class="org">Shockproof Training</p>
   <div class="row"><span class="role">Product Innovation Intern</span><span>Jun 2025 – Sep 2025</span></div>
@@ -103,15 +105,24 @@ p{margin:0}
   <p class="org">Mason’s Pool Cleaning</p>
   <div class="row"><span class="role">Founder and Service Technician</span><span>Jun 2022 – Sep 2025</span></div>
   <ul>
-    <li>Ran all business operations, including scheduling, client relationships, invoicing, and receivables tracking</li>
     <li>Repaired and maintained complex swimming pool and water feature systems</li>
+    <li>Generated and delivered comprehensive monthly invoices for clients</li>
   </ul>
 
-  <h2>Projects <span>- live on the web, built with AI coding tools</span></h2>
-  <ul class="tight">
-    <li><b>Homeroom</b> <i>(React, Vercel)</i>: Student dashboard with Canvas, calendar, Spotify, mail, and AI widgets; built in four days for Cal Poly Vibe Coding’s Build Day #1</li>
-    <li><b>WhenWorks</b> <i>(Next.js, Gemini AI, Postgres)</i>: Group scheduler where AI reads screenshots of everyone’s schedule and finds when all are free</li>
-    <li><b>Personal portfolio</b> <i>(three.js, GSAP)</i>: Interactive 3D website; 390+ commits across 8 GitHub repositories since September 2026</li>
+  <h2>Projects</h2>
+  <p class="org">Homeroom <span class="url">(thehomeroom.vercel.app)</span></p>
+  <div class="row"><span class="role">Creator · React, Vite, Vercel</span><span>Sep 2026</span></div>
+  <ul>
+    <li>Built a student dashboard with Canvas, Google Calendar, Spotify, Gmail, to-dos, and AI quick-ask on one screen</li>
+    <li>Designed and shipped it in four days for Cal Poly Vibe Coding’s Build Day #1 using AI coding tools</li>
+    <li>Added Google and Microsoft sign-in so dashboards sync across devices; live and free to use</li>
+  </ul>
+  <p class="org">WhenWorks <span class="url">(usewhenworks.vercel.app)</span></p>
+  <div class="row"><span class="role">Creator · Next.js, TypeScript, Gemini AI, Postgres</span><span>Oct 2026</span></div>
+  <ul>
+    <li>Built a group scheduler: everyone uploads a schedule screenshot, AI reads it, and shared free times light up</li>
+    <li>Added voting and one-tap calendar invites for Google, Apple, and Outlook, with Google Meet links</li>
+    <li>Private by default: no accounts, screenshots are never stored, and event names stay hidden</li>
   </ul>
 
   <h2>Leadership + Skills &amp; Interests</h2>
@@ -121,9 +132,7 @@ p{margin:0}
     <li>Provided academic support in math, science, English, and foreign language to 30 students</li>
     <li>Led large group and one-on-one sessions to build understanding and confidence</li>
   </ul>
-  <p class="gap"><b>Technical:</b> Swift, SwiftUI, React, Next.js, Git/GitHub, Vercel, AI coding tools (Claude Code, ChatGPT)</p>
-  <p><b>Business &amp; Data:</b> Excel, SQL, Tableau, PowerPoint, Canva, Microsoft Office Suite, Google Workspace</p>
-  <p><b>Certifications:</b> SQL Essential Training; Excel Essential Training (LinkedIn Learning)</p>
+  <p class="gap"><b>Skills:</b> Canva, Microsoft Office Suite, PowerPoint, Excel, SQL, Vibe Coding, Tableau</p>
   <p><b>Interests:</b> Weightlifting, Baseball (San Francisco Giants), Cars (1960s Ford GT40)</p>
 </main>
 <script data-goatcounter="https://masondileo.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>

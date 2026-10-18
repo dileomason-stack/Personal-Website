@@ -21,6 +21,7 @@ const COMMANDS = {
   <b>open</b> &lt;project&gt;    open a case study (holdthisthought, homeroom, whenworks)
   <b>ls</b>                sections of this page
   <b>cd</b> &lt;section&gt;      go to a section
+  <b>resume</b>            open my résumé
   <b>contact</b>           copy my email
   <b>linkedin</b> · <b>github</b>
   <b>lights</b> on|off     light or dark mode
@@ -53,6 +54,8 @@ and learn whatever skills they need. Open to internships and co-ops.`,
     catch (e) { return `Email me: <a href="mailto:${EMAIL}">${EMAIL}</a>`; }
   },
   email: (a) => COMMANDS.contact(a),
+  resume: () => { window.open('resume/', '_blank', 'noopener'); return `Opening ${link('resume/', 'my résumé')} (there’s a PDF download there too).`; },
+  cv: (a) => COMMANDS.resume(a),
   linkedin: () => { window.open('https://www.linkedin.com/in/masondileo/', '_blank', 'noopener'); return `Opening ${link('https://www.linkedin.com/in/masondileo/', 'linkedin.com/in/masondileo')}`; },
   github: () => { window.open('https://github.com/dileomason-stack', '_blank', 'noopener'); return `Opening ${link('https://github.com/dileomason-stack', 'github.com/dileomason-stack')}`; },
   lights: ([mode]) => {

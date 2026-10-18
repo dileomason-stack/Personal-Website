@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Résumé · Mason Di Leo</title>
+<meta name="description" content="Mason Di Leo's résumé: Business Administration + Information Systems at Cal Poly SLO.">
+<meta property="og:title" content="Mason Di Leo · Résumé">
+<meta property="og:image" content="https://dileomason-stack.github.io/Personal-Website/og/site.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121a19'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='800' font-size='26' fill='%23f4f1ea' text-anchor='middle'%3EMD%3C/text%3E%3C/svg%3E">
+<style>
+@font-face{font-family:Manrope;font-weight:200 800;font-display:swap;src:url(../fonts/manrope-latin.woff2) format("woff2")}
+*{box-sizing:border-box}
+html{background:#e9e5dd}
+body{margin:0;font-family:Manrope,system-ui,sans-serif;color:#151513}
+/* The toolbar (screen only) */
+.bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:12px max(16px,calc((100% - 8.5in) / 2));background:rgba(233,229,221,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.bar a,.bar button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:40px;font:700 12px/1 Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.bar .back{margin-right:auto;padding-left:4px;color:#3d3c37;letter-spacing:0;text-transform:none;font-weight:600;font-size:14px}
+.bar .pdf{background:#151513;color:#f3f0ea}
+.bar .print{border:1px solid #c6c0b3}
+.bar a:focus-visible,.bar button:focus-visible{outline:2px solid #d4471f;outline-offset:3px}
+/* The page: the same classic layout as the original document */
+.page{width:8.5in;min-height:11in;margin:8px auto 40px;padding:.62in .95in .5in;background:#fff;box-shadow:0 1px 2px rgb(0 0 0 / .08),0 20px 50px -24px rgb(0 0 0 / .35);
+  font:11pt/1.2 "Times New Roman",Times,serif;color:#000}
+h1{margin:0 0 6pt;text-align:center;font-size:23pt;font-weight:700;line-height:1.1}
+.info{margin:0 0 12pt;text-align:center;font-size:11pt}
+.info span+span:before{content:"|";margin:0 .45em;font-weight:700}
+.info a{color:inherit;text-decoration:none}
+h2{margin:11pt 0 2pt;padding-bottom:1pt;border-bottom:1px solid #000;font-size:11pt;font-weight:700;text-transform:uppercase}
+h2 span{text-transform:none;font-weight:400}
+.row{display:flex;justify-content:space-between;gap:12pt}
+.org{font-weight:700;margin-top:6pt}
+h2+.org,h2+.row{margin-top:1pt}
+.role{font-style:italic}
+ul{margin:0;padding-left:.38in;list-style:disc}
+li{padding-left:.06in}
+p{margin:0}
+.gap{margin-top:7pt}
+@media screen and (max-width:8.7in){
+  html{background:#fff}
+  .page{width:auto;min-height:0;margin:0;padding:24px 18px 48px;box-shadow:none;font-size:15px}
+  h1{font-size:28px}.info,h2{font-size:15px}
+  .info span{display:inline-block}
+  .row{flex-wrap:wrap;gap:0 12px}
+}
+@page{size:letter;margin:0}
+@media print{
+  html,body{background:#fff}
+  .bar{display:none}
+  .page{width:auto;min-height:0;margin:0;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<nav class="bar" aria-label="Résumé actions">
+  <a class="back" href="../">← Back to the portfolio</a>
+  <button class="print" type="button" onclick="print()">Print</button>
+  <a class="pdf" href="Mason-Di-Leo-Resume.pdf" download>Download PDF ↓&#xFE0E;</a>
+</nav>
+<main class="page" id="resume">
+  <h1>Mason Di Leo</h1>
+  <p class="info"><span>Los Altos, CA</span><span><a href="mailto:dileomason@gmail.com">dileomason@gmail.com</a></span><span><a href="https://www.linkedin.com/in/masondileo/">linkedin.com/in/masondileo</a></span></p>
+
+  <h2>Education <span>- Junior</span></h2>
+  <div class="row"><b>California Polytechnic State University – Orfalea College of Business</b><span>San Luis Obispo, CA</span></div>
+  <div class="row"><i>Bachelor of Science in Business Administration, Information Systems</i><b>Expected Graduation: 2028</b></div>
+  <ul>
+    <li><b>Relevant Coursework:</b> Business Law, Statistics, Financial + Managerial Accounting</li>
+    <li><b>Cumulative GPA:</b> 3.85 <b>|</b> <b>Major GPA:</b> 4.0</li>
+  </ul>
+  <p class="gap"><b>London School of Economics (Summer Course) –</b> AI in Business: Machine Learning + Data Strategy</p>
+
+  <h2>Professional Experience</h2>
+  <p class="org">Hold This Thought</p>
+  <div class="row"><span class="role">Founder &amp; iOS Developer</span><span>August 2026 – Present</span></div>
+  <ul>
+    <li>Developing a native iOS reminder app in Swift that turns spoken or typed thoughts into time, location, calendar, and event aware prompts</li>
+    <li>Built workflows for photo attachment, widgets, notifications and alarms, and saved locations</li>
+    <li>Conducted testing from concept through live iPhone demos</li>
+  </ul>
+  <p class="org">California Polytechnic State University</p>
+  <div class="row"><span class="role">Instructional Student Assistant - Statistics</span><span>Jan 2026 – Present</span></div>
+  <ul>
+    <li>Tutor 80+ students by explaining statistical concepts and guiding problem-solving</li>
+    <li>Guided students' learning by grading 6 weekly assignments, labs, and quizzes</li>
+    <li>Provided academic support by hosting weekly office hours</li>
+  </ul>
+  <p class="org">Shockproof Training</p>
+  <div class="row"><span class="role">Product Innovation Intern</span><span>Jun 2025 – Sep 2025</span></div>
+  <ul>
+    <li>Collaborated directly with CEO to modernize and relaunch digital compliance training module</li>
+    <li>Redesigned 2 product training modules with brand new features and user interface</li>
+    <li>Developed and presented a product pitch to the company board on AI integration</li>
+  </ul>
+  <p class="org">NBA.Downtown (Social Media Brand)</p>
+  <div class="row"><span class="role">Operations Manager</span><span>Jun 2021 – Sep 2024</span></div>
+  <ul>
+    <li>Grew Instagram following from 35K to 160K by optimizing a niche content strategy</li>
+    <li>Secured sponsorships with companies including DraftKings and UFC through targeted outreach</li>
+    <li>Created an engaging environment with graphics and statistics featured in 10 + posts per week</li>
+  </ul>
+  <p class="org">Mason’s Pool Cleaning</p>
+  <div class="row"><span class="role">Founder and Service Technician</span><span>Jun 2022 – Sep 2025</span></div>
+  <ul>
+    <li>Repaired and maintained complex swimming pool and water feature systems</li>
+    <li>Generated and delivered comprehensive monthly invoices for clients</li>
+  </ul>
+
+  <h2>Leadership + Skills &amp; Interests</h2>
+  <p class="org">AVID Tutoring Program</p>
+  <div class="row"><span class="role">Peer Tutor</span><span>Aug 2023 – Jun 2025</span></div>
+  <ul>
+    <li>Provided academic support in math, science, English, and foreign language to 30 students</li>
+    <li>Led large group and one-on-one sessions to build understanding and confidence</li>
+  </ul>
+  <p class="gap"><b>Skills:</b> Canva, Microsoft Office Suite, PowerPoint, Excel, SQL, Vibe Coding, Tableau</p>
+  <p><b>Interests:</b> Weightlifting, Baseball (San Francisco Giants), Cars (1960s Ford GT40)</p>
+</main>
+<script data-goatcounter="https://masondileo.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

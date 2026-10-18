@@ -475,3 +475,15 @@ addEventListener('keydown', e => {
   terminal();
 });
 $('.foot-term')?.addEventListener('click', terminal);
+
+// ---------- Printing the homepage prints the résumé instead ----------
+// The résumé page (resume/) is the one source; its content is copied in, hidden until printing.
+const loadResume = () => fetch('resume/').then(r => r.text()).then(html => {
+  const page = new DOMParser().parseFromString(html, 'text/html').getElementById('resume');
+  if (!page || document.querySelector('.print-resume')) return;
+  const box = Object.assign(document.createElement('div'), { className: 'print-resume', innerHTML: page.innerHTML });
+  box.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(box);
+}).catch(() => {});
+(window.requestIdleCallback || (cb => setTimeout(cb, 2000)))(loadResume, { timeout: 4000 });
+addEventListener('beforeprint', () => track('resume/print', 'Printed the résumé'));

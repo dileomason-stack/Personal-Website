@@ -476,8 +476,8 @@ addEventListener('keydown', e => {
 });
 $('.foot-term')?.addEventListener('click', terminal);
 
-// ---------- Printing the homepage prints the résumé instead ----------
-// The résumé page (resume/) is the one source; its content is copied in, hidden until printing.
+// ---------- Printing the homepage prints the resume instead ----------
+// The resume page (resume/) is the one source; its content is copied in, hidden until printing.
 const loadResume = () => fetch('resume/').then(r => r.text()).then(html => {
   const page = new DOMParser().parseFromString(html, 'text/html').getElementById('resume');
   if (!page || document.querySelector('.print-resume')) return;
@@ -486,4 +486,4 @@ const loadResume = () => fetch('resume/').then(r => r.text()).then(html => {
   document.body.appendChild(box);
 }).catch(() => {});
 (window.requestIdleCallback || (cb => setTimeout(cb, 2000)))(loadResume, { timeout: 4000 });
-addEventListener('beforeprint', () => track('resume/print', 'Printed the résumé'));
+addEventListener('beforeprint', () => track('resume/print', 'Printed the resume'));

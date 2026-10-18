@@ -21,6 +21,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Check which repositories the token can read
+        env:
+          GH_TOKEN: ${{ secrets.ACTIVITY_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then exit 0; fi
+          gh api 'user/repos?per_page=100&affiliation=owner' --jq '.[] | "\(.name) (\(.visibility))"' || true
       - name: Count commits
         env:
           GH_TOKEN: ${{ secrets.ACTIVITY_TOKEN }}

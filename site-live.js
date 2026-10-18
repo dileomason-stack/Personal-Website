@@ -383,9 +383,11 @@ if (room) {
   const place = () => {
     spot = SPOTS[innerWidth <= 700 ? 'phone' : 'desk'];
     const W = section.clientWidth, H = section.clientHeight;
-    scale = Math.max(W / spot.img[0], H / spot.img[1]);
-    dx = (W - spot.img[0] * scale) / 2;
-    const box = (el, [x, y, w, h]) => Object.assign(el.style, { left: `${dx + x * scale}px`, top: `${y * scale}px`, width: `${w * scale}px`, height: `${h * scale}px` });
+    // Desktop: the image covers the section, pinned to the top. Phones: full width, pinned to the bottom.
+    let dy = 0;
+    if (spot === SPOTS.phone) { scale = W / spot.img[0]; dx = 0; dy = H - spot.img[1] * scale; }
+    else { scale = Math.max(W / spot.img[0], H / spot.img[1]); dx = (W - spot.img[0] * scale) / 2; }
+    const box = (el, [x, y, w, h]) => Object.assign(el.style, { left: `${dx + x * scale}px`, top: `${dy + y * scale}px`, width: `${w * scale}px`, height: `${h * scale}px` });
     box(sw, spot.sw);
     box(ball, spot.ball);
     ballImg.src = `room/ball-${spot === SPOTS.desk ? 'desk' : 'phone'}.webp`;

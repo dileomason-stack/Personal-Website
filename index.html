@@ -556,7 +556,9 @@ html.lenis{scroll-behavior:auto}
 .contact .btn:hover{background:#d4471f;border-color:#d4471f;color:#fff}
 .contact .btn.ghost{background:rgba(255,255,255,.35);color:#151513;border-color:rgba(21,21,19,.25)}
 .contact .btn.ghost:hover{background:#151513;color:#f3f0ea;border-color:#151513}
-@media(max-width:700px){.contact{min-height:max(calc(100svh - 196px),560px)}.room-copy{padding-top:clamp(64px,11vh,96px)}.contact p{font-size:15px}}
+/* Phones: the room sits at the bottom at its own shape (never cropped), and the section is tall enough that
+   the text has the blank wall above the light switch to itself */
+@media(max-width:700px){.contact{min-height:calc(100vw * 1280 / 780 + 330px);background:#e9e5dc}.room-bg img{top:auto;bottom:0;height:auto;object-fit:fill;-webkit-mask-image:linear-gradient(transparent,#000 22%);mask-image:linear-gradient(transparent,#000 22%)}.room-copy{padding-top:56px}.contact p{font-size:15px}}
 /* ---------- Case studies: a full page over the site; the card's video and title morph into it ---------- */
 .case-open .arr{display:inline-block}
 .case{position:fixed;inset:0;z-index:60;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);color:var(--text)}
@@ -948,9 +950,9 @@ footer a{text-decoration:none}
     <h2 class="reveal d1">LEARNING<br>BY<br><em>BUILDING</em></h2>
     <p class="lead reveal d2">Business major at heart, builder in progress. I take on projects that solve real problems, learn whatever skills they need, and have fun along the way.</p>
     <div class="hero-actions reveal d3">
-      <button class="btn email-btn" type="button">LET’S TALK <span class="arr">↗</span></button>
-      <a class="btn ghost" href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LINKEDIN <span class="arr">↗</span></a>
-      <a class="btn ghost" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GITHUB <span class="arr">↗</span></a>
+      <button class="btn email-btn" type="button">LET’S TALK <span class="arr">↗︎</span></button>
+      <a class="btn ghost" href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LINKEDIN <span class="arr">↗︎</span></a>
+      <a class="btn ghost" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GITHUB <span class="arr">↗︎</span></a>
     </div>
   </div>
   <aside class="quick reveal d2">
@@ -1097,8 +1099,8 @@ footer a{text-decoration:none}
         <div class="pills"><span class="pill">React</span><span class="pill">Vite</span><span class="pill">Vercel</span><span class="pill">Serverless API</span></div>
         <div class="proj-links">
           <button class="btn case-open" type="button" data-case="homeroom">CASE STUDY + DEMO <span class="arr">→</span></button>
-          <a class="btn ghost" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
-          <a class="btn ghost" href="https://github.com/dileomason-stack/Project---Homeroom-" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a>
+          <a class="btn ghost" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗︎</span></a>
+          <a class="btn ghost" href="https://github.com/dileomason-stack/Project---Homeroom-" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗︎</span></a>
         </div>
       </div>
     </article>
@@ -1111,8 +1113,8 @@ footer a{text-decoration:none}
         <div class="pills"><span class="pill">Next.js</span><span class="pill">TypeScript</span><span class="pill">Gemini AI</span><span class="pill">Postgres</span><span class="pill">Vercel</span></div>
         <div class="proj-links">
           <button class="btn case-open" type="button" data-case="whenworks">CASE STUDY + DEMO <span class="arr">→</span></button>
-          <a class="btn ghost" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗</span></a>
-          <a class="btn ghost" href="https://github.com/dileomason-stack/Project---WhenWorks" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a>
+          <a class="btn ghost" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN APP <span class="arr">↗︎</span></a>
+          <a class="btn ghost" href="https://github.com/dileomason-stack/Project---WhenWorks" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗︎</span></a>
         </div>
       </div>
     </article>
@@ -1194,13 +1196,13 @@ footer a{text-decoration:none}
   <h3 class="reveal d1">LET’S BUILD<br><em>SOMETHING.</em></h3>
   <p class="reveal d2">Looking for a <b>Summer 2027 internship</b>, a <b>co-op</b>, or <b>remote</b> work. Email is the fastest way to reach me.</p>
   <div class="hero-actions reveal d3">
-    <button class="btn email-btn" type="button">EMAIL ME <span class="arr">↗</span></button>
-    <a class="btn ghost" href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LINKEDIN <span class="arr">↗</span></a>
-      <a class="btn ghost" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GITHUB <span class="arr">↗</span></a>
+    <button class="btn email-btn" type="button">EMAIL ME <span class="arr">↗︎</span></button>
+    <a class="btn ghost" href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LINKEDIN <span class="arr">↗︎</span></a>
+      <a class="btn ghost" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GITHUB <span class="arr">↗︎</span></a>
   </div>
   </div>
 </section>
-<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="?intro">Replay intro ↺</a><button class="foot-term" type="button" aria-label="Open the terminal">&gt;_</button></span><span>Cal Poly SLO / Business + IS</span></footer>
+<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗︎</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗︎</a><a href="?intro">Replay intro ↺</a><button class="foot-term" type="button" aria-label="Open the terminal">&gt;_</button></span><span>Cal Poly SLO / Business + IS</span></footer>
 </main>
 
 <!-- Case studies (case-study.js): each card's screenshot and title morph into the page (View Transitions) -->
@@ -1244,7 +1246,7 @@ footer a{text-decoration:none}
     <li><b>No server.</b> Sharing and groups go through each person’s iCloud with CloudKit, so the app runs no backend at all.</li>
   </ul></div></section>
   <section class="case-row"><p class="mo case-h">Private by design</p><div class="case-copy"><p>No sign-up, no ads, no tracking. Thoughts stay on your iPhone and back up to your own private iCloud, and shared thoughts only go to the people you choose.</p></div></section>
-  <div class="case-links"><a class="btn" href="https://dileomason-stack.github.io/holdthisthought/" target="_blank" rel="noopener noreferrer">APP WEBSITE + BETA <span class="arr">↗</span></a></div>
+  <div class="case-links"><a class="btn" href="https://dileomason-stack.github.io/holdthisthought/" target="_blank" rel="noopener noreferrer">APP WEBSITE + BETA <span class="arr">↗︎</span></a></div>
 </template>
 <template id="case-homeroom">
   <header class="case-hero">
@@ -1276,7 +1278,7 @@ footer a{text-decoration:none}
     <li><b>Private by design.</b> Canvas and calendar feed links stay in your own browser and are never logged.</li>
   </ul></div></section>
   <figure class="case-fig"><img src="projects/homeroom-example.webp" alt="Homeroom’s example dashboard with Spotify, Canvas assignments, Google Calendar, a Google Doc, notes, mail, fantasy football and Claude on one screen" width="1600" height="1000" loading="lazy"><figcaption class="mo">The example dashboard, for a fictional Cal Poly student</figcaption></figure>
-  <div class="case-links"><a class="btn" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN HOMEROOM <span class="arr">↗</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---Homeroom-" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a></div>
+  <div class="case-links"><a class="btn" href="https://thehomeroom.vercel.app" target="_blank" rel="noopener noreferrer">OPEN HOMEROOM <span class="arr">↗︎</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---Homeroom-" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗︎</span></a></div>
 </template>
 <template id="case-whenworks">
   <header class="case-hero">
@@ -1310,7 +1312,7 @@ footer a{text-decoration:none}
     <li><b>Event names stay hidden</b> from the group unless you share them.</li>
     <li><b>No accounts.</b> Each browser keeps a private key, so only you can edit your schedule.</li>
   </ul></div></section>
-  <div class="case-links"><a class="btn" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN WHENWORKS <span class="arr">↗</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---WhenWorks" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗</span></a></div>
+  <div class="case-links"><a class="btn" href="https://usewhenworks.vercel.app" target="_blank" rel="noopener noreferrer">OPEN WHENWORKS <span class="arr">↗︎</span></a><a class="btn ghost" href="https://github.com/dileomason-stack/Project---WhenWorks" target="_blank" rel="noopener noreferrer">CODE <span class="arr">↗︎</span></a></div>
 </template>
 
 <script>

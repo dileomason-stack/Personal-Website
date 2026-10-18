@@ -100,7 +100,7 @@ const WIDGETS = {
     title: 'Spotify', group: 'Apps & links', description: 'A playlist, album, or podcast player', color: '#1db954', size: [16, 16],
     html: () => `<div class="sp"><div class="sp-art"><b>Late Night<br>Study</b></div><div class="sp-main"><b class="sp-song">Coffee Shop Rain</b><span class="sp-artist">Lo-fi Study Beats</span>
       <div class="sp-bar"><i></i></div>
-      <div class="sp-ctrl"><span class="sp-t">0:00</span><button type="button" data-sp="prev" aria-label="Previous">⏮</button><button type="button" class="sp-play" data-sp="play" aria-label="Pause">❚❚</button><button type="button" data-sp="next" aria-label="Next">⏭</button><span class="sp-t">2:48</span></div></div></div>`,
+      <div class="sp-ctrl"><span class="sp-t">0:00</span><button type="button" data-sp="prev" aria-label="Previous">⏮︎</button><button type="button" class="sp-play" data-sp="play" aria-label="Pause">❚❚</button><button type="button" data-sp="next" aria-label="Next">⏭︎</button><span class="sp-t">2:48</span></div></div></div>`,
     init(card) {
       const songs = [['Coffee Shop Rain', 'Lo-fi Study Beats', 168], ['Window Seat', 'Chillhop Days', 154], ['Finals Week', 'Quiet Hours', 191]];
       let k = 0, t = 47, playing = true;
@@ -110,7 +110,7 @@ const WIDGETS = {
         card.querySelector('.sp-song').textContent = song; card.querySelector('.sp-artist').textContent = artist;
         bar.style.width = `${(t / len) * 100}%`;
         times[0].textContent = `${Math.floor(t / 60)}:${pad(t % 60)}`; times[1].textContent = `${Math.floor(len / 60)}:${pad(len % 60)}`;
-        play.textContent = playing ? '❚❚' : '▶'; play.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+        play.textContent = playing ? '❚❚' : '▶︎'; play.setAttribute('aria-label', playing ? 'Pause' : 'Play');
       };
       card.addEventListener('click', e => {
         const b = e.target.closest('[data-sp]');
@@ -177,7 +177,7 @@ const WIDGETS = {
   },
   claude: {
     title: 'Claude', group: 'Apps & links', description: 'Ask Claude; opens with your question filled in', color: '#d97757', size: [16, 12],
-    html: () => '<form class="cl"><span class="cl-hi">✳ How can I help you today?</span><input placeholder="Ask Claude…" aria-label="Ask Claude"></form>',
+    html: () => '<form class="cl"><span class="cl-hi">✳︎ How can I help you today?</span><input placeholder="Ask Claude…" aria-label="Ask Claude"></form>',
     init(card) { card.querySelector('form').addEventListener('submit', e => { e.preventDefault(); const q = e.target.querySelector('input').value.trim(); if (q) window.open(`https://claude.ai/new?q=${encodeURIComponent(q)}`, '_blank', 'noopener'); }); },
   },
   inbox: {

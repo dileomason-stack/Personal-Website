@@ -39,15 +39,22 @@ gsap.to('.bar-progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, e
 const car = $('.bar-car'), wheels = $$('.wheel', car || document.createElement('i'));
 if (car) {
   const state = { p: 0 };
+  let live = null;
   const place = () => {
     const bar = $('.bar').clientWidth, x = state.p * bar - car.offsetWidth * state.p;
     car.style.transform = `translateX(${x.toFixed(1)}px)`;
-    const turn = `rotate(${(x * 9) % 360}deg)`;
-    wheels.forEach(w => (w.style.transform = turn));
+    if (live) live.update(state.p, x);
+    else { const turn = `rotate(${(x * 9) % 360}deg)`; wheels.forEach(w => (w.style.transform = turn)); }
     car.classList.toggle('on', state.p > 0.004);
   };
   gsap.to(state, { p: 1, ease: 'none', onUpdate: place, scrollTrigger: { start: 0, end: 'max', scrub: 0.3 } });
   addEventListener('resize', place);
+  // Two versions to compare: the pictures (default), or ?car=3d for the live 3D model (car3d.js).
+  // The choice is remembered; ?car=2d goes back. If the 3D one can't load, the pictures stay.
+  const pick = new URLSearchParams(location.search).get('car');
+  let mode = pick;
+  try { if (pick) localStorage.setItem('car', pick); else mode = localStorage.getItem('car'); } catch (e) {}
+  if (mode === '3d') import('./car3d.js').then(m => m.mount(car)).then(l => { live = l; place(); }).catch(() => {});
 }
 const nav = $('.nav'), pill = $('.nav-pill');
 function movePill() {

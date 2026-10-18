@@ -1,0 +1,36 @@
+# Recounts Mason's GitHub commits once a day and updates the commit strip on the site.
+# Needs a repository secret named ACTIVITY_TOKEN: a fine-grained token with read-only access to
+# Contents on all of Mason's repositories (the private ones included).
+name: Refresh commit counts
+
+on:
+  schedule:
+    - cron: '17 13 * * *'   # every day at about 6 AM in California
+  workflow_dispatch:        # plus a "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Count commits
+        env:
+          GH_TOKEN: ${{ secrets.ACTIVITY_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "ACTIVITY_TOKEN isn't set yet; skipping."; exit 0; fi
+          node scripts/build-activity.mjs
+      - name: Save if it changed
+        run: |
+          if git diff --quiet data/activity.json; then echo "No change."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Refresh commit counts (daily)"
+          git push

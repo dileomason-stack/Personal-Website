@@ -25,7 +25,8 @@ for (const [repo, name] of Object.entries(REPOS)) {
   const seen = new Set();
   let count = 0;
   for (const c of commits) {
-    if (seen.has(c.sha) || c.commit.message.startsWith('Merge ')) continue;
+    // Merges and the daily count refresh (this script's own commits) aren't work
+    if (seen.has(c.sha) || c.commit.message.startsWith('Merge ') || c.commit.message.startsWith('Refresh commit counts')) continue;
     seen.add(c.sha);
     // The day in Mason's time zone, not UTC
     const day = new Date(c.commit.author.date).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });

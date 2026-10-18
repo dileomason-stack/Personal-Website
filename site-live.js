@@ -467,9 +467,6 @@ if (room) {
   });
 }
 
-// ---------- The smart cursor (cursor.js), on desktops with a mouse ----------
-if (!reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) import('./cursor.js').then(m => m.init()).catch(() => {});
-
 // ---------- A hidden terminal: press ` anywhere (or the >_ link in the footer) ----------
 const terminal = () => import('./terminal.js').then(m => m.openTerminal());
 addEventListener('keydown', e => {

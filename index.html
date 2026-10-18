@@ -511,19 +511,6 @@ html.lenis{scroll-behavior:auto}
 /* Returning visitors: the hero waits (briefly) for its entrance instead of flashing in first */
 .hero-wait .hero{visibility:hidden}
 .bar-progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;pointer-events:none}
-/* A little Gulf-style race car drives along the progress line as you scroll (site-motion.js) */
-/* The car (a render of a 3D model, CC BY: see car/CREDITS.txt); its wheels are separate images that turn */
-.bar-car{position:absolute;left:0;bottom:0;width:64px;aspect-ratio:320/92;container-type:inline-size;pointer-events:none;opacity:0;transition:opacity .3s;will-change:transform}
-.bar-car.on{opacity:1}
-.bar-car img{position:absolute;display:block;max-width:none}
-.car-body{left:0;top:0;width:100%;height:auto}
-.bar-car .wheel{height:auto}
-.car-shadow{position:absolute;left:6%;right:6%;bottom:-6%;height:16%;border-radius:50%;background:rgb(0 0 0 / .3);filter:blur(2px);z-index:-1}
-.bar-car.live{width:84px;aspect-ratio:84/34}
-.bar-car.live img{display:none}
-.car-3d{position:absolute;inset:0;width:100%;height:100%}
-.bar-car.live .car-shadow{left:12%;right:12%;bottom:-2%;height:12%}
-@media(prefers-reduced-motion:reduce){.bar-car{display:none}}
 .nav-pill{position:absolute;top:0;left:0;height:100%;width:0;border-radius:40px;background:var(--text);opacity:0;pointer-events:none}
 .motion .nav a.active{background:transparent}
 .motion .nav a{z-index:1}
@@ -969,7 +956,6 @@ footer a{text-decoration:none}
 <main class="site">
 <nav class="bar" id="bar">
   <i class="bar-progress" aria-hidden="true"></i>
-  <span class="bar-car" aria-hidden="true"><img class="car-body" src="car/car-body.webp" alt="" width="320" height="92"><img class="wheel" src="car/car-wheel-front.webp" alt="" style="left:71.14%;top:calc(65.85% - 10.01cqw);width:20.01%"><img class="wheel" src="car/car-wheel-rear.webp" alt="" style="left:3.02%;top:calc(65.85% - 10.08cqw);width:20.15%"><i class="car-shadow"></i></span>
   <a class="brand" href="#top">MASON DI LEO</a>
   <div class="nav">
     <span class="nav-pill" aria-hidden="true"></span>
@@ -1251,7 +1237,7 @@ footer a{text-decoration:none}
   </div>
   </div>
 </section>
-<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗︎</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗︎</a><a href="?intro">Replay intro ↺</a><a href="car/CREDITS.txt">Credits</a><button class="foot-term" type="button" aria-label="Open the terminal">&gt;_</button></span><span>Cal Poly SLO / Business + IS</span></footer>
+<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗︎</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗︎</a><a href="?intro">Replay intro ↺</a><button class="foot-term" type="button" aria-label="Open the terminal">&gt;_</button></span><span>Cal Poly SLO / Business + IS</span></footer>
 </main>
 
 <!-- Case studies (case-study.js): each card's screenshot and title morph into the page (View Transitions) -->

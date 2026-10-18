@@ -1,8 +1,0 @@
-The race car in the site's navigation bar is a render of "CarConcept" by Eric Chadwick,
-© 2024 Darmstadt Graphics Group GmbH, from the Khronos glTF Sample Assets:
-https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept
-
-Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
-https://creativecommons.org/licenses/by/4.0/
-
-Changes: repainted (light blue and orange), interior details removed, compressed, and rendered as a side view.

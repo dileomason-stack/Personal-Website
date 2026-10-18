@@ -412,6 +412,7 @@ if (room) {
   const lightsOn = () => {
     lit = true;
     sw.setAttribute('aria-pressed', 'true');
+    section.style.setProperty('--wash', 1);
     if (reduce) { room.style.opacity = 0; return; }
     // The same uneven flicker as the intro's bulb, then steady
     flicker = room.animate([
@@ -424,8 +425,10 @@ if (room) {
     sw.setAttribute('aria-pressed', 'false');
     flicker?.cancel();
     room.style.opacity = 0.94;
+    section.style.setProperty('--wash', 0);
   };
-  new IntersectionObserver(([en], io) => { if (en.isIntersecting) { io.disconnect(); setTimeout(() => { lightsOn(); track('contact/lights', 'Reached the contact room'); }, 250); } }, { threshold: 0.45 }).observe(section);
+  // On phones the lights come on as soon as the room starts to show, so it never sits there looking broken
+  new IntersectionObserver(([en], io) => { if (en.isIntersecting) { io.disconnect(); setTimeout(() => { lightsOn(); track('contact/lights', 'Reached the contact room'); }, 250); } }, { threshold: innerWidth <= 700 ? 0.2 : 0.45 }).observe(section);
   sw.addEventListener('click', () => {
     sound(3200, 0.03, 0.5); setTimeout(() => sound(700, 0.07, 0.35), 35);
     lit ? lightsOff() : lightsOn();

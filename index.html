@@ -283,29 +283,29 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .more-work summary::-webkit-details-marker{display:none}
 .more-work summary .plus{width:34px;height:34px;border-radius:50%;border:1px solid var(--inv-line);display:grid;place-items:center;font-size:18px;transition:transform .35s var(--ease),background .25s}
 .more-work[open] summary .plus{transform:rotate(45deg);background:var(--inv-accent);color:var(--inv-bg);border-color:var(--inv-accent)}
-/* More experience: one timeline, newest first; a dot on the rail for each role, a stat where there is one */
+/* More experience: a bento grid. The current role and the biggest number get the large tiles. */
 .more-meta{margin-left:auto;margin-right:18px;color:var(--inv-muted)}
-.xp-list{list-style:none;margin:0;padding:6px clamp(24px,4vw,40px) 30px;position:relative}
-.xp{position:relative;display:grid;grid-template-columns:150px 1fr auto;gap:12px 32px;align-items:start;padding:22px 0 22px 26px;border-top:1px solid var(--inv-line)}
-.xp:first-child{border-top:0}
-.xp:before{content:"";position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--inv-line)}
-.xp:after{content:"";position:absolute;left:-4px;top:28px;width:9px;height:9px;border-radius:50%;background:var(--inv-bg);box-shadow:inset 0 0 0 1.5px var(--inv-muted)}
-.xp.now:after{background:var(--inv-accent);box-shadow:0 0 0 4px rgba(233,201,163,.15)}
-.xp time{color:var(--inv-accent);padding-top:4px}
-.xp h4{margin:0 0 6px;font-size:20px;letter-spacing:-.025em;line-height:1.25;color:var(--inv-text)}
-.xp h4 span{display:block;margin-top:2px;font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--inv-text-2)}
-.xp p{margin:0;max-width:62ch;color:var(--inv-text-2);font-size:15px;line-height:1.55}
-.xp-side{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right;min-width:96px}
-.xp-side b{font-size:30px;font-weight:800;letter-spacing:-.04em;line-height:1;color:var(--inv-text)}
-.xp-side .mo{color:var(--inv-muted)}
-.xp-side .xp-tag{margin-top:6px;padding:4px 9px;border:1px solid var(--inv-line);border-radius:30px;color:var(--inv-text-2);font-size:10px}
-.xp.now .xp-tag{border-color:var(--inv-accent);color:var(--inv-accent)}
-.xp{transition:background .25s}
-.xp:hover{background:linear-gradient(90deg,transparent,rgba(255,255,255,.025) 30%,transparent)}
-.more-work[open] .xp{animation:xpIn .5s var(--ease) both}
-.more-work[open] .xp:nth-child(2){animation-delay:.04s}.more-work[open] .xp:nth-child(3){animation-delay:.08s}.more-work[open] .xp:nth-child(4){animation-delay:.12s}.more-work[open] .xp:nth-child(5){animation-delay:.16s}.more-work[open] .xp:nth-child(6){animation-delay:.2s}
+.xb-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:6px clamp(16px,3vw,28px) clamp(16px,3vw,28px)}
+.xb{grid-column:span 1;display:flex;flex-direction:column;padding:22px;border-radius:var(--r-md);background:var(--inv-surface);border:1px solid var(--inv-line);transition:border-color .3s,transform .3s var(--ease)}
+.xb:hover{border-color:var(--inv-muted);transform:translateY(-2px)}
+.xb.big{grid-column:span 2;padding:26px 28px}
+.xb.now{background:linear-gradient(160deg,rgba(233,201,163,.1),transparent 60%),var(--inv-surface);border-color:rgba(233,201,163,.35)}
+.xb-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:auto;padding-bottom:22px}
+.xb-top time{color:var(--inv-accent)}
+.xb-tag{padding:4px 9px;border:1px solid var(--inv-line);border-radius:30px;color:var(--inv-text-2);font-size:10px}
+.xb.now .xb-tag{border-color:var(--inv-accent);color:var(--inv-accent)}
+.xb-stat{margin:0 0 10px!important;display:flex;align-items:baseline;gap:8px}
+.xb-stat b{font-size:clamp(40px,4.4vw,60px);font-weight:800;letter-spacing:-.05em;line-height:.9;color:var(--inv-text)}
+.xb-stat .mo{color:var(--inv-muted)}
+.xb h4{margin:0;font-size:18px;letter-spacing:-.02em;line-height:1.25;color:var(--inv-text)}
+.xb.big h4{font-size:22px}
+.xb .xb-org{margin:3px 0 10px!important;font-size:14px!important;color:var(--inv-accent)!important;opacity:.85}
+.xb .xb-desc{margin:0!important;font-size:14px!important;line-height:1.5!important;color:var(--inv-text-2)!important}
+.more-work[open] .xb{animation:xpIn .5s var(--ease) both}
+.more-work[open] .xb:nth-child(2){animation-delay:.05s}.more-work[open] .xb:nth-child(3){animation-delay:.1s}.more-work[open] .xb:nth-child(4){animation-delay:.14s}.more-work[open] .xb:nth-child(5){animation-delay:.18s}.more-work[open] .xb:nth-child(6){animation-delay:.22s}
 @keyframes xpIn{from{opacity:0;transform:translateY(10px)}}
-@media(max-width:760px){.xp{grid-template-columns:1fr auto;grid-template-areas:"time side" "body body";gap:8px 12px}.xp time{grid-area:time;padding:0}.xp-body{grid-area:body}.xp-side{grid-area:side;flex-direction:row;align-items:baseline;gap:6px;min-width:0}.xp-side .xp-tag{margin:0 4px 0 0;order:-1}.xp-side b{font-size:20px}.more-meta{display:none}}
+@media(max-width:1000px){.xb-grid{grid-template-columns:repeat(2,1fr)}.xb.big{grid-column:span 2}}
+@media(max-width:600px){.xb-grid{grid-template-columns:1fr}.xb.big{grid-column:auto}.more-meta{display:none}.xb,.xb.big{padding:20px}.xb-top{padding-bottom:16px}}
 
 /* ---------- Projects ---------- */
 .projects{background:var(--bg)}
@@ -807,6 +807,24 @@ footer a{text-decoration:none}
   footer{flex-direction:column}
 }
 @media(min-width:701px){.bar .btn{display:none}}
+/* Phones: buttons in a tidy grid (the main one full width), a roomier readout card, a stacked commit strip,
+   and a pool of bulb light behind the Contact text so the photos on the wall don't fight it */
+@media(max-width:520px){
+  .hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hero-actions .btn{justify-content:center}
+  .hero-actions .btn:first-child{grid-column:1/-1}
+  .quick{padding:22px}
+  .quick-head{flex-wrap:wrap;gap:8px}
+  .quick dt{white-space:nowrap}
+  .quick dd{font-size:17px;text-align:right}
+}
+@media(max-width:700px){
+  .activity{grid-template-columns:1fr;gap:4px}
+  .act-sub{white-space:normal;margin-bottom:12px}
+  .act-bars{grid-column:auto}
+  .room-copy:before{content:"";position:absolute;z-index:-1;left:-10%;right:-10%;top:4%;bottom:-6%;background:radial-gradient(ellipse at 50% 45%,rgba(236,230,218,.9),rgba(236,230,218,.55) 45%,transparent 72%);pointer-events:none;opacity:var(--wash,1);transition:opacity .4s}
+  .contact h3{font-size:clamp(40px,12vw,56px)}
+}
 @media(max-width:700px){.nav{display:none}.bar .btn{height:40px;padding:0 16px}}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
@@ -1023,38 +1041,44 @@ footer a{text-decoration:none}
 
   <details class="more-work reveal" id="experience">
     <summary><span class="mo">More experience</span><span class="more-meta mo">6 roles since 2021</span><span class="plus" aria-hidden="true">+</span></summary>
-    <ol class="xp-list">
-      <li class="xp now">
-        <time class="mo">2026 — Present</time>
-        <div class="xp-body"><h4>Instructional Student Assistant <span>Statistics · Cal Poly</span></h4><p>Supporting Cal Poly students through tutoring, grading, and weekly office hours.</p></div>
-        <div class="xp-side"><span class="xp-tag mo">Current</span></div>
-      </li>
-      <li class="xp">
-        <time class="mo">2025</time>
-        <div class="xp-body"><h4>Product Innovation Intern <span>Shockproof Training</span></h4><p>Modernized digital training modules and developed an AI-integration product pitch for the board.</p></div>
-        <div class="xp-side"><span class="xp-tag mo">Work</span></div>
-      </li>
-      <li class="xp">
-        <time class="mo">2022 — 2025</time>
-        <div class="xp-body"><h4>Founder <span>Mason’s Pool Cleaning</span></h4><p>Ran a service business covering technical repairs, client relationships, invoicing, and operations.</p></div>
-        <div class="xp-side"><span class="xp-tag mo">Founder</span></div>
-      </li>
-      <li class="xp">
-        <time class="mo">2023 — 2025</time>
-        <div class="xp-body"><h4>Peer Tutor <span>AVID Program</span></h4><p>One-on-one and group support across math, science, English, and foreign language.</p></div>
-        <div class="xp-side"><b>30</b><span class="mo">students</span><span class="xp-tag mo">Volunteer</span></div>
-      </li>
-      <li class="xp">
-        <time class="mo">2024</time>
-        <div class="xp-body"><h4>Camp Counselor <span>Golden Eagle Summer Sports Camp</span></h4><p>Led sports and team-building activities while mentoring campers in a fast-paced environment.</p></div>
-        <div class="xp-side"><span class="xp-tag mo">Volunteer</span></div>
-      </li>
-      <li class="xp">
-        <time class="mo">2021 — 2024</time>
-        <div class="xp-body"><h4>Operations Manager <span>NBA.Downtown</span></h4><p>Grew the brand and secured sponsorships including UFC and DraftKings.</p></div>
-        <div class="xp-side"><b>160K+</b><span class="mo">followers</span><span class="xp-tag mo">Work</span></div>
-      </li>
-    </ol>
+    <div class="xb-grid">
+      <article class="xb big now">
+        <div class="xb-top"><time class="mo">2026 — Present</time><span class="xb-tag mo">Current</span></div>
+        
+        <h4>Instructional Student Assistant</h4><p class="xb-org">Statistics · Cal Poly</p>
+        <p class="xb-desc">Supporting Cal Poly students through tutoring, grading, and weekly office hours.</p>
+      </article>
+      <article class="xb big">
+        <div class="xb-top"><time class="mo">2021 — 2024</time><span class="xb-tag mo">Work</span></div>
+        <p class="xb-stat"><b>160K+</b> <span class="mo">followers</span></p>
+        <h4>Operations Manager</h4><p class="xb-org">NBA.Downtown</p>
+        <p class="xb-desc">Grew the brand and secured sponsorships including UFC and DraftKings.</p>
+      </article>
+      <article class="xb ">
+        <div class="xb-top"><time class="mo">2025</time><span class="xb-tag mo">Work</span></div>
+        
+        <h4>Product Innovation Intern</h4><p class="xb-org">Shockproof Training</p>
+        <p class="xb-desc">Modernized digital training modules and pitched an AI integration to the board.</p>
+      </article>
+      <article class="xb ">
+        <div class="xb-top"><time class="mo">2022 — 2025</time><span class="xb-tag mo">Founder</span></div>
+        
+        <h4>Founder</h4><p class="xb-org">Mason’s Pool Cleaning</p>
+        <p class="xb-desc">Ran a service business: repairs, clients, invoicing, and operations.</p>
+      </article>
+      <article class="xb ">
+        <div class="xb-top"><time class="mo">2023 — 2025</time><span class="xb-tag mo">Volunteer</span></div>
+        <p class="xb-stat"><b>30</b> <span class="mo">students</span></p>
+        <h4>Peer Tutor</h4><p class="xb-org">AVID Program</p>
+        <p class="xb-desc">One-on-one and group support across math, science, English, and languages.</p>
+      </article>
+      <article class="xb ">
+        <div class="xb-top"><time class="mo">2024</time><span class="xb-tag mo">Volunteer</span></div>
+        
+        <h4>Camp Counselor</h4><p class="xb-org">Golden Eagle Summer Sports Camp</p>
+        <p class="xb-desc">Led sports and team-building while mentoring campers.</p>
+      </article>
+    </div>
   </details>
 </section>
 

@@ -197,9 +197,11 @@ const showcase = $('.showcase'), phone = $('.phone-tilt'), phone3d = $('.phone-3
 gsap.from(showcase, { y: 70, autoAlpha: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: showcase, start: 'top 85%', once: true } });
 // The phone arrives turned away (its back and edge showing) and turns to face you as the section scrolls in,
 // the light sliding across its glass as it goes
-gsap.fromTo(phone3d, { rotationY: -160, y: 50 }, {
+// (On phones the phone sits at the top of the section, so it finishes turning by mid-screen)
+const narrowPhone = innerWidth <= 900;
+gsap.fromTo(phone3d, { rotationY: narrowPhone ? -130 : -160, y: 50 }, {
   rotationY: 0, y: 0, ease: 'none',
-  scrollTrigger: { trigger: showcase, start: 'top 95%', end: 'top 20%', scrub: 0.8, onUpdate: st => glare.style.setProperty('--glare', `${100 - st.progress * 100}%`) },
+  scrollTrigger: { trigger: phone3d, start: narrowPhone ? 'top 100%' : 'top 95%', end: narrowPhone ? 'top 45%' : 'top 20%', scrub: 0.8, onUpdate: st => glare.style.setProperty('--glare', `${100 - st.progress * 100}%`) },
 });
 if (finePointer) {
   const tiltY = gsap.quickTo(phone, 'rotateY', { duration: 0.8, ease: 'power3' }), tiltX = gsap.quickTo(phone, 'rotateX', { duration: 0.8, ease: 'power3' });

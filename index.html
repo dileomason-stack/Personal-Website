@@ -289,6 +289,7 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .xb{grid-column:span 1;display:flex;flex-direction:column;padding:22px;border-radius:var(--r-md);background:var(--inv-surface);border:1px solid var(--inv-line);transition:border-color .3s,transform .3s var(--ease)}
 .xb:hover{border-color:var(--inv-muted);transform:translateY(-2px)}
 .xb.big{grid-column:span 2;padding:26px 28px}
+.xb.wide{grid-column:span 2}
 .xb.now{background:linear-gradient(160deg,rgba(233,201,163,.1),transparent 60%),var(--inv-surface);border-color:rgba(233,201,163,.35)}
 .xb-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:auto;padding-bottom:22px}
 .xb-top time{color:var(--inv-accent)}
@@ -304,8 +305,8 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .more-work[open] .xb{animation:xpIn .5s var(--ease) both}
 .more-work[open] .xb:nth-child(2){animation-delay:.05s}.more-work[open] .xb:nth-child(3){animation-delay:.1s}.more-work[open] .xb:nth-child(4){animation-delay:.14s}.more-work[open] .xb:nth-child(5){animation-delay:.18s}.more-work[open] .xb:nth-child(6){animation-delay:.22s}
 @keyframes xpIn{from{opacity:0;transform:translateY(10px)}}
-@media(max-width:1000px){.xb-grid{grid-template-columns:repeat(2,1fr)}.xb.big{grid-column:span 2}}
-@media(max-width:600px){.xb-grid{grid-template-columns:1fr}.xb.big{grid-column:auto}.more-meta{display:none}.xb,.xb.big{padding:20px}.xb-top{padding-bottom:16px}}
+@media(max-width:1000px){.xb-grid{grid-template-columns:repeat(2,1fr)}.xb.big{grid-column:span 2}.xb.wide{grid-column:span 1}}
+@media(max-width:600px){.xb-grid{grid-template-columns:1fr}.xb.big,.xb.wide{grid-column:auto}.more-meta{display:none}.xb,.xb.big{padding:20px}.xb-top{padding-bottom:16px}}
 
 /* ---------- Projects ---------- */
 .projects{background:var(--bg)}
@@ -1056,25 +1057,25 @@ footer a{text-decoration:none}
         <h4>Operations Manager</h4><p class="xb-org">NBA.Downtown</p>
         <p class="xb-desc">Grew the brand and secured sponsorships including UFC and DraftKings.</p>
       </article>
-      <article class="xb ">
+      <article class="xb big">
         <div class="xb-top"><time class="mo">2025</time><span class="xb-tag mo">Work</span></div>
         
         <h4>Product Innovation Intern</h4><p class="xb-org">Shockproof Training</p>
         <p class="xb-desc">Modernized digital training modules and pitched an AI integration to the board.</p>
       </article>
-      <article class="xb ">
+      <article class="xb big">
         <div class="xb-top"><time class="mo">2022 — 2025</time><span class="xb-tag mo">Founder</span></div>
         
         <h4>Founder</h4><p class="xb-org">Mason’s Pool Cleaning</p>
         <p class="xb-desc">Ran a service business: repairs, clients, invoicing, and operations.</p>
       </article>
-      <article class="xb ">
+      <article class="xb big">
         <div class="xb-top"><time class="mo">2023 — 2025</time><span class="xb-tag mo">Volunteer</span></div>
         <p class="xb-stat"><b>30</b> <span class="mo">students</span></p>
         <h4>Peer Tutor</h4><p class="xb-org">AVID Program</p>
         <p class="xb-desc">One-on-one and group support across math, science, English, and languages.</p>
       </article>
-      <article class="xb ">
+      <article class="xb big">
         <div class="xb-top"><time class="mo">2024</time><span class="xb-tag mo">Volunteer</span></div>
         
         <h4>Camp Counselor</h4><p class="xb-org">Golden Eagle Summer Sports Camp</p>

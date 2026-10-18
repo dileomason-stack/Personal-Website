@@ -30,7 +30,7 @@ if (!intro.classList.contains('done')) {
     heroEntrance();
   }, { once: true });
 }
-document.fonts.ready.then(() => ScrollTrigger.refresh());
+(window.fontsReady || document.fonts.ready).then(() => ScrollTrigger.refresh());
 $('#experience')?.addEventListener('toggle', () => ScrollTrigger.refresh());
 
 // ---------- Nav: reading progress, and an ink pill that slides to the active section ----------
@@ -118,7 +118,7 @@ function scrambleReadout() {
     }, i * 110);
   });
 }
-if (root.classList.contains('hero-wait')) document.fonts.ready.then(heroEntrance);
+if (root.classList.contains('hero-wait')) (window.fontsReady || document.fonts.ready).then(heroEntrance);
 
 // ---------- Section headings: each line rises out of its own mask ----------
 $$('.display').forEach(el => {

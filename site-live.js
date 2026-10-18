@@ -7,6 +7,25 @@ const $ = (sel, el = document) => el.querySelector(sel);
 const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// ---------- Visitor stats (GoatCounter): off until the page's <meta name="goatcounter"> has a code ----------
+// Page views come from GoatCounter's script; these events add what people do here.
+const statsCode = document.querySelector('meta[name="goatcounter"]')?.content.trim();
+if (statsCode) {
+  const s = Object.assign(document.createElement('script'), { async: true, src: 'https://gc.zgo.at/count.js' });
+  s.dataset.goatcounter = `https://${statsCode}.goatcounter.com/count`;
+  document.head.appendChild(s);
+}
+const sent = new Set();
+// Once per page view per event, e.g. track('case/homeroom', 'Opened the Homeroom case study')
+export function track(path, title) {
+  if (!statsCode || sent.has(path)) return;
+  sent.add(path);
+  const send = () => window.goatcounter?.count?.({ path, title, event: true });
+  window.goatcounter?.count ? send() : addEventListener('load', () => setTimeout(send, 500), { once: true });
+}
+addEventListener('intro:skip', () => track('intro/skipped', 'Skipped the intro'));
+addEventListener('intro:done', () => setTimeout(() => sent.has('intro/skipped') || track('intro/watched', 'Watched the intro'), 0));
+
 // ---------- Nav: Mason's time in San Luis Obispo, then what he's probably up to ----------
 // Edit the moods here. Hours are Pacific time; `days` limits a row to weekdays (1-5) or weekends.
 const MOODS = [
@@ -111,6 +130,7 @@ if (showcase) {
   function save() {
     const r = read();
     if (!r) return;
+    track('demo/hold-this-thought', 'Saved a thought in the app demo');
     // Like the app: the sheet goes away, then the banner comes up from the bottom for five seconds
     open(false);
     input.value = '';

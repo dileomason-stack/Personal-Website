@@ -12,16 +12,16 @@ import { createTerminal, INSTALL_AT } from './intro-terminal.js';
 // tape: [x, y, angle] per strip, x/y from -1 to 1 across the print (corners are ±1).
 // curl: how far the untaped bottom corners lift off the wall.
 const POSTERS = [
-  { src: 'intro/car-917.jpg', poster: true, title: 'PORSCHE 917', no: '01', w: 1, h: 1.42, tilt: -0.04, at: [0.13, 0.36, 0.34], narrow: [0.12, 0.24, 0.19],
+  { src: 'intro/car-917.webp', poster: true, title: 'PORSCHE 917', no: '01', w: 1, h: 1.42, tilt: -0.04, at: [0.13, 0.36, 0.34], narrow: [0.12, 0.24, 0.19],
     tape: [[-1, 1, -0.7], [1, 1, 0.7], [-1, -1, 0.7], [1, -1, -0.7]], curl: 0 },
-  { src: 'intro/car-f40.jpg', w: 1.5, h: 1, tilt: 0.06, at: [0.23, 0.12, 0.15], narrow: [0.2, 0.06, 0.08],
+  { src: 'intro/car-f40.webp', w: 1.5, h: 1, tilt: 0.06, at: [0.23, 0.12, 0.15], narrow: [0.2, 0.06, 0.08],
     tape: [[0, 1, 1.48]], curl: 1 },
-  { src: 'intro/car-heritage-1.jpg', w: 1, h: 1.333, tilt: 0.07, at: [0.87, 0.24, 0.24], narrow: [0.96, 0.18, 0.16],
+  { src: 'intro/car-heritage-1.webp', w: 1, h: 1.333, tilt: 0.07, at: [0.87, 0.24, 0.24], narrow: [0.96, 0.18, 0.16],
     tape: [[-1, 1, -0.75], [1, 1, 0.65]], curl: 0.8 },
-  { src: 'intro/car-911.jpg', w: 1, h: 1.333, tilt: -0.09, at: [0.81, 0.45, 0.17], narrow: [0.88, 0.4, 0.11],
+  { src: 'intro/car-911.webp', w: 1, h: 1.333, tilt: -0.09, at: [0.81, 0.45, 0.17], narrow: [0.88, 0.4, 0.11],
     tape: [[-1, 1, -0.7], [1, -1, -0.6]], curl: 0 },
   // Mason and his girlfriend; links to the "Off the clock" photos instead of the cars
-  { src: 'intro/us.jpg', w: 1, h: 1.315, tilt: 0.05, at: [0.2, 0.66, 0.19], narrow: [0.84, 0.6, 0.11],
+  { src: 'intro/us.webp', w: 1, h: 1.315, tilt: 0.05, at: [0.2, 0.66, 0.19], narrow: [0.84, 0.6, 0.11],
     tape: [[0, 1, 1.52]], curl: 0.9, note: ['Off the clock', 'Me, outside the work'], target: 'photos' },
 ];
 
@@ -189,11 +189,13 @@ export function buildRoom(scene, renderer) {
   const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 8), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xff9a5c, emissiveIntensity: 0 }));
   desk.add(pulse);
 
-  new GLTFLoader().loadAsync('models/baseball_01/baseball_01.gltf').then(g => {
+  // The baseball (a slimmed-down glTF: quantized mesh, 256px WebP textures) loads once the room is
+  // up, so it never competes with what's on screen first
+  (window.requestIdleCallback || (cb => setTimeout(cb, 600)))(() => new GLTFLoader().loadAsync('models/baseball.glb').then(g => {
     const ball = normalize(g.scene, 0.2);
     ball.position.set(0, 0, 0.2);
     shelf.add(ball);
-  });
+  }), { timeout: 1500 });
 
   // ---------- Layout ----------
   let scale = 1;
@@ -355,7 +357,7 @@ function tapeTexture() {
 async function posterTexture(p, maxAniso) {
   const img = new Image();
   img.src = p.src;
-  await Promise.all([img.decode(), document.fonts.load('800 60px Manrope'), document.fonts.load('500 20px "DM Mono"')]);
+  await Promise.all([img.decode(), window.fontsReady]);
   const W = 900, H = Math.round(W * p.h / p.w);
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
@@ -400,9 +402,9 @@ function createPhoneScreen(maxAniso) {
   const img = document.createElement('canvas');
   img.width = W; img.height = H;
   const src = new Image();
-  src.src = 'intro/htt-home.jpg';
+  src.src = 'intro/htt-home.webp';
   let ready = false, lastKey = '';
-  Promise.all([src.decode(), document.fonts.ready]).then(() => {
+  Promise.all([src.decode(), window.fontsReady]).then(() => {
     const p = img.getContext('2d');
     p.drawImage(src, 0, 0);
     const font = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif';

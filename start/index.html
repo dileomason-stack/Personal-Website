@@ -22,8 +22,13 @@
 <meta name="twitter:image" content="https://dileomason-stack.github.io/Personal-Website/og/site.jpg">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <meta name="theme-color" content="#0c0d0e">
-<meta http-equiv="refresh" content="0; url=../?intro">
-<script>location.replace('../?intro');</script>
+<noscript><meta http-equiv="refresh" content="0; url=../?intro"></noscript>
+<script>
+  // Passes on where the click came from (LinkedIn, a text…) for the visitor stats, which read ?ref=
+  let ref = 'share-link';
+  try { if (document.referrer) ref = new URL(document.referrer).hostname.replace(/^www\./, ''); } catch (e) {}
+  location.replace('../?intro&ref=' + encodeURIComponent(ref));
+</script>
 <style>html,body{margin:0;height:100%;background:#0c0d0e}body{display:grid;place-items:center;font-family:system-ui,sans-serif}a{color:#8b877d}</style>
 </head>
 <body><a href="../?intro">Continue to Mason Di Leo’s portfolio →</a></body>

@@ -6,9 +6,11 @@ const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
 const root = document.documentElement;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const page = $('#case'), body = $('.case-body', page);
-const names = { homeroom: 'Homeroom', whenworks: 'WhenWorks' };
+const names = { homeroom: 'Homeroom', whenworks: 'WhenWorks', holdthisthought: 'Hold This Thought' };
 let current = null, opener = null;
 
+import { parseThought, readAs } from './thought-parser.js';
+import { track } from './site-live.js';
 const transition = (update, cls) => {
   if (!document.startViewTransition || reduce) { update(); return Promise.resolve(); }
   root.classList.add(cls);
@@ -22,7 +24,7 @@ export async function openCase(key, trigger, { push = true } = {}) {
   const card = document.getElementById(key), tpl = document.getElementById(`case-${key}`);
   if (!card || !tpl) return;
   opener = trigger || null;
-  const media = $('.shot video, .shot img', card), title = $('h4', card);
+  const media = $('.shot video, .shot img, .phone-frame', card), title = $('h4', card);
   media?.pause?.();
   name(media, 'case-shot'); name(title, 'case-title');
   if (push) history.pushState({ case: key }, '', `?case=${key}`);
@@ -32,18 +34,20 @@ export async function openCase(key, trigger, { push = true } = {}) {
     $('.case-crumb', page).textContent = `Projects / ${names[key]}`;
     page.hidden = false;
     page.scrollTop = 0;
-    name($('.case-shot', body), 'case-shot'); name($('.case-title', body), 'case-title');
+    name($('[data-shot]', body), 'case-shot'); name($('.case-title', body), 'case-title');
     root.classList.add('case-is-open');
     window.siteLenis?.stop();
   }, 'vt-case-in');
-  name($('.case-shot', body)); name($('.case-title', body));
+  name($('[data-shot]', body)); name($('.case-title', body));
   current = key;
+  track(`case/${key}`, `Opened the ${names[key]} case study`);
   page.focus({ preventScroll: true });
   // Once it has landed, the hero image becomes the project's demo video (the poster is the same frame)
-  const shot = $('.case-shot', body), src = $('.shot video', card)?.getAttribute('src');
+  const shot = $('img.case-shot', body), src = $('.shot video', card)?.getAttribute('src');
   if (shot && src) {
     const video = Object.assign(document.createElement('video'), { className: 'case-shot', src, poster: shot.getAttribute('src'), controls: true, muted: true, playsInline: true, preload: 'none' });
     video.setAttribute('aria-label', shot.alt);
+    video.dataset.shot = '';
     shot.replaceWith(video);
   }
   setup(key);
@@ -52,15 +56,15 @@ export async function openCase(key, trigger, { push = true } = {}) {
 export async function closeCase({ pop = false } = {}) {
   if (!current) return;
   const key = current, card = document.getElementById(key);
-  const media = $('.shot video, .shot img', card), title = $('h4', card);
-  name($('.case-shot', body), 'case-shot'); name($('.case-title', body), 'case-title');
+  const media = $('.shot video, .shot img, .phone-frame', card), title = $('h4', card);
+  name($('[data-shot]', body), 'case-shot'); name($('.case-title', body), 'case-title');
   current = null;
   if (!pop && history.state?.case) history.back();
   // The card has to be on screen for the morph to land on it
   card.scrollIntoView({ block: 'center' });
   window.siteLenis?.scrollTo(card, { immediate: true, offset: -innerHeight / 2 + card.offsetHeight / 2, force: true });
   await transition(() => {
-    name($('.case-shot', body)); name($('.case-title', body));
+    name($('[data-shot]', body)); name($('.case-title', body));
     page.hidden = true;
     body.replaceChildren();
     root.classList.remove('case-is-open');
@@ -81,7 +85,7 @@ addEventListener('popstate', () => {
 
 function setup(key) {
   const demo = $('[data-demo]', body);
-  if (demo) (key === 'homeroom' ? homeroomDemo : whenworksDemo)(demo, $('.case-reset', body));
+  if (demo) ({ homeroom: homeroomDemo, whenworks: whenworksDemo, holdthisthought: readerDemo })[key](demo, $('.case-reset', body));
 }
 
 // ---------- Homeroom: a small copy of its workspace, built the way the real one is (src/lib/grid.js):
@@ -262,6 +266,7 @@ function homeroomDemo(el, reset) {
   menu.addEventListener('click', e => {
     const b = e.target.closest('[data-add]');
     if (!b) return;
+    track('demo/homeroom', 'Added a widget in the Homeroom demo');
     const type = b.dataset.add, [w, h] = narrow ? [24, WIDGETS[type].size[1]] : WIDGETS[type].size;
     let spot = null;
     for (let y = 0; y + h <= MAX && !spot; y++) for (let x = 0; x + w <= COLS && !spot; x++) if (!Object.values(layout).some(r => hits(r, [x, y, w, h]))) spot = [x, y, w, h];
@@ -423,6 +428,7 @@ function whenworksDemo(el, reset) {
   grid.addEventListener('pointerdown', e => {
     const blk = e.target.closest('.ww-block');
     if (!blk) return;
+    track('demo/whenworks', 'Moved a block in the WhenWorks demo');
     e.preventDefault();
     const i = +blk.dataset.i, g = geo(), r = grid.getBoundingClientRect();
     const ox = e.clientX - r.left - parseFloat(blk.style.left), oy = e.clientY - r.top - parseFloat(blk.style.top);
@@ -445,4 +451,38 @@ function whenworksDemo(el, reset) {
     blk.addEventListener('pointerup', up, { once: true });
     blk.addEventListener('pointercancel', up, { once: true });
   });
+}
+
+// ---------- Hold This Thought: the reader playground. What you type, how the reader rewrites it before
+// reading (shorthand, spoken numbers, ranges), and what it decides: title, when, repeat, where. ----------
+function readerDemo(el) {
+  const HARD = ['2nyt call alex', 'call mom tmrw after work', 'chart check at 0700', 'gym every tue and thu at 6', 'weekdays at 7 except fridays walk the dog', 'remind me in 2 1/2 hours to move the car', 'pay rent on the 1st of every month', 'buy batteries next time im at the pharmacy'];
+  el.innerHTML = `<div class="pr-in"><label for="pr-input">Type a reminder the way you’d text it</label>
+    <div class="pr-field"><input id="pr-input" type="text" placeholder="remind me to call mom tmrw after work" maxlength="140" autocomplete="off" spellcheck="false"></div>
+    <div class="pr-ex" aria-label="Hard examples">${HARD.map(t => `<button type="button">${t}</button>`).join('')}</div></div>
+    <div class="pr-out" aria-live="polite"><p class="pr-empty">Its reading shows up here as you type.</p></div>`;
+  const input = $('#pr-input', el), out = $('.pr-out', el), ex = $$('.pr-ex button', el);
+  const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const when = d => d.toLocaleString('en-US', { weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  // Words the clean-up changed, highlighted
+  const diff = (before, after) => {
+    const a = new Set(before.toLowerCase().split(/\s+/));
+    return after.split(' ').map(w => (a.has(w) ? esc(w) : `<mark>${esc(w)}</mark>`)).join(' ');
+  };
+  function render() {
+    const text = input.value.trim();
+    ex.forEach(b => b.classList.toggle('on', b.textContent === input.value));
+    if (!text) { out.innerHTML = '<p class="pr-empty">Its reading shows up here as you type.</p>'; return; }
+    const t0 = performance.now(), r = parseThought(text), read = readAs(text).replace(/\bat at\b/g, 'at'), ms = performance.now() - t0;
+    const row = (k, v, cls = '') => `<div><dt>${k}</dt><dd class="${cls}">${v}</dd></div>`;
+    out.innerHTML = `<dl>${row('Read as', diff(text, read), 'read')}${row('Title', esc(r.title))}
+      ${row('When', r.when ? `${esc(when(r.when.date))}${r.when.timer ? ' (countdown)' : ''}` : 'Not said', r.when ? '' : 'none')}
+      ${row('Repeats', r.repeat ? esc(r.repeat) : 'No', r.repeat ? '' : 'none')}
+      ${row('Where', r.place ? (r.place === 'Home' ? 'When you get home' : `When you get to ${esc(r.place)}`) : r.nearby ? `Offers ${esc(r.nearby)}` : 'Anywhere', r.place || r.nearby ? '' : 'none')}</dl>
+      <p class="ms">Read in ${ms < 1 ? ms.toFixed(2) : ms.toFixed(1)} ms, in your browser</p>`;
+  }
+  input.addEventListener('input', () => { render(); track('demo/reader', 'Tried the reader playground'); });
+  ex.forEach(b => b.addEventListener('click', () => { input.value = b.textContent; render(); track('demo/reader', 'Tried the reader playground'); }));
+  // One read up front, so the first timing isn't the browser compiling the patterns
+  parseThought('call mom tomorrow at 5');
 }

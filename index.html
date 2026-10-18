@@ -17,12 +17,27 @@
 <meta property="og:image:alt" content="Mason Di Leo: Learning by building. Projects: Hold This Thought, Homeroom, WhenWorks.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Visitor stats (GoatCounter, no cookies): put the account's code here, e.g. "masondileo", to turn them on -->
+<meta name="goatcounter" content="">
 <meta name="theme-color" content="#f3f0ea">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121a19'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='800' font-size='26' fill='%23f4f1ea' text-anchor='middle'%3EMD%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Fonts are served from this site (Manrope is one variable file for every weight), and Manrope is
+     fetched right away: it's the nav name and the headlines, so the page's first big paint waits on it -->
+<link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:Manrope;font-style:normal;font-weight:200 800;font-display:swap;src:url(fonts/manrope-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:"DM Mono";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/dm-mono-400-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:"DM Mono";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/dm-mono-500-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+</style>
+<script>
+  // Resolves once the fonts are in (or after 3s, so nothing waits forever). Canvas text in the intro and
+  // the hero's letter-by-letter entrance wait on this.
+  window.fontsReady = Promise.race([
+    Promise.all(['800 60px Manrope', '500 20px "DM Mono"'].map(f => document.fonts.load(f))).then(() => document.fonts.ready),
+    new Promise(done => setTimeout(done, 3000)),
+  ]).catch(() => {});
+</script>
 <style>
 /* ---------- Design tokens ----------
    Every color on the site comes from these. Light sections use the first set; the dark
@@ -558,6 +573,36 @@ html.vt-case-out::view-transition-new(root){animation:none}
 ::view-transition-old(case-title),::view-transition-new(case-title){height:100%;object-fit:contain;object-position:left}
 @media(max-width:900px){.case-meta{grid-template-columns:1fr 1fr}.case-row{grid-template-columns:1fr;gap:12px}.case-demo-head{grid-template-columns:1fr}.case-demo h3{white-space:normal}.case-crumb{display:none}}
 
+/* Hold This Thought case: a lineup of app screens, and the reader playground */
+.sc-case{margin:0 0 26px}
+.case-phones{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,2vw,28px);align-items:end}
+.cp{padding:clamp(4px,.6vw,8px);border-radius:clamp(20px,3vw,40px);background:#101010;box-shadow:var(--shadow-lg)}
+.cp img{width:100%;height:auto;border-radius:clamp(16px,2.5vw,33px)}
+.cp:nth-child(even){transform:translateY(-6%)}
+.pr-demo{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(16px,2.5vw,32px)}
+.pr-in label{display:block;margin-bottom:10px;color:var(--inv-text-2);font-size:14px}
+.pr-field{display:flex;gap:6px;padding:5px 5px 5px 16px;border-radius:40px;background:var(--inv-surface);border:1px solid var(--inv-line)}
+.pr-field:focus-within{border-color:var(--inv-accent)}
+.pr-field input{all:unset;flex:1;min-width:0;height:40px;font:500 16px Manrope,system-ui,sans-serif;color:var(--inv-text)}
+.pr-field input::placeholder{color:var(--inv-muted)}
+.pr-ex{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pr-ex button{all:unset;cursor:pointer;padding:7px 12px;border-radius:40px;border:1px solid var(--inv-line);color:var(--inv-text-2);font:500 13px "DM Mono",monospace}
+.pr-ex button:hover,.pr-ex button.on{border-color:var(--inv-accent);color:var(--inv-text)}
+.pr-ex button:focus-visible{outline:2px solid var(--inv-accent);outline-offset:2px}
+.pr-out{border-radius:var(--r-md);background:var(--inv-surface);border:1px solid var(--inv-line);padding:18px 20px;min-height:220px}
+.pr-out dl{margin:0;display:grid;gap:0}
+.pr-out dl>div{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--inv-line);align-items:baseline}
+.pr-out dl>div:first-child{border-top:0;padding-top:0}
+.pr-out dt{font:500 11px "DM Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--inv-muted)}
+.pr-out dd{margin:0;font-size:16px;font-weight:600;color:var(--inv-text);letter-spacing:-.01em}
+.pr-out dd.read{font:500 14px "DM Mono",monospace;color:var(--inv-text-2);font-weight:500}
+.pr-out dd.read mark{background:rgba(158,235,26,.18);color:#c9f27a;border-radius:3px;padding:0 2px}
+.pr-out dd.none{color:var(--inv-muted);font-weight:500}
+.pr-out .ms{margin-top:12px;font:500 11px "DM Mono",monospace;color:var(--inv-muted)}
+.pr-empty{color:var(--inv-muted);font-size:15px;margin:0}
+.pr-pass{padding:6px 12px;border-radius:40px;background:rgba(158,235,26,.14);color:#c9f27a;white-space:nowrap}
+@media(max-width:900px){.case-phones{grid-template-columns:repeat(2,1fr)}.case-phones .cp:nth-child(n+3){display:none}.pr-demo{grid-template-columns:1fr}}
+
 /* Homeroom demo: its workspace in miniature (Homeroom's own colors, cards, placeholder and Add widget panel) */
 .hr-demo{position:relative;border-radius:14px;background:#f4f4f2;color:#1c1c1a;box-shadow:inset 0 0 0 1px #e2e2de;font:400 12px/1.4 -apple-system,system-ui,sans-serif;user-select:none;-webkit-user-select:none}
 .hr-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px 6px}
@@ -879,12 +924,13 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     <p class="num mo">01 / Founder + iOS Developer</p>
     <h3 class="display">WHAT I’VE<br>BEEN BUILDING.</h3>
   </div>
-  <article class="feature showcase reveal">
+  <article class="feature showcase reveal" id="holdthisthought">
     <div class="sc-copy">
       <span class="sc-label mo"><img class="sc-icon" src="hold-this-thought-logo-transparent.webp" alt="" width="40" height="40">Hold This Thought / Active build</span>
       <h4>Hold This Thought</h4>
       <p>Building a native Swift iOS reminder app that helps people capture passing thoughts before they disappear. The app turns spoken or typed ideas into helpful prompts based on time, location, calendar events, and saved places. I lead product direction, interface design, and iOS development, from concept testing through live iPhone demos.</p>
       <div class="pills"><span class="pill">Swift</span><span class="pill">Product</span><span class="pill">UX</span><span class="pill">iOS</span></div>
+      <button class="btn case-open sc-case" type="button" data-case="holdthisthought">CASE STUDY + PARSER <span class="arr">→</span></button>
       <div class="sc-steps" role="tablist" aria-label="How Hold This Thought works">
         <button class="sc-step is-active" type="button" role="tab" aria-selected="true"><b>At the right time.</b><i class="sc-bar" aria-hidden="true"></i></button>
         <button class="sc-step" type="button" role="tab" aria-selected="false"><b>Say it once.</b><i class="sc-bar" aria-hidden="true"></i></button>
@@ -1106,12 +1152,50 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   <div class="case-bar"><button class="case-back mo" type="button">← Back to projects</button><span class="mo case-crumb"></span><button class="case-x" type="button" aria-label="Close case study">×</button></div>
   <div class="case-body"></div>
 </div>
+<template id="case-holdthisthought">
+  <header class="case-hero">
+    <p class="mo case-kicker">iOS app / Beta, coming soon to the App Store</p>
+    <h2 class="case-title" id="case-title">Hold This Thought</h2>
+    <p class="case-lede">The fastest way to get a passing thought out of your head and back in front of you when it matters. Say it once; it works out when and where to remind you.</p>
+    <div class="case-phones">
+      <div class="cp" data-shot><img src="app/htt-home.webp" alt="Home: what went off, what’s due today and what’s coming up" width="828" height="1800"></div>
+      <div class="cp"><img src="app/htt-capture.webp" alt="One-tap ways to capture a thought" width="828" height="1800" loading="lazy"></div>
+      <div class="cp"><img src="app/htt-places.webp" alt="Thoughts waiting at places" width="828" height="1800" loading="lazy"></div>
+      <div class="cp"><img src="app/htt-friends.webp" alt="Thoughts shared with friends and a group" width="828" height="1800" loading="lazy"></div>
+    </div>
+  </header>
+  <dl class="case-meta">
+    <div><dt class="mo">Role</dt><dd>Founder: product, design and iOS development, with AI coding tools</dd></div>
+    <div><dt class="mo">Timeline</dt><dd>Active build, fall 2026; testers on TestFlight</dd></div>
+    <div><dt class="mo">Stack</dt><dd>Swift, SwiftUI, App Intents, WidgetKit, CloudKit, Core Location, EventKit, Speech</dd></div>
+    <div><dt class="mo">Status</dt><dd>Beta; App Store listing ready</dd></div>
+  </dl>
+  <section class="case-row"><p class="mo case-h">The problem</p><div class="case-copy"><p>Thoughts show up at the wrong moment: on a walk, in class, half asleep. A reminder app wants you to stop and fill in a title, a date and a time, so most of them never get saved. Hold This Thought lets you say it the way you’d text a friend and does the rest.</p></div></section>
+  <section class="case-row"><p class="mo case-h">What it does</p><div class="case-copy"><ul class="case-list">
+    <li><b>Say it, don’t type it.</b> From a Home Screen widget, the Control Center button, the Action Button or Back Tap, just talk: “call Sam tomorrow at 5.”</li>
+    <li><b>Reminds you at the right time or place.</b> “In 20 minutes,” “Friday at 3,” “every weekday at 9,” when you walk in at home, at whichever pharmacy you go to, or in time for a calendar event.</li>
+    <li><b>Shares with friends and groups.</b> “Remind Sam to bring the charger.” When either of you does it, it comes off both lists. Roommate groups split chores.</li>
+    <li><b>Snoozes the smart way.</b> Busy when you get home? “Next time I’m here” brings it back on your next arrival.</li>
+  </ul></div></section>
+  <section class="case-demo">
+    <div class="case-demo-head"><div><p class="mo case-h">Try it</p><h3>Try the reader.</h3></div><p>The heart of the app is the part that reads what you said. This is that code, ported from Swift to JavaScript and running in your browser. Type the messiest reminder you can think of, or tap one of the hard ones; you’ll see how it cleaned up the words and what it decided.</p><span class="pr-pass mo">295 / 295 tests pass</span></div>
+    <div class="pr-demo" data-demo="holdthisthought"></div>
+  </section>
+  <section class="case-row"><p class="mo case-h">How it works</p><div class="case-copy"><ul class="case-list">
+    <li><b>A reader built on rules, not guesses.</b> About 1,400 lines of Swift turn “2nyt,” “ten to five,” “at 0700” or “weekdays except Fridays” into a time, a repeat or a place. Every rule is pinned down by a test case, run against a fixed clock.</li>
+    <li><b>Short titles.</b> Simple rules make an instant title; on iPhones with Apple Intelligence, the on-device model writes a better one, and it’s only used if it keeps every word that mattered.</li>
+    <li><b>Places and stores.</b> Core Location watches for arrivals at saved places, and for “the pharmacy” it reminds you at whichever nearby one you walk into.</li>
+    <li><b>No server.</b> Sharing and groups go through each person’s iCloud with CloudKit, so the app runs no backend at all.</li>
+  </ul></div></section>
+  <section class="case-row"><p class="mo case-h">Private by design</p><div class="case-copy"><p>No sign-up, no ads, no tracking. Thoughts stay on your iPhone and back up to your own private iCloud, and shared thoughts only go to the people you choose.</p></div></section>
+  <div class="case-links"><a class="btn" href="https://dileomason-stack.github.io/holdthisthought/" target="_blank" rel="noopener noreferrer">APP WEBSITE + BETA <span class="arr">↗</span></a></div>
+</template>
 <template id="case-homeroom">
   <header class="case-hero">
     <p class="mo case-kicker">Build Day #1 / Live</p>
     <h2 class="case-title" id="case-title">Homeroom</h2>
     <p class="case-lede">Where your school day starts. Canvas, your calendar, Spotify, mail, to-dos and AI on one screen, arranged the way you want.</p>
-    <img class="case-shot" src="homeroom-demo-poster.jpg" alt="Homeroom demo" width="1280" height="720">
+    <img class="case-shot" data-shot src="homeroom-demo-poster.jpg" alt="Homeroom demo" width="1280" height="720">
   </header>
   <dl class="case-meta">
     <div><dt class="mo">Role</dt><dd>Product, design and build, with AI coding tools</dd></div>
@@ -1143,7 +1227,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
     <p class="mo case-kicker">Side project / Live</p>
     <h2 class="case-title" id="case-title">WhenWorks</h2>
     <p class="case-lede">Find a time when everyone in your group project is actually free. Everyone uploads a screenshot of their schedule, AI reads it, and the times that work for the whole group light up.</p>
-    <img class="case-shot" src="whenworks-demo-poster.jpg" alt="WhenWorks demo" width="1280" height="720">
+    <img class="case-shot" data-shot src="whenworks-demo-poster.jpg" alt="WhenWorks demo" width="1280" height="720">
   </header>
   <dl class="case-meta">
     <div><dt class="mo">Role</dt><dd>Product, design and build, with AI coding tools</dd></div>

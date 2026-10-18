@@ -135,6 +135,9 @@ const normalized = text => rangeStarts(spokenTimesAsDigits(minutesAroundHour(spo
   .replace(/a\.m\.?/g, 'am').replace(/p\.m\.?/g, 'pm')
   .replace(/\s+/g, ' ').trim();
 
+// What the reader actually reads, after the shorthand, spoken times and ranges are cleaned up
+export const readAs = text => normalized(text);
+
 // ---------- When ----------
 
 export function createParser(now = new Date()) {

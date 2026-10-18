@@ -245,12 +245,13 @@ export function buildRoom(scene, renderer) {
       switchSpot.y = toScreen(screen.localToWorld(new THREE.Vector3(0, 0, 0))).y;
     }
 
-    // Draw both screens at their size on the display (with a little headroom for the angle)
+    // Draw both screens at twice their size on the display, then let mipmaps scale them down smoothly
+    // (sharper text than drawing at 1x, without the shimmer of an oversized texture)
     desk.updateMatrixWorld(true);
-    const pr = renderer.getPixelRatio(), widthOnScreen = (mesh, half) =>
+    const pr = Math.max(renderer.getPixelRatio(), Math.min(devicePixelRatio, 2)), widthOnScreen = (mesh, half) =>
       Math.abs(toScreen(mesh.localToWorld(new THREE.Vector3(half, 0, 0))).x - toScreen(mesh.localToWorld(new THREE.Vector3(-half, 0, 0))).x);
-    terminal.setResolution(widthOnScreen(screen, SCREEN_W / 2) * pr * 1.3);
-    phoneUI.setResolution(widthOnScreen(phoneScreen, 0.1675) * pr * 1.3);
+    terminal.setResolution(widthOnScreen(screen, SCREEN_W / 2) * pr * 2);
+    phoneUI.setResolution(widthOnScreen(phoneScreen, 0.1675) * pr * 2);
 
     screenToPlane(w * (narrow ? 0.16 : 0.83), h * (narrow ? 0.55 : 0.6), 0, v);
     shelf.position.set(v.x, v.y, 0);
@@ -390,9 +391,10 @@ function createPhoneScreen(maxAniso) {
   const g = canvas.getContext('2d');
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  // Drawn at about its size on screen (see setResolution), so no mipmap blur
-  texture.generateMipmaps = false;
-  texture.minFilter = THREE.LinearFilter;
+  // Drawn at twice its size on screen (see setResolution) and mipmapped down
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.anisotropy = maxAniso;
   g.imageSmoothingQuality = 'high';
   // The App Store screenshot, with its sample name swapped for Mason
   const img = document.createElement('canvas');

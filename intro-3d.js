@@ -180,7 +180,9 @@ function start() {
   scene.add(new THREE.Points(dustGeo, dustMat));
 
   // ---------- Post ----------
-  const composer = new EffectComposer(renderer);
+  // Post-processing renders into its own targets, which skip the canvas's antialiasing, so they get
+  // their own 4x multisampling (WebGL2); without it every edge and the screens' text look jagged
+  const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio(), { type: THREE.HalfFloatType, samples: 4 }));
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.55, 1.3);
   composer.addPass(bloom);
@@ -201,7 +203,7 @@ function start() {
         g += mix(vec3(.02, .009, -.006), vec3(-.006, 0., .008), smoothstep(.2, .8, l));
         g = mix(g, g * g * (3. - 2. * g), .16);
         g *= mix(1., smoothstep(1.2, .35, length(vUv - .5) * 1.3), .5);
-        g += (hash(gl_FragCoord.xy + fract(uTime * 13.) * 91.) - .5) * .02;
+        g += (hash(gl_FragCoord.xy + fract(uTime * 13.) * 91.) - .5) * .01;
         gl_FragColor = vec4(mix(c.rgb, g, uAmount), c.a);
       }`,
   });
@@ -327,23 +329,28 @@ function start() {
   const clock = new THREE.Clock();
   let running = true;
   // Adaptive quality: if it keeps running under ~40fps (two windows in a row, after startup's shader
-  // compiles have settled), step down resolution, then shadows and bloom
+  // compiles have settled), give up the things you notice least first: shadows, then the glow and some
+  // resolution (never below 1.5x on a Retina screen, so the screens' text stays sharp), then every
+  // other frame
   const perf = { frames: 0, time: 0, level: 0 };
   function degrade() {
     perf.level++;
-    const pr = perf.level === 1 ? Math.min(devicePixelRatio, 1.5) : 1;
-    renderer.setPixelRatio(pr);
-    composer.setPixelRatio(pr);
-    dustMat.uniforms.uPR.value = pr;
     bulbLight.castShadow = false;
-    if (perf.level === 2) { torch.castShadow = false; bloom.enabled = false; }
-    layout();
+    torch.castShadow = false;
+    if (perf.level >= 2) {
+      bloom.enabled = false;
+      const pr = Math.min(devicePixelRatio, 1.5);
+      renderer.setPixelRatio(pr);
+      composer.setPixelRatio(pr);
+      dustMat.uniforms.uPR.value = pr;
+      layout();
+    }
   }
   function frame() {
     if (!running) return;
     requestAnimationFrame(frame);
     const raw = clock.getDelta(), dt = Math.min(raw, 0.05);
-    if (perf.level < 2 && !entered && clock.elapsedTime > 3 && !document.hidden) {
+    if (perf.level < 3 && !entered && clock.elapsedTime > 3 && !document.hidden) {
       perf.frames++;
       perf.time += raw;
       if (perf.frames === 60) {
@@ -353,7 +360,7 @@ function start() {
       }
     }
     // On the slowest devices, draw every other frame (30fps) to leave the main thread some room
-    if (perf.level === 2 && (skipFrame = !skipFrame)) return;
+    if (perf.level === 3 && (skipFrame = !skipFrame)) return;
     draw(dt, clock.elapsedTime);
   }
   let skipFrame = false;

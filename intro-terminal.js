@@ -46,9 +46,10 @@ export function createTerminal() {
   const g = canvas.getContext('2d');
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  // Drawn at about the size it appears on screen (see setResolution), so no mipmap blur
-  texture.generateMipmaps = false;
-  texture.minFilter = THREE.LinearFilter;
+  // Drawn at twice the size it appears on screen (see setResolution) and mipmapped down
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.anisotropy = 8;
   const MONO = '"DM Mono", Menlo, monospace';
   // Big type so it stays readable at the laptop's size on screen
   const FS = 32, LH = 46, PAD = 40, TOP = 58;

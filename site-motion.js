@@ -64,6 +64,9 @@ gsap.to('.hero > div', { yPercent: -14, ease: 'none', scrollTrigger: hero });
 gsap.to('.quick', { y: -70, rotate: -2, ease: 'none', scrollTrigger: hero });
 gsap.to('.scroll-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140', scrub: true } });
 
+// ---------- Hero: a slowly moving glow behind it (its own small WebGL module) ----------
+import('./living-bg.js').then(m => m.init($('.hero'))).catch(() => {});
+
 // ---------- Hero entrance: one choreographed timeline, each piece arriving in its own way ----------
 // Plays right after the intro (or on load for returning visitors). The grid draws outward, the
 // eyebrow decodes, the headline's letters rise, the paragraph rises
@@ -119,9 +122,18 @@ function decode(el, seconds) {
   });
 }
 
-// The readout's numbers roll up like an odometer (rollNumber lives in site-live.js)
+// The readout's numbers flicker through digits before settling, like an instrument powering on
 function scrambleReadout() {
-  import('./site-live.js').then(m => $$('.quick dd').forEach((dd, i) => m.rollNumber(dd, i * 110)));
+  $$('.quick dd').forEach((dd, i) => {
+    const final = dd.textContent;
+    let n = 0;
+    setTimeout(() => {
+      const id = setInterval(() => {
+        dd.textContent = ++n > 10 ? final : final.replace(/\d/g, () => (Math.random() * 10) | 0);
+        if (n > 10) clearInterval(id);
+      }, 45);
+    }, i * 110);
+  });
 }
 if (root.classList.contains('hero-wait')) (window.fontsReady || document.fonts.ready).then(heroEntrance);
 

@@ -224,8 +224,13 @@ if (activity) whenNear(activity, async () => {
       c.style.transform = '';
       c.animate({ transform: ['scaleY(0)', 'scaleY(1)'] }, { duration: 600, delay: i * 18, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
     });
-    counter.textContent = total;
-    rollNumber(counter, 150);
+    const t0 = performance.now(), length = cells.length * 18 + 500;
+    const step = now => {
+      const p = Math.min(1, (now - t0) / length);
+      counter.textContent = Math.round(total * (1 - (1 - p) ** 3));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   });
 });
 
@@ -273,14 +278,30 @@ $$('.gallery-wrap').forEach(wrap => {
   // order: indexes from the bottom of the pile to the top
   let order = data.map((_, i) => i).reverse(), near = false, spins = 0;
   const load = i => { const img = cards[i].querySelector('img'); if (!img.src) img.src = cards[i].dataset.src; };
+  // A photo that comes to the top develops like an instant photo: milky and pale, then the picture
+  // comes up through it (once it's loaded, and only once the pile is on screen)
+  let lastTop = -1, seen = false;
+  const develop = i => {
+    if (reduce) return;
+    const img = cards[i].querySelector('img');
+    const run = () => img.animate([
+      { filter: 'grayscale(1) sepia(.25) brightness(1.55) contrast(.35) blur(1.5px)', opacity: .55 },
+      { filter: 'grayscale(.6) sepia(.35) brightness(1.25) contrast(.6) blur(.6px)', opacity: .8, offset: .35 },
+      { filter: 'none', opacity: 1 },
+    ], { duration: 3000, easing: 'cubic-bezier(.35,.55,.35,1)' });
+    img.complete && img.naturalWidth ? run() : img.addEventListener('load', run, { once: true });
+  };
   function sync() {
     order.forEach(i => pile.appendChild(cards[i]));
     const top = order.at(-1);
     cap.textContent = data[top][2];
     count.textContent = `${String(top + 1).padStart(2, '0')} / ${String(data.length).padStart(2, '0')}`;
     if (near) order.slice(-3).forEach(load);
+    if (seen && top !== lastTop) develop(top);
+    lastTop = top;
   }
   sync();
+  whenSeen(pile, () => { seen = true; develop(order.at(-1)); });
   new IntersectionObserver(([en], io) => { if (en.isIntersecting) { near = true; sync(); io.disconnect(); } }, { rootMargin: '800px 0px' }).observe(pile);
   // Each polaroid as big as fits in the pile (with room for its tilt): the photo, a 3.2% border, and the caption
   const fit = () => {
@@ -483,67 +504,40 @@ const loadResume = () => fetch('resume/').then(r => r.text()).then(html => {
 (window.requestIdleCallback || (cb => setTimeout(cb, 2000)))(loadResume, { timeout: 4000 });
 addEventListener('beforeprint', () => track('resume/print', 'Printed the resume'));
 
-// ---------- Numbers roll into place like an odometer ----------
-// Each digit becomes a little column of 0-9 that spins (a full turn and a bit) and stops on its digit,
-// the leftmost first. Other characters (".", "/", "K+") stay put. Afterwards the plain text comes back.
-export function rollNumber(el, delay = 0) {
-  if (!el || reduce || el.dataset.rolling) return;
-  const text = el.textContent;
-  if (!/\d/.test(text)) return;
-  el.dataset.rolling = '1';
-  el.setAttribute('aria-label', text);
-  const digits = '0123456789';
-  let n = 0;
-  el.innerHTML = [...text].map(ch => {
-    if (!/\d/.test(ch)) return `<span class="odo-fixed" aria-hidden="true">${ch === ' ' ? '&nbsp;' : ch}</span>`;
-    const i = n++;
-    return `<span class="odo" aria-hidden="true"><span class="odo-col" data-d="${ch}" style="--i:${i}">${(digits + digits).split('').map(d => `<span>${d}</span>`).join('')}</span></span>`;
-  }).join('');
-  const cols = [...el.querySelectorAll('.odo-col')];
-  let left = cols.length;
-  cols.forEach((col, i) => {
-    const target = 10 + +col.dataset.d;
-    col.animate([{ transform: 'translateY(0)' }, { transform: `translateY(${-target * 1.25}em)` }],
-      { duration: 900 + i * 160, delay: delay + i * 40, easing: 'cubic-bezier(.2,.75,.25,1)', fill: 'forwards' })
-      .finished.then(() => { if (--left === 0) { el.textContent = text; el.removeAttribute('aria-label'); delete el.dataset.rolling; } });
-  });
-}
-// The big numbers in More experience roll when it's opened
-$('#experience')?.addEventListener('toggle', e => {
-  if (e.target.open) $$('.xb-stat b', e.target).forEach((b, i) => rollNumber(b, 250 + i * 150));
-});
 
-// ---------- The pull chain on the dark mode switch ----------
-// Pull it down past a little resistance and let go: the lights flicker over to the other theme and the
-// chain springs back. A plain click on it works too.
-const cord = $('.lights .cord');
-if (cord) {
-  let startY = 0, pulled = 0, down = false, moved = false;
-  const base = () => parseFloat(getComputedStyle(cord).getPropertyValue('--len')) || 20;
-  cord.addEventListener('pointerdown', e => {
-    e.preventDefault(); e.stopPropagation();
-    down = true; moved = false; startY = e.clientY; pulled = 0;
-    cord.setPointerCapture(e.pointerId);
-    cord.classList.add('pulling');
-  });
-  cord.addEventListener('pointermove', e => {
-    if (!down) return;
-    pulled = Math.max(0, Math.min(46, e.clientY - startY));
-    if (pulled > 3) moved = true;
-    cord.style.height = `${base() + pulled}px`;
-  });
-  const release = () => {
-    if (!down) return;
-    down = false;
-    cord.classList.remove('pulling');
-    const from = cord.offsetHeight;
-    cord.style.height = '';
-    if (!reduce) cord.animate([{ height: `${from}px` }, { height: `${base() - 4}px` }, { height: `${base() + 2}px` }, { height: `${base()}px` }], { duration: 500, easing: 'ease-out' });
-    // A real pull, or just a tap on the chain
-    if (pulled > 14 || !moved) { window.toggleTheme?.('flicker'); track('egg/pull-chain', 'Pulled the light chain'); }
+// ---------- Thoughts fly into the phone ----------
+// When the Hold This Thought phone comes into view, a few real example thoughts drift in from the sides
+// as message bubbles and get pulled into the screen, shrinking as they go. Once per visit.
+const device = $('.sc-device');
+if (device && !reduce) {
+  const THOUGHTS = ['call mom tmrw at 5', 'buy batteries at Costco', 'MWF 8am lift', 'pay rent on the 1st', 'text Sam when I get home'];
+  const fly = () => {
+    const box = device.getBoundingClientRect(), screen = $('.phone-screen', device).getBoundingClientRect();
+    const tx = screen.left + screen.width / 2 - box.left, ty = screen.top + screen.height * 0.42 - box.top;
+    const narrow = innerWidth < 900;
+    THOUGHTS.slice(0, narrow ? 3 : 5).forEach((text, i) => {
+      const b = document.createElement('span');
+      b.className = 'thought';
+      b.setAttribute('aria-hidden', 'true');
+      b.textContent = text;
+      device.appendChild(b);
+      const side = i % 2 ? 1 : -1, w = b.offsetWidth, h = b.offsetHeight;
+      // Start out to the side of the phone, staggered up and down
+      const sx = tx + side * (narrow ? 120 : 240 + (i % 3) * 30) - w / 2, sy = ty - 170 + i * 85 - h / 2;
+      const ex = tx - w / 2, ey = ty - h / 2;
+      const mx = (sx + ex) / 2 + side * 40, my = Math.min(sy, ey) - 50;
+      b.animate([
+        { transform: `translate(${sx}px,${sy}px) scale(.85)`, opacity: 0 },
+        { transform: `translate(${sx}px,${sy}px) scale(1)`, opacity: 1, offset: .18 },
+        { transform: `translate(${sx}px,${sy}px) scale(1)`, opacity: 1, offset: .45 },
+        { transform: `translate(${mx}px,${my}px) scale(.7)`, opacity: 1, offset: .72 },
+        { transform: `translate(${ex}px,${ey}px) scale(.08)`, opacity: 0 },
+      ], { duration: 2600, delay: i * 320, easing: 'cubic-bezier(.45,0,.3,1)', fill: 'both' }).finished.then(() => b.remove());
+    });
+    // The screen gives a little pulse as each one lands
+    const scr = $('.phone-screen', device);
+    THOUGHTS.slice(0, narrow ? 3 : 5).forEach((_, i) => setTimeout(() => scr.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.12)' }, { filter: 'brightness(1)' }], { duration: 420 }), 2600 + i * 320 - 200));
   };
-  cord.addEventListener('pointerup', release);
-  cord.addEventListener('pointercancel', release);
-  // The button's own click (from this press) shouldn't toggle a second time
-  cord.addEventListener('click', e => e.stopPropagation());
+  const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { io.disconnect(); setTimeout(fly, 700); } }, { threshold: 0.6 });
+  io.observe($('.phone-3d', device) || device);
 }

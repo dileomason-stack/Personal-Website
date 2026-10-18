@@ -50,9 +50,6 @@ gsap.to('.hero > div', { yPercent: -14, ease: 'none', scrollTrigger: hero });
 gsap.to('.quick', { y: -70, rotate: -2, ease: 'none', scrollTrigger: hero });
 gsap.to('.scroll-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140', scrub: true } });
 
-// ---------- Hero: a slowly moving glow behind it (its own small WebGL module) ----------
-import('./living-bg.js').then(m => m.init($('.hero'))).catch(() => {});
-
 // ---------- Hero entrance: one choreographed timeline, each piece arriving in its own way ----------
 // Plays right after the intro (or on load for returning visitors). The grid draws outward, the
 // eyebrow decodes, the headline's letters rise, the paragraph rises

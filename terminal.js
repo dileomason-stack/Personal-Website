@@ -78,8 +78,8 @@ Built with Claude Code. Source: ${link('https://github.com/dileomason-stack/Pers
     await print('[sudo] password for recruiter: ********', 'dim', 500);
     await print('Checking references… ✓', 'dim', 600);
     await print('Checking the commit history… ✓', 'dim', 600);
-    setTimeout(() => { location.href = `mailto:${EMAIL}?subject=${encodeURIComponent('Let’s talk')}`; }, 900);
-    return '<b class="t-ok">Access granted.</b> Opening an email to Mason…';
+    // A link to click, rather than opening someone's mail app on its own
+    return `<b class="t-ok">Access granted.</b> <a href="mailto:${EMAIL}?subject=${encodeURIComponent('Let’s talk')}">Email Mason →</a>`;
   },
   hire: () => 'Did you mean <b>sudo hire mason</b>?',
   claude: () => '✻ Thinking… I helped build this whole site. Mason did the deciding.',

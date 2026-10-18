@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- GitHub Pages serves this for any address on the site that doesn't exist. It can be shown at any depth,
+     so every path here is absolute. The room is the render from the intro, with the lights off. -->
+<title>Wrong room · Mason Di Leo</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#070a0a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121a19'/%3E%3Ctext x='32' y='42' font-family='Arial' font-weight='800' font-size='26' fill='%23f4f1ea' text-anchor='middle'%3EMD%3C/text%3E%3C/svg%3E">
+<style>
+@font-face{font-family:Manrope;font-weight:200 800;font-display:swap;src:url(/Personal-Website/fonts/manrope-latin.woff2) format("woff2")}
+@font-face{font-family:"DM Mono";font-weight:500;font-display:swap;src:url(/Personal-Website/fonts/dm-mono-500-latin.woff2) format("woff2")}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#070a0a}
+body{font-family:Manrope,system-ui,sans-serif;color:#151513;overflow:hidden}
+.room{position:fixed;inset:0;isolation:isolate}
+.room img{position:absolute;left:0;top:0;display:block}
+.room .bg{width:100%;height:100%;object-fit:cover;object-position:50% 0;z-index:-2}
+.room .ball{z-index:-1}
+.dark{position:absolute;inset:0;z-index:-1;background:#05070a;opacity:.95;pointer-events:none}
+.copy{position:relative;z-index:1;text-align:center;padding:clamp(70px,13vh,130px) 22px 0;color:#d8d4cb;transition:color .6s}
+.lit .copy{color:#151513}
+.mo{font:500 12px "DM Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:#d4471f;margin:0 0 18px}
+h1{font-size:clamp(46px,7vw,96px);line-height:.88;letter-spacing:-.055em;margin:0 0 18px;font-weight:800}
+h1 em{font-style:normal;color:#d4471f}
+p{margin:0 auto 10px;max-width:440px;font-size:17px;line-height:1.55;opacity:.8}
+.home{display:inline-block;margin-top:14px;color:inherit;font:500 12px "DM Mono",monospace;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+.home:hover{opacity:1}
+/* The real switch in the render: a button over it, with a soft ring until it's found */
+.switch{all:unset;position:absolute;z-index:2;cursor:pointer;border-radius:10px}
+.switch:before{content:"";position:absolute;inset:-14px;border-radius:16px;border:2px solid rgba(212,71,31,.8);animation:ring 1.8s ease-out infinite}
+.lit .switch:before{display:none}
+.switch:focus-visible{outline:2px solid #d4471f;outline-offset:6px}
+@keyframes ring{0%{opacity:.9;transform:scale(.9)}100%{opacity:0;transform:scale(1.25)}}
+@media(prefers-reduced-motion:reduce){.switch:before{animation:none}}
+</style>
+</head>
+<body>
+<div class="room">
+  <picture><source media="(max-width: 700px)" srcset="/Personal-Website/room/room-phone.webp"><img class="bg" src="/Personal-Website/room/room-desk.webp" alt=""></picture>
+  <img class="ball" alt="">
+  <div class="dark"></div>
+  <button class="switch" type="button" aria-label="Flip the light switch and go to the homepage"></button>
+  <div class="copy">
+    <p class="mo">404 / Wrong room</p>
+    <h1>THIS ROOM<br><em>ISN’T BUILT YET.</em></h1>
+    <p>The page you’re after doesn’t exist, or I haven’t made it. Find the light switch to head home.</p>
+    <a class="home" href="/Personal-Website/">Or just take me home →</a>
+  </div>
+</div>
+<script>
+  // The same image positions as the Contact section (site-live.js): the image covers the window, pinned to the top
+  const SPOTS = {
+    desk: { img: [2400, 1270], sw: [808, 833, 130, 200], ball: [1987, 718, 58, 53], src: 'desk' },
+    phone: { img: [780, 1280], sw: [335, 745, 110, 150], ball: [106, 680, 30, 30], src: 'phone' },
+  };
+  const room = document.querySelector('.room'), sw = document.querySelector('.switch'), ball = document.querySelector('.ball'), dark = document.querySelector('.dark');
+  function place() {
+    const spot = SPOTS[innerWidth <= 700 ? 'phone' : 'desk'], W = innerWidth, H = innerHeight;
+    const s = Math.max(W / spot.img[0], H / spot.img[1]), dx = (W - spot.img[0] * s) / 2;
+    const box = (el, [x, y, w, h]) => Object.assign(el.style, { left: dx + x * s + 'px', top: y * s + 'px', width: w * s + 'px', height: h * s + 'px' });
+    box(sw, spot.sw);
+    box(ball, spot.ball);
+    ball.src = `/Personal-Website/room/ball-${spot.src}.webp`;
+  }
+  addEventListener('resize', place);
+  place();
+  sw.addEventListener('click', () => {
+    if (room.classList.contains('lit')) return;
+    room.classList.add('lit');
+    // A click, then the bulb flickers on, then home
+    try {
+      const a = new (window.AudioContext || window.webkitAudioContext)(), t = a.currentTime, b = a.createBuffer(1, a.sampleRate * 0.05, a.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+      f.type = 'bandpass'; f.frequency.value = 2400; g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+      src.buffer = b; src.connect(f).connect(g).connect(a.destination); src.start(t);
+    } catch (e) {}
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (still) dark.style.opacity = 0;
+    else dark.animate([{ opacity: 0.95 }, { opacity: 0.95, offset: 0.12 }, { opacity: 0.3, offset: 0.16 }, { opacity: 0.9, offset: 0.24 }, { opacity: 0.15, offset: 0.45 }, { opacity: 0.7, offset: 0.52 }, { opacity: 0 }], { duration: 1500, fill: 'forwards' });
+    document.querySelector('.copy p:not(.mo)').textContent = 'There we go. Taking you home…';
+    setTimeout(() => { location.href = '/Personal-Website/'; }, still ? 600 : 2100);
+  });
+</script>
+<script data-goatcounter="https://masondileo.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

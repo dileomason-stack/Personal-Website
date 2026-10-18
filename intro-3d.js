@@ -68,6 +68,15 @@ function start() {
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environmentIntensity = 0;
   const room = buildRoom(scene, renderer);
+  // ?still: a fixed camera and a few hooks, for rendering stills of the room (the Contact section's
+  // backdrop and its baseball, made with scripts in the repo's history)
+  const still = new URLSearchParams(location.search).has('still');
+  if (still) window.introStill = {
+    spot(obj) { const v = new THREE.Vector3(); obj.getWorldPosition(v); v.project(camera); return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight }; },
+    switch: () => window.introStill.spot(sw3),
+    ball: () => room.ball && window.introStill.spot(room.ball),
+    hideBall() { if (room.ball) room.ball.visible = false; },
+  };
 
   // ---------- Light switch ----------
   const plateMat = new THREE.MeshStandardMaterial({ color: 0xf1ebdd, roughness: 0.42 });
@@ -361,6 +370,8 @@ function start() {
     }
     // On the slowest devices, draw every other frame (30fps) to leave the main thread some room
     if (perf.level === 3 && (skipFrame = !skipFrame)) return;
+    // ?still: once frozen, nothing moves; the same frame is just drawn again
+    if (still && window.introStill.frozen) { composer.render(0); return; }
     draw(dt, clock.elapsedTime);
   }
   let skipFrame = false;
@@ -368,8 +379,8 @@ function start() {
     const k = 1 - Math.exp(-dt * 5);
 
     // Camera: gentle parallax, then the flight into the laptop screen
-    const mx = pointerSeen ? px / innerWidth - 0.5 : Math.sin(t * 0.3) * 0.15;
-    const my = pointerSeen ? py / innerHeight - 0.5 : 0;
+    const mx = still ? 0 : pointerSeen ? px / innerWidth - 0.5 : Math.sin(t * 0.3) * 0.15;
+    const my = still ? 0 : pointerSeen ? py / innerHeight - 0.5 : 0;
     par.x += (mx * 0.3 - par.x) * k;
     par.y += (-my * 0.18 - par.y) * k;
     if (S.fly > 0 && !flight.curve) planFlight();

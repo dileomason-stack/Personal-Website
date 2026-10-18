@@ -7,6 +7,20 @@ const $ = (sel, el = document) => el.querySelector(sel);
 const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// ---------- For whoever opens DevTools ----------
+console.log(
+  '%c MASON DI LEO %c Learning by building\n\n%cHey, you opened the console. I like you.\n\n' +
+  'This site is hand-built, no framework or template: three.js for the room, GSAP and Lenis for the motion, ' +
+  'Matter.js for the letters, View Transitions for the case studies, and a JavaScript port of my iOS app\'s ' +
+  'reminder parser. Built with Claude Code.\n\n' +
+  'Source:  https://github.com/dileomason-stack/Personal-Website\n' +
+  'Email:   dileomason@gmail.com\n\n' +
+  'Psst: press ` (backtick) anywhere on the page.',
+  'background:#d4471f;color:#fff;font:800 13px Manrope,system-ui,sans-serif;padding:6px 10px;border-radius:4px 0 0 4px',
+  'background:#151513;color:#f3f0ea;font:500 12px "DM Mono",monospace;padding:7px 10px;border-radius:0 4px 4px 0',
+  'color:inherit;font:13px/1.6 system-ui,sans-serif',
+);
+
 // ---------- Visitor stats (GoatCounter): off until the page's <meta name="goatcounter"> has a code ----------
 // Page views come from GoatCounter's script; these events add what people do here.
 const statsCode = document.querySelector('meta[name="goatcounter"]')?.content.trim();
@@ -356,16 +370,103 @@ $$('.gallery-wrap').forEach(wrap => {
 });
 
 // ---------- Contact: the room from the intro, dark until the bulb flickers on ----------
+// The render's light switch and baseball work: a button sits over each, placed to match the image
+// (it's scaled to cover the section, pinned to the top). Positions come from the 3D scene that made it.
 const room = $('.contact .room-dark');
 if (room) {
-  const on = () => {
+  const section = room.parentElement, sw = $('.room-switch', section), ball = $('.room-ball', section), ballImg = $('img', ball);
+  const SPOTS = {
+    desk: { img: [2400, 1270], sw: [808, 833, 130, 200], ball: [1987, 718, 58, 53], floor: 1254 },
+    phone: { img: [780, 1280], sw: [335, 745, 110, 150], ball: [106, 680, 30, 30], floor: 1260 },
+  };
+  let spot, scale, dx, ballOnFloor = false;
+  const place = () => {
+    spot = SPOTS[innerWidth <= 700 ? 'phone' : 'desk'];
+    const W = section.clientWidth, H = section.clientHeight;
+    scale = Math.max(W / spot.img[0], H / spot.img[1]);
+    dx = (W - spot.img[0] * scale) / 2;
+    const box = (el, [x, y, w, h]) => Object.assign(el.style, { left: `${dx + x * scale}px`, top: `${y * scale}px`, width: `${w * scale}px`, height: `${h * scale}px` });
+    box(sw, spot.sw);
+    box(ball, spot.ball);
+    ballImg.src = `room/ball-${spot === SPOTS.desk ? 'desk' : 'phone'}.webp`;
+    if (ballOnFloor) ball.style.transform = landed();
+  };
+  new ResizeObserver(place).observe(section);
+  place();
+
+  // A small synthesized sound (no audio files), only after a click
+  let audio;
+  const sound = (freq, length, gain) => {
+    try {
+      audio ??= new (window.AudioContext || window.webkitAudioContext)();
+      const t = audio.currentTime, src = audio.createBufferSource(), b = audio.createBuffer(1, audio.sampleRate * length, audio.sampleRate), d = b.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const f = audio.createBiquadFilter(), g = audio.createGain();
+      f.type = 'bandpass'; f.frequency.value = freq;
+      g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + length);
+      src.buffer = b; src.connect(f).connect(g).connect(audio.destination); src.start(t);
+    } catch (e) {}
+  };
+
+  let lit = false, flicker;
+  const lightsOn = () => {
+    lit = true;
+    sw.setAttribute('aria-pressed', 'true');
     if (reduce) { room.style.opacity = 0; return; }
     // The same uneven flicker as the intro's bulb, then steady
-    room.animate([
+    flicker = room.animate([
       { opacity: 0.94 }, { opacity: 0.94, offset: 0.12 }, { opacity: 0.3, offset: 0.16 }, { opacity: 0.9, offset: 0.24 },
       { opacity: 0.85, offset: 0.4 }, { opacity: 0.15, offset: 0.45 }, { opacity: 0.7, offset: 0.52 }, { opacity: 0.05, offset: 0.62 }, { opacity: 0 },
     ], { duration: 1700, easing: 'linear', fill: 'forwards' });
-    track('contact/lights', 'Reached the contact room');
   };
-  new IntersectionObserver(([en], io) => { if (en.isIntersecting) { io.disconnect(); setTimeout(on, 250); } }, { threshold: 0.45 }).observe(room.parentElement);
+  const lightsOff = () => {
+    lit = false;
+    sw.setAttribute('aria-pressed', 'false');
+    flicker?.cancel();
+    room.style.opacity = 0.94;
+  };
+  new IntersectionObserver(([en], io) => { if (en.isIntersecting) { io.disconnect(); setTimeout(() => { lightsOn(); track('contact/lights', 'Reached the contact room'); }, 250); } }, { threshold: 0.45 }).observe(section);
+  sw.addEventListener('click', () => {
+    sound(3200, 0.03, 0.5); setTimeout(() => sound(700, 0.07, 0.35), 35);
+    lit ? lightsOff() : lightsOn();
+    track('egg/switch', 'Flipped the light switch');
+  });
+
+  // The baseball rolls off the shelf, drops to the floor and bounces to a stop; click it there and it
+  // hops back up. Distances are in image pixels, scaled like the image.
+  const landed = () => `translate(${-120 * scale}px, ${(spot.floor - spot.ball[1] - spot.ball[3]) * scale}px) rotate(-540deg)`;
+  ball.addEventListener('click', () => {
+    track('egg/baseball', 'Knocked the baseball off the shelf');
+    const fall = (spot.floor - spot.ball[1] - spot.ball[3]) * scale, s = scale;
+    if (reduce) { ballOnFloor = !ballOnFloor; ball.style.transform = ballOnFloor ? landed() : ''; return; }
+    if (!ballOnFloor) {
+      ball.animate([
+        { transform: 'none', easing: 'ease-in' },
+        { transform: `translate(${-34 * s}px, 0) rotate(-120deg)`, offset: 0.2, easing: 'cubic-bezier(.5,0,1,.6)' },
+        { transform: `translate(${-70 * s}px, ${fall}px) rotate(-300deg)`, offset: 0.55, easing: 'cubic-bezier(0,.4,.5,1)' },
+        { transform: `translate(${-92 * s}px, ${fall - 60 * s}px) rotate(-400deg)`, offset: 0.7, easing: 'cubic-bezier(.5,0,1,.6)' },
+        { transform: `translate(${-108 * s}px, ${fall}px) rotate(-480deg)`, offset: 0.83, easing: 'ease-out' },
+        { transform: landed() },
+      ], { duration: 1500, fill: 'forwards' });
+      setTimeout(() => sound(160, 0.12, 0.9), 820);
+      setTimeout(() => sound(160, 0.08, 0.4), 1240);
+    } else {
+      ball.animate([
+        { transform: landed(), easing: 'cubic-bezier(0,.5,.4,1)' },
+        { transform: `translate(${-40 * s}px, ${-50 * s}px) rotate(-200deg)`, offset: 0.6, easing: 'cubic-bezier(.6,0,1,1)' },
+        { transform: 'none' },
+      ], { duration: 900, fill: 'forwards' });
+      setTimeout(() => sound(900, 0.05, 0.3), 880);
+    }
+    ballOnFloor = !ballOnFloor;
+  });
 }
+
+// ---------- A hidden terminal: press ` anywhere (or the >_ link in the footer) ----------
+const terminal = () => import('./terminal.js').then(m => m.openTerminal());
+addEventListener('keydown', e => {
+  if (e.key !== '`' || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.('input, textarea, [contenteditable]')) return;
+  e.preventDefault();
+  terminal();
+});
+$('.foot-term')?.addEventListener('click', terminal);

@@ -533,6 +533,13 @@ html.lenis{scroll-behavior:auto}
 /* The dark comes off as the bulb flickers on (site-live.js); the page above fades down into the room */
 .room-dark{position:absolute;inset:0;z-index:-1;background:#05070a;opacity:.94;pointer-events:none}
 .contact:before{content:"";position:absolute;left:0;right:0;top:0;height:22vh;z-index:0;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+/* The switch and the baseball in the render are real: a button over each, placed to match the image */
+.room-ball,.room-switch{all:unset;position:absolute;left:0;top:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.room-ball{z-index:-1;transform-origin:50% 50%}
+.room-ball img{display:block;width:100%;height:100%}
+.room-switch{z-index:2;border-radius:8px}
+.room-ball:focus-visible,.room-switch:focus-visible{outline:2px solid #d4471f;outline-offset:4px;border-radius:50%}
+.room-copy{pointer-events:none}.room-copy>*{pointer-events:auto}
 .room-copy{position:relative;z-index:1;padding:clamp(80px,14vh,130px) var(--gutter) 0}
 .contact .num{justify-content:center;color:#d4471f}
 .contact h3{font-size:clamp(44px,6.2vw,96px);line-height:.86;letter-spacing:-.06em;margin:0 0 18px;font-weight:800}
@@ -774,7 +781,8 @@ html.vt-case-out::view-transition-new(root){animation:none}
 @media(max-width:700px){.activity{grid-template-columns:1fr auto}.act-bars{grid-column:1/-1;height:34px}.act-tip{display:none}}
 
 footer{display:flex;justify-content:space-between;gap:12px;padding:26px var(--pad-x);background:var(--inv-bg);color:var(--inv-muted);font-size:12px;border-top:1px solid var(--inv-line)}
-footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{color:var(--inv-text)}
+footer a{text-decoration:none}
+.foot-term{all:unset;cursor:pointer;font:500 12px "DM Mono",monospace;color:inherit}.foot-term:hover{color:var(--inv-text)}.foot-term:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.foot-links{display:flex;gap:20px}footer a:hover{color:var(--inv-text)}
 
 /* ---------- Responsive ---------- */
 @media(max-width:900px){
@@ -1160,7 +1168,9 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
 <section class="contact" id="contact">
   <!-- The ending: the page dims into the bedroom from the intro, and the bulb flickers on -->
   <picture class="room-bg" aria-hidden="true"><source media="(max-width: 700px)" srcset="room/room-phone.webp"><img src="room/room-desk.webp" alt="" width="2400" height="1270" loading="lazy" decoding="async"></picture>
+  <button class="room-ball" type="button" aria-label="Knock the baseball off the shelf"><img src="room/ball-desk.webp" alt="" draggable="false"></button>
   <div class="room-dark" aria-hidden="true"></div>
+  <button class="room-switch" type="button" aria-label="Light switch" aria-pressed="true"></button>
   <div class="room-copy">
   <p class="num mo reveal">08 / Contact</p>
   <h3 class="reveal d1">LET’S BUILD<br><em>SOMETHING.</em></h3>
@@ -1172,7 +1182,7 @@ footer a{text-decoration:none}.foot-links{display:flex;gap:20px}footer a:hover{c
   </div>
   </div>
 </section>
-<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="?intro">Replay intro ↺</a></span><span>Cal Poly SLO / Business + IS</span></footer>
+<footer><span>© 2026 Mason Di Leo</span><span class="foot-links"><a href="https://www.linkedin.com/in/masondileo/" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="?intro">Replay intro ↺</a><button class="foot-term" type="button" aria-label="Open the terminal">&gt;_</button></span><span>Cal Poly SLO / Business + IS</span></footer>
 </main>
 
 <!-- Case studies (case-study.js): each card's screenshot and title morph into the page (View Transitions) -->

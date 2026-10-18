@@ -189,12 +189,14 @@ export function buildRoom(scene, renderer) {
   const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 8), new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xff9a5c, emissiveIntensity: 0 }));
   desk.add(pulse);
 
+  const api = {};
   // The baseball (a slimmed-down glTF: quantized mesh, 256px WebP textures) loads once the room is
   // up, so it never competes with what's on screen first
   (window.requestIdleCallback || (cb => setTimeout(cb, 600)))(() => new GLTFLoader().loadAsync('models/baseball.glb').then(g => {
     const ball = normalize(g.scene, 0.2);
     ball.position.set(0, 0, 0.2);
     shelf.add(ball);
+    api.ball = ball;
   }), { timeout: 1500 });
 
   // ---------- Layout ----------
@@ -287,7 +289,8 @@ export function buildRoom(scene, renderer) {
   // Full resolution for the camera's dive into the laptop
   const highRes = () => terminal.setResolution(2048);
 
-  return { layout, update, highRes, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot, hotspots };
+  Object.assign(api, { layout, update, highRes, screen, screenSize: [SCREEN_W, SCREEN_H], paperMat, switchSpot, hotspots });
+  return api;
 }
 
 // Center a loaded model on x/z, sit it on y = 0, and scale its longest side to `size`

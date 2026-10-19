@@ -466,6 +466,16 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .showcase .try-note{margin:14px 0 0;font-size:12.5px;line-height:1.55;color:var(--inv-muted);max-width:none}
 /* Phones: the mockup has scrolled away by the time you reach the box, so it goes; the case study has the reader to try */
 @media(max-width:700px){.sc-try{display:none}}
+/* Desktop: the phone sits at the top beside the copy, and Try the app runs as a wide strip under both,
+   right below the phone whose screen it drives */
+.showcase{align-items:start;row-gap:28px}
+.showcase>.sc-try{grid-column:1/-1;margin-top:0;display:grid;grid-template-columns:minmax(220px,.75fr) 2fr;gap:6px 32px;align-items:start;padding:24px 28px}
+.showcase>.sc-try .try-label{grid-column:1;grid-row:1;margin:0}
+.showcase>.sc-try .try-note{grid-column:1;grid-row:2;margin:6px 0 0}
+.showcase>.sc-try .try-field{grid-column:2;grid-row:1}
+.showcase>.sc-try .try-chips{grid-column:2;grid-row:2;margin-top:6px}
+.showcase>.sc-try .try-result{grid-column:1/-1}
+@media(max-width:1100px){.showcase>.sc-try{grid-template-columns:1fr}.showcase>.sc-try>*{grid-column:1!important;grid-row:auto!important}}
 /* On a phone the mockup has scrolled away by the time you type, so the card shows right under the field */
 @media(max-width:900px){.try-result:not(:empty){display:block;margin-top:14px;padding:16px;border-radius:var(--r-md);background:#fff;color:#141414;font-family:Manrope,system-ui,sans-serif;font-size:15px}}
 
@@ -1007,23 +1017,6 @@ footer a{text-decoration:none}
         <p class="sc-cap">Get reminded when you walk into home, the grocery store, or the gym.</p>
         <p class="sc-cap">Share a thought with a friend or a group. When one of you does it, it comes off both lists.</p>
       </div>
-      <form class="sc-try" autocomplete="off" spellcheck="false">
-        <label class="try-label" for="htt-input"><span class="mo">Try the app</span>Type a reminder the way you’d text it</label>
-        <div class="try-field">
-          <input id="htt-input" type="text" placeholder="remind me to call Sam tomorrow at 5" maxlength="120" enterkeyhint="done">
-          <button class="try-clear" type="button" aria-label="Clear" hidden>×</button>
-          <button class="try-go" type="submit">Save</button>
-        </div>
-        <div class="try-chips" aria-label="Examples">
-          <button type="button">call mom tmrw at 5</button>
-          <button type="button">buy batteries next time I’m at Costco</button>
-          <button type="button">MWF at 8am lift</button>
-          <button type="button">check the bread in 20</button>
-          <button type="button">pay rent on the 1st of every month</button>
-        </div>
-        <div class="try-result" aria-live="polite"></div>
-        <p class="try-note">This is the app’s own reminder reader, ported from Swift to JavaScript and running in your browser. It passes all 295 of the app’s test cases.</p>
-      </form>
     </div>
     <div class="sc-device">
       <div class="phone-3d">
@@ -1054,6 +1047,23 @@ footer a{text-decoration:none}
         </div>
       </div>
     </div>
+    <form class="sc-try" autocomplete="off" spellcheck="false">
+      <label class="try-label" for="htt-input"><span class="mo">Try the app</span>Type a reminder the way you’d text it</label>
+      <div class="try-field">
+        <input id="htt-input" type="text" placeholder="remind me to call Sam tomorrow at 5" maxlength="120" enterkeyhint="done">
+        <button class="try-clear" type="button" aria-label="Clear" hidden>×</button>
+        <button class="try-go" type="submit">Save</button>
+      </div>
+      <div class="try-chips" aria-label="Examples">
+        <button type="button">call mom tmrw at 5</button>
+        <button type="button">buy batteries next time I’m at Costco</button>
+        <button type="button">MWF at 8am lift</button>
+        <button type="button">check the bread in 20</button>
+        <button type="button">pay rent on the 1st of every month</button>
+      </div>
+      <div class="try-result" aria-live="polite"></div>
+      <p class="try-note">This is the app’s own reminder reader, ported from Swift to JavaScript and running in your browser. It passes all 295 of the app’s test cases.</p>
+    </form>
   </article>
 
   <div class="exp reveal" id="experience">

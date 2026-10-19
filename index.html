@@ -463,15 +463,13 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .htt-saved{display:flex;align-items:center;gap:10px;font-weight:500}
 .htt-saved svg{flex:none;width:20px;height:20px;fill:#141a17}
 .try-result:has(.htt-saved){background:#9eeb1a!important;border-radius:99px!important}
-.showcase .try-note{margin:14px 0 0;font-size:12.5px;line-height:1.55;color:var(--inv-muted);max-width:none}
 /* Phones: the mockup has scrolled away by the time you reach the box, so it goes; the case study has the reader to try */
 @media(max-width:700px){.sc-try{display:none}}
 /* Desktop: the phone sits at the top beside the copy, and Try the app runs as a wide strip under both,
    right below the phone whose screen it drives */
 .showcase{align-items:start;row-gap:28px}
 .showcase>.sc-try{grid-column:1/-1;margin-top:0;display:grid;grid-template-columns:minmax(220px,.75fr) 2fr;gap:6px 32px;align-items:start;padding:24px 28px}
-.showcase>.sc-try .try-label{grid-column:1;grid-row:1;margin:0}
-.showcase>.sc-try .try-note{grid-column:1;grid-row:2;margin:6px 0 0}
+.showcase>.sc-try .try-label{grid-column:1;grid-row:1 / span 2;margin:0}
 .showcase>.sc-try .try-field{grid-column:2;grid-row:1}
 .showcase>.sc-try .try-chips{grid-column:2;grid-row:2;margin-top:6px}
 .showcase>.sc-try .try-result{grid-column:1/-1}
@@ -1058,11 +1056,8 @@ footer a{text-decoration:none}
         <button type="button">call mom tmrw at 5</button>
         <button type="button">buy batteries next time I’m at Costco</button>
         <button type="button">MWF at 8am lift</button>
-        <button type="button">check the bread in 20</button>
-        <button type="button">pay rent on the 1st of every month</button>
       </div>
       <div class="try-result" aria-live="polite"></div>
-      <p class="try-note">This is the app’s own reminder reader, ported from Swift to JavaScript and running in your browser. It passes all 295 of the app’s test cases.</p>
     </form>
   </article>
 

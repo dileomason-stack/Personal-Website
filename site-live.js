@@ -253,7 +253,7 @@ if (linked) {
 // bottom of the pile. Arrow buttons and the keyboard do the same. Photos load as they near the top.
 $$('.gallery-wrap').forEach(wrap => {
   const data = JSON.parse(wrap.dataset.slides);
-  const title = wrap.closest('section')?.querySelector('.display')?.textContent.replace(/\s+/g, ' ').trim() || 'Photos';
+  const title = wrap.dataset.title || wrap.closest('section')?.querySelector('.display')?.textContent.replace(/\s+/g, ' ').trim() || 'Photos';
   wrap.innerHTML = `<div class="pile" tabindex="0" role="group" aria-roledescription="photo pile" aria-label="${title} photos. Use the arrow keys to flip through."></div>
     <div class="pile-side"><p class="cap" aria-live="polite"></p><p class="count mo"></p>
     <div class="pile-btns"><button type="button" class="prev" aria-label="Previous photo">←</button><button type="button" class="next" aria-label="Next photo">→</button></div>

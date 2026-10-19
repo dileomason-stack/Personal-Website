@@ -280,7 +280,7 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 /* The main roles sit in the open; the rest fold away below them */
 .exp{margin-top:clamp(40px,6vw,72px)}
 .exp-label{margin:0 0 14px;color:var(--inv-muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
-.xb-open{padding:0}
+.exp .xb-open{padding:0}
 .more-work{margin-top:12px;border-radius:var(--r-lg);border:1px solid var(--inv-line);overflow:hidden}
 .more-work summary{padding:22px clamp(24px,4vw,40px);cursor:pointer;display:flex;justify-content:space-between;align-items:center;list-style:none;color:var(--inv-text);transition:background .25s}
 .more-work summary:hover{background:var(--inv-surface)}
@@ -295,13 +295,10 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .xb.big{grid-column:span 1;padding:26px 28px}
 .xb.wide{grid-column:span 2}
 .xb.now{background:linear-gradient(160deg,rgba(233,201,163,.1),transparent 60%),var(--inv-surface);border-color:rgba(233,201,163,.35)}
-.xb-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:auto;padding-bottom:22px}
+.xb-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:22px}
 .xb-top time{color:var(--inv-accent)}
 .xb-tag{padding:4px 9px;border:1px solid var(--inv-line);border-radius:30px;color:var(--inv-text-2);font-size:10px}
 .xb.now .xb-tag{border-color:var(--inv-accent);color:var(--inv-accent)}
-.xb-stat{margin:0 0 10px!important;display:flex;align-items:baseline;gap:8px}
-.xb-stat b{font-size:clamp(40px,4.4vw,60px);font-weight:800;letter-spacing:-.05em;line-height:.9;color:var(--inv-text)}
-.xb-stat .mo{color:var(--inv-muted)}
 .xb h4{margin:0;font-size:18px;letter-spacing:-.02em;line-height:1.25;color:var(--inv-text)}
 .xb.big h4{font-size:22px}
 .xb .xb-org{margin:3px 0 10px!important;font-size:14px!important;color:var(--inv-accent)!important;opacity:.85}
@@ -540,6 +537,17 @@ html.lenis{scroll-behavior:auto}
 .pile-btns button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .pile-hint{margin:18px 0 0;color:var(--text-2);font-size:14px}
 @media(max-width:900px){.gallery-wrap{grid-template-columns:1fr}.pile{height:min(118vw,520px)}}
+/* Off the clock: two piles side by side, each with its controls underneath */
+.piles{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px)}
+.pile-title{margin:0 0 6px;color:var(--accent);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.piles .gallery-wrap{grid-template-columns:1fr;gap:18px}
+.piles .pile{height:clamp(340px,34vw,500px)}
+.piles .pile-side{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:16px}
+.piles .pile-side .cap{font-size:clamp(22px,2vw,28px)}
+.piles .pile-side .count{margin:0}
+.piles .pile-btns{grid-column:2;grid-row:1 / span 2}
+.piles .pile-hint{grid-column:1 / -1;margin-top:10px}
+@media(max-width:760px){.piles{grid-template-columns:1fr;gap:56px}.piles .pile{height:min(110vw,480px)}}
 
 /* ---------- Contact ---------- */
 .contact{min-height:max(calc(100svh - 138px),600px);padding:0;background:#070a0a;color:#151513;text-align:center;overflow:hidden;display:grid;justify-items:center;align-items:start;isolation:isolate}
@@ -1092,9 +1100,8 @@ footer a{text-decoration:none}
       </article>
       <article class="xb big">
         <div class="xb-top"><time class="mo">2021 — 2024</time><span class="xb-tag mo">Work</span></div>
-        <p class="xb-stat"><b>160K+</b> <span class="mo">followers</span></p>
         <h4>Operations Manager</h4><p class="xb-org">NBA.Downtown</p>
-        <p class="xb-desc">Grew the brand and secured sponsorships including UFC and DraftKings.</p>
+        <p class="xb-desc">Grew the Instagram from 35K to 160K followers and secured sponsorships including UFC and DraftKings.</p>
       </article>
     </div>
     <details class="more-work" id="more-experience">
@@ -1108,9 +1115,8 @@ footer a{text-decoration:none}
       </article>
       <article class="xb big">
         <div class="xb-top"><time class="mo">2023 — 2025</time><span class="xb-tag mo">Volunteer</span></div>
-        <p class="xb-stat"><b>30</b> <span class="mo">students</span></p>
         <h4>Peer Tutor</h4><p class="xb-org">AVID Program</p>
-        <p class="xb-desc">One-on-one and group support across math, science, English, and languages.</p>
+        <p class="xb-desc">Supported 30 students one-on-one and in groups across math, science, English, and languages.</p>
       </article>
       <article class="xb big">
         <div class="xb-top"><time class="mo">2024</time><span class="xb-tag mo">Volunteer</span></div>
@@ -1193,27 +1199,36 @@ footer a{text-decoration:none}
 <section class="personal" id="photos">
   <div class="personal-head reveal">
     <div><p class="num mo">04 / Off the clock</p><h3 class="display">OFF THE<br>CLOCK.</h3></div>
-    <p class="body">Trips, training, the people who keep me going, and the cars I’ve tracked down in person (every car photo is one I took).</p>
+    <p class="body">Two piles: the cars I’ve tracked down in person (every photo one I took), and trips, training, and the people who keep me going.</p>
   </div>
-  <div class="gallery-wrap reveal" data-slides='[
-    ["photos/personal-london.webp","Mason in London","London",1000,750],
-    ["photos/car-dino.webp","Blue classic sports car","Classic Italian design",1000,667],
-    ["photos/personal-paris.webp","Paris river view","Paris",750,1000],
-    ["photos/car-911.webp","Green classic Porsche 911","Air-cooled Porsche",750,1000],
-    ["photos/personal-dog.webp","White dog resting","Home",751,1000],
-    ["photos/car-rally.webp","Red Porsche rally car","Rally character",1000,667],
-    ["photos/personal-gym.webp","Friends at the gym","Training",750,1000],
-    ["photos/car-f40.webp","Red Ferrari F40 cars","Ferrari F40",1000,667],
-    ["photos/personal-formal.webp","Mason dressed formally outdoors","Celebrating",750,1000],
-    ["photos/car-88.webp","Historic number 88 race car","Endurance history",750,1000],
-    ["photos/personal-punting.webp","Punting on a river","Exploring",750,1000],
-    ["photos/car-carrera.webp","Silver Porsche Carrera GT","Engineering icon",750,1000],
-    ["photos/personal-giants.webp","Giants baseball game","Giants baseball",1000,750],
-    ["photos/car-supercar.webp","White supercar on a street","Modern performance",1000,667],
-    ["photos/personal-hike.webp","Hiking by a mountain lake","Outdoors",1000,728],
-    ["photos/car-917.webp","Porsche 917 race car","Porsche 917",750,1000],
-    ["photos/car-heritage-1.webp","Porsche 962 race car","Porsche 962",750,1000],
-    ["photos/car-heritage-2.webp","Silver McLaren F1","McLaren F1",750,1000]]'></div>
+  <div class="piles">
+    <div class="pile-col reveal">
+      <p class="pile-title mo">Cars</p>
+      <div class="gallery-wrap" data-title="Cars" data-slides='[
+      ["photos/car-dino.webp","Blue classic sports car","Classic Italian design",1000,667],
+      ["photos/car-911.webp","Green classic Porsche 911","Air-cooled Porsche",750,1000],
+      ["photos/car-rally.webp","Red Porsche rally car","Rally character",1000,667],
+      ["photos/car-f40.webp","Red Ferrari F40 cars","Ferrari F40",1000,667],
+      ["photos/car-88.webp","Historic number 88 race car","Endurance history",750,1000],
+      ["photos/car-carrera.webp","Silver Porsche Carrera GT","Engineering icon",750,1000],
+      ["photos/car-supercar.webp","White supercar on a street","Modern performance",1000,667],
+      ["photos/car-917.webp","Porsche 917 race car","Porsche 917",750,1000],
+      ["photos/car-heritage-1.webp","Porsche 962 race car","Porsche 962",750,1000],
+      ["photos/car-heritage-2.webp","Silver McLaren F1","McLaren F1",750,1000]]'></div>
+    </div>
+    <div class="pile-col reveal">
+      <p class="pile-title mo">Life</p>
+      <div class="gallery-wrap" data-title="Life" data-slides='[
+      ["photos/personal-paris.webp","Paris river view","Paris",750,1000],
+      ["photos/personal-dog.webp","White dog resting","Home",751,1000],
+      ["photos/personal-gym.webp","Friends at the gym","Training",750,1000],
+      ["photos/personal-formal.webp","Mason dressed formally outdoors","Celebrating",750,1000],
+      ["photos/personal-punting.webp","Punting on a river","Exploring",750,1000],
+      ["photos/personal-giants.webp","Giants baseball game","Giants baseball",1000,750],
+      ["photos/personal-hike.webp","Hiking by a mountain lake","Outdoors",1000,728],
+      ["photos/personal-london.webp","Mason in London","London",1000,750]]'></div>
+    </div>
+  </div>
 </section>
 
 <section class="contact" id="contact">

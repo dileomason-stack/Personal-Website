@@ -52,8 +52,8 @@ gsap.matchMedia().add('(min-width: 701px)', () => { gsap.to('.quick', { y: -70, 
 gsap.to('.scroll-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140', scrub: true } });
 
 // ---------- Hero entrance: one choreographed timeline, each piece arriving in its own way ----------
-// Plays right after the intro (or on load for returning visitors). The eyebrow decodes, the headline's letters rise, the paragraph rises
-// line by line, the buttons spring up, the readout card boots like an instrument, and the scroll
+// Plays right after the intro (or on load for returning visitors). The eyebrow fades in, the headline's letters rise, the paragraph rises
+// line by line, the buttons spring up, the readout card opens and its rows fade in, and the scroll
 // cue arrives last.
 function heroEntrance() {
   const hero = $('.hero'), eyebrow = $('.eyebrow', hero), h2 = $('h2', hero), lead = $('.lead', hero);
@@ -67,7 +67,7 @@ function heroEntrance() {
   const arrows = buttons.map(b => $('.arr', b));
   gsap.set(arrows, { transition: 'none' });
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
-  tl.add(() => decode(eyebrow, 0.9), 0.05)
+  tl.to(eyebrow, { autoAlpha: 1, duration: 0.8, ease: 'power2.out' }, 0.05)
     .from(letters.chars, { yPercent: 115, rotate: 6, transformOrigin: '0% 100%', duration: 1.1, stagger: 0.028 }, 0.15)
     .add(() => letters.revert(), 2.1)
     .from(lines.lines, { yPercent: 105, duration: 1, stagger: 0.08 }, 0.55)
@@ -80,41 +80,10 @@ function heroEntrance() {
     .from($('.status', card), { autoAlpha: 0, duration: 0.08, repeat: 4, yoyo: true, ease: 'none' }, 1.15)
     .fromTo(rows, { '--rule': 0 }, { '--rule': 1, duration: 0.7, ease: 'power2.inOut', stagger: 0.1 }, 1.05)
     .from(rows.flatMap(r => [...r.children]), { autoAlpha: 0, y: 6, duration: 0.45, ease: 'power2.out', stagger: 0.05 }, 1.15)
-    .add(scrambleReadout, 1.2)
     .from(cue, { autoAlpha: 0, y: -12, duration: 0.8, ease: 'power3.out' }, 1.9);
   root.classList.remove('hero-wait');
 }
 
-// Mono text types itself out, with a short run of scrambled characters ahead of what's settled
-function decode(el, seconds) {
-  const text = el.textContent, glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/+';
-  el.setAttribute('aria-label', text);
-  gsap.set(el, { autoAlpha: 1 });
-  const state = { p: 0 };
-  gsap.to(state, {
-    p: 1, duration: seconds, ease: 'power1.inOut',
-    onUpdate: () => {
-      const n = Math.floor(state.p * text.length);
-      const ahead = text.slice(n, n + 7).replace(/[^ ]/g, () => glyphs[(Math.random() * glyphs.length) | 0]);
-      el.textContent = text.slice(0, n) + ahead;
-    },
-    onComplete: () => { el.textContent = text; el.removeAttribute('aria-label'); },
-  });
-}
-
-// The readout's numbers flicker through digits before settling, like an instrument powering on
-function scrambleReadout() {
-  $$('.quick dd').forEach((dd, i) => {
-    const final = dd.textContent;
-    let n = 0;
-    setTimeout(() => {
-      const id = setInterval(() => {
-        dd.textContent = ++n > 10 ? final : final.replace(/\d/g, () => (Math.random() * 10) | 0);
-        if (n > 10) clearInterval(id);
-      }, 45);
-    }, i * 110);
-  });
-}
 if (root.classList.contains('hero-wait')) (window.fontsReady || document.fonts.ready).then(heroEntrance);
 
 // ---------- Section headings: each line rises out of its own mask ----------
@@ -211,17 +180,3 @@ gsap.matchMedia().add('(min-width: 901px)', () => {
 $$('.gallery-wrap').forEach(g => {
   gsap.fromTo(g, { scale: 0.9, y: 60 }, { scale: 1, y: 0, ease: 'none', scrollTrigger: { trigger: g, start: 'top bottom', end: 'top 35%', scrub: true } });
 });
-
-
-// ---------- Buttons lean toward the cursor, then spring back ----------
-if (finePointer) {
-  $$('.btn').forEach(b => {
-    const toX = gsap.quickTo(b, 'x', { duration: 0.45, ease: 'power3' }), toY = gsap.quickTo(b, 'y', { duration: 0.45, ease: 'power3' });
-    b.addEventListener('pointermove', e => {
-      const r = b.getBoundingClientRect();
-      toX((e.clientX - r.left - r.width / 2) * 0.25);
-      toY((e.clientY - r.top - r.height / 2) * 0.4);
-    });
-    b.addEventListener('pointerleave', () => gsap.to(b, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.35)' }));
-  });
-}

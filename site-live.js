@@ -40,7 +40,7 @@ export function track(path, title) {
 addEventListener('intro:skip', () => track('intro/skipped', 'Skipped the intro'));
 addEventListener('intro:done', () => setTimeout(() => sent.has('intro/skipped') || track('intro/watched', 'Watched the intro'), 0));
 
-// ---------- Nav: Mason's time in San Luis Obispo, then what he's probably up to ----------
+// ---------- Nav: what Mason's probably up to right now (his local time is in the tooltip) ----------
 // Edit the moods here. Hours are Pacific time; `days` limits a row to weekdays (1-5) or weekends.
 const MOODS = [
   { from: 0, to: 2, text: 'Up late, building', mood: 'late' },
@@ -53,7 +53,6 @@ const MOODS = [
 ];
 const now = $('#now');
 if (now) {
-  const roll = $('.now-roll', now), a = $('.now-a', now), b = $('.now-b', now);
   const clock = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit' });
   const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hourCycle: 'h23', weekday: 'short' });
   const days = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
@@ -61,15 +60,13 @@ if (now) {
     const d = new Date(), p = Object.fromEntries(parts.formatToParts(d).map(x => [x.type, x.value]));
     const hour = +p.hour % 24, day = days[p.weekday];
     const m = MOODS.find(r => hour >= r.from && hour < r.to && (!r.days || r.days.includes(day)));
-    a.textContent = `${clock.format(d)} in SLO`;
-    b.textContent = m.text;
+    now.textContent = m.text;
+    now.title = `${clock.format(d)} in San Luis Obispo`;
     now.dataset.mood = m.mood || 'awake';
     now.setAttribute('aria-label', `${clock.format(d)} in San Luis Obispo. ${m.text}.`);
   };
   update();
   setInterval(update, 15000);
-  // Rolls between the time and the mood every few seconds (holds on the time with reduced motion)
-  if (!reduce) setInterval(() => roll.classList.toggle('flip'), 4500);
 }
 
 // ---------- Hold This Thought: type a thought and the app's own parser reads it ----------

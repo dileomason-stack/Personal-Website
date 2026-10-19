@@ -491,6 +491,8 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .htt-saved svg{flex:none;width:20px;height:20px;fill:#141a17}
 .try-result:has(.htt-saved){background:#9eeb1a!important;border-radius:99px!important}
 .showcase .try-note{margin:14px 0 0;font-size:12.5px;line-height:1.55;color:var(--inv-muted);max-width:none}
+/* Phones: the mockup has scrolled away by the time you reach the box, so it goes; the case study has the reader to try */
+@media(max-width:700px){.sc-try{display:none}}
 /* On a phone the mockup has scrolled away by the time you type, so the card shows right under the field */
 @media(max-width:900px){.try-result:not(:empty){display:block;margin-top:14px;padding:16px;border-radius:var(--r-md);background:#fff;color:#141414;font-family:Manrope,system-ui,sans-serif;font-size:15px}}
 
@@ -1019,7 +1021,7 @@ footer a{text-decoration:none}
     <div class="sc-copy">
       <span class="sc-label mo"><img class="sc-icon" src="hold-this-thought-logo-transparent.webp" alt="" width="40" height="40">Hold This Thought / Active build</span>
       <h4>Hold This Thought</h4>
-      <p>Building a native Swift iOS reminder app that helps people capture passing thoughts before they disappear. The app turns spoken or typed ideas into helpful prompts based on time, location, calendar events, and saved places. I lead product direction, interface design, and iOS development, from concept testing through live iPhone demos.</p>
+      <p>A native iOS app that turns spoken or typed thoughts into reminders that go off at the right time, the right place, or with the right people. I lead product, design, and iOS development.</p>
       <div class="pills"><span class="pill">Swift</span><span class="pill">Product</span><span class="pill">UX</span><span class="pill">iOS</span></div>
       <button class="btn case-open sc-case" type="button" data-case="holdthisthought">CASE STUDY + PARSER <span class="arr">→</span></button>
       <div class="sc-steps" role="tablist" aria-label="How Hold This Thought works">
@@ -1136,7 +1138,7 @@ footer a{text-decoration:none}
   </div>
   <div class="proj-grid single">
     <article class="proj reveal" id="homeroom">
-      <div class="shot"><video class="demo" src="homeroom-demo.mp4" poster="homeroom-demo-poster.jpg" muted loop playsinline controls preload="none" aria-label="Homeroom demo video"></video></div>
+      <div class="shot"><video class="demo" src="homeroom-demo.mp4" data-start="7.5" poster="homeroom-demo-poster.jpg" muted loop playsinline controls preload="none" aria-label="Homeroom demo video"></video></div>
       <div class="proj-body">
         <span class="mo">Build Day #1 / Live</span>
         <h4>Homeroom</h4>
@@ -1150,7 +1152,7 @@ footer a{text-decoration:none}
       </div>
     </article>
     <article class="proj reveal" id="whenworks">
-      <div class="shot"><video class="demo" src="whenworks-demo.mp4" poster="whenworks-demo-poster.jpg" muted loop playsinline controls preload="none" aria-label="WhenWorks demo video"></video></div>
+      <div class="shot"><video class="demo" src="whenworks-demo.mp4" data-start="6.8" poster="whenworks-demo-poster.jpg" muted loop playsinline controls preload="none" aria-label="WhenWorks demo video"></video></div>
       <div class="proj-body">
         <span class="mo">Side project / Live</span>
         <h4>WhenWorks</h4>
@@ -1519,10 +1521,20 @@ footer a{text-decoration:none}
   function revealVisible() { document.querySelectorAll('.reveal').forEach(el => revObs.observe(el)); }
   if (reduce) document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
 
-  // Demo videos: play muted while on screen
+  // Demo videos: play muted while on screen. The first time, skip the dark title card (data-start)
+  // so the app is what you see; later loops play the whole thing.
   document.querySelectorAll('video.demo').forEach(v => {
+    let started = false;
     new IntersectionObserver(([en]) => {
-      if (en.isIntersecting && !reduce) { v.preload = 'auto'; v.play().catch(() => {}); }
+      if (en.isIntersecting && !reduce) {
+        v.preload = 'auto';
+        if (!started) {
+          started = true;
+          const skip = () => { if (v.currentTime < +v.dataset.start) v.currentTime = +v.dataset.start; };
+          v.readyState >= 1 ? skip() : v.addEventListener('loadedmetadata', skip, { once: true });
+        }
+        v.play().catch(() => {});
+      }
       else if (!en.isIntersecting) v.pause();
     }, { threshold: .4 }).observe(v);
   });

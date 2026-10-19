@@ -3,7 +3,7 @@
 import { track } from './site-live.js';
 
 const EMAIL = 'dileomason@gmail.com';
-const SECTIONS = { work: '#work', experience: '#experience', projects: '#projects', education: '#education', cars: '#cars', photos: '#photos', contact: '#contact', top: '#top' };
+const SECTIONS = { work: '#work', experience: '#experience', projects: '#projects', education: '#education', cars: '#photos', photos: '#photos', contact: '#contact', top: '#top' };
 const PROJECTS = {
   holdthisthought: ['Hold This Thought', 'iOS app. Say a thought once; it reminds you at the right time or place.'],
   homeroom: ['Homeroom', 'A dashboard where a student’s day starts. Built in four days.'],

@@ -31,7 +31,7 @@ if (!intro.classList.contains('done')) {
   }, { once: true });
 }
 (window.fontsReady || document.fonts.ready).then(() => ScrollTrigger.refresh());
-$('#experience')?.addEventListener('toggle', () => ScrollTrigger.refresh());
+$('#more-experience')?.addEventListener('toggle', () => ScrollTrigger.refresh());
 
 // ---------- Nav: reading progress, and an ink pill that slides to the active section ----------
 gsap.to('.bar-progress', { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: 0.3 } });

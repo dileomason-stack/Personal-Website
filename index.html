@@ -277,7 +277,11 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .feature p{color:var(--inv-text-2);line-height:1.65;font-size:17px;margin:0 0 28px;max-width:620px}
 .feature .pill{border-color:var(--inv-line);color:var(--inv-text-2)}
 .feature .pill:hover{border-color:var(--inv-accent);color:var(--inv-text)}
-.more-work{margin-top:24px;border-radius:var(--r-lg);border:1px solid var(--inv-line);overflow:hidden}
+/* The main roles sit in the open; the rest fold away below them */
+.exp{margin-top:clamp(40px,6vw,72px)}
+.exp-label{margin:0 0 14px;color:var(--inv-muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.xb-open{padding:0}
+.more-work{margin-top:12px;border-radius:var(--r-lg);border:1px solid var(--inv-line);overflow:hidden}
 .more-work summary{padding:22px clamp(24px,4vw,40px);cursor:pointer;display:flex;justify-content:space-between;align-items:center;list-style:none;color:var(--inv-text);transition:background .25s}
 .more-work summary:hover{background:var(--inv-surface)}
 .more-work summary::-webkit-details-marker{display:none}
@@ -285,10 +289,10 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .more-work[open] summary .plus{transform:rotate(45deg);background:var(--inv-accent);color:var(--inv-bg);border-color:var(--inv-accent)}
 /* More experience: a bento grid. The current role and the biggest number get the large tiles. */
 .more-meta{margin-left:auto;margin-right:18px;color:var(--inv-muted)}
-.xb-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:6px clamp(16px,3vw,28px) clamp(16px,3vw,28px)}
+.xb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:6px clamp(16px,3vw,28px) clamp(16px,3vw,28px)}
 .xb{grid-column:span 1;display:flex;flex-direction:column;padding:22px;border-radius:var(--r-md);background:var(--inv-surface);border:1px solid var(--inv-line);transition:border-color .3s,transform .3s var(--ease)}
 .xb:hover{border-color:var(--inv-muted);transform:translateY(-2px)}
-.xb.big{grid-column:span 2;padding:26px 28px}
+.xb.big{grid-column:span 1;padding:26px 28px}
 .xb.wide{grid-column:span 2}
 .xb.now{background:linear-gradient(160deg,rgba(233,201,163,.1),transparent 60%),var(--inv-surface);border-color:rgba(233,201,163,.35)}
 .xb-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:auto;padding-bottom:22px}
@@ -305,8 +309,8 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .more-work[open] .xb{animation:xpIn .5s var(--ease) both}
 .more-work[open] .xb:nth-child(2){animation-delay:.05s}.more-work[open] .xb:nth-child(3){animation-delay:.1s}.more-work[open] .xb:nth-child(4){animation-delay:.14s}.more-work[open] .xb:nth-child(5){animation-delay:.18s}.more-work[open] .xb:nth-child(6){animation-delay:.22s}
 @keyframes xpIn{from{opacity:0;transform:translateY(10px)}}
-@media(max-width:1000px){.xb-grid{grid-template-columns:repeat(2,1fr)}.xb.big{grid-column:span 2}.xb.wide{grid-column:span 1}}
-@media(max-width:600px){.xb-grid{grid-template-columns:1fr}.xb.big,.xb.wide{grid-column:auto}.more-meta{display:none}.xb,.xb.big{padding:20px}.xb-top{padding-bottom:16px}}
+@media(max-width:1000px){.xb-grid{grid-template-columns:repeat(2,1fr)}.xb.big{grid-column:span 1}.xb-grid .xb:first-child{grid-column:span 2}}
+@media(max-width:600px){.xb-grid{grid-template-columns:1fr}.xb.big,.xb.wide,.xb-grid .xb:first-child{grid-column:auto}.more-meta{display:none}.xb,.xb.big{padding:20px}.xb-top{padding-bottom:16px}}
 
 /* ---------- Projects ---------- */
 .projects{background:var(--bg)}
@@ -959,7 +963,7 @@ footer a{text-decoration:none}
     <a href="#experience" id="exp-link">Experience</a>
     <a href="#projects">Projects</a>
     <a href="#education">Education</a>
-    <a href="#cars">About Me</a>
+    <a href="#photos">About Me</a>
     <a href="#contact">Contact</a>
   </div>
   <div class="bar-end">
@@ -1071,9 +1075,9 @@ footer a{text-decoration:none}
     </div>
   </article>
 
-  <details class="more-work reveal" id="experience">
-    <summary><span class="mo">More experience</span><span class="more-meta mo">6 roles since 2021</span><span class="plus" aria-hidden="true">+</span></summary>
-    <div class="xb-grid">
+  <div class="exp reveal" id="experience">
+    <p class="exp-label mo">Experience</p>
+    <div class="xb-grid xb-open">
       <article class="xb big now">
         <div class="xb-top"><time class="mo">2026 — Present</time><span class="xb-tag mo">Current</span></div>
         
@@ -1081,17 +1085,21 @@ footer a{text-decoration:none}
         <p class="xb-desc">Supporting Cal Poly students through tutoring, grading, and weekly office hours.</p>
       </article>
       <article class="xb big">
-        <div class="xb-top"><time class="mo">2021 — 2024</time><span class="xb-tag mo">Work</span></div>
-        <p class="xb-stat"><b>160K+</b> <span class="mo">followers</span></p>
-        <h4>Operations Manager</h4><p class="xb-org">NBA.Downtown</p>
-        <p class="xb-desc">Grew the brand and secured sponsorships including UFC and DraftKings.</p>
-      </article>
-      <article class="xb big">
         <div class="xb-top"><time class="mo">2025</time><span class="xb-tag mo">Work</span></div>
         
         <h4>Product Innovation Intern</h4><p class="xb-org">Shockproof Training</p>
         <p class="xb-desc">Modernized digital training modules and pitched an AI integration to the board.</p>
       </article>
+      <article class="xb big">
+        <div class="xb-top"><time class="mo">2021 — 2024</time><span class="xb-tag mo">Work</span></div>
+        <p class="xb-stat"><b>160K+</b> <span class="mo">followers</span></p>
+        <h4>Operations Manager</h4><p class="xb-org">NBA.Downtown</p>
+        <p class="xb-desc">Grew the brand and secured sponsorships including UFC and DraftKings.</p>
+      </article>
+    </div>
+    <details class="more-work" id="more-experience">
+      <summary><span class="mo">More experience</span><span class="more-meta mo">3 more roles</span><span class="plus" aria-hidden="true">+</span></summary>
+      <div class="xb-grid">
       <article class="xb big">
         <div class="xb-top"><time class="mo">2022 — 2025</time><span class="xb-tag mo">Founder</span></div>
         
@@ -1110,8 +1118,9 @@ footer a{text-decoration:none}
         <h4>Camp Counselor</h4><p class="xb-org">Golden Eagle Summer Sports Camp</p>
         <p class="xb-desc">Led sports and team-building while mentoring campers.</p>
       </article>
-    </div>
-  </details>
+      </div>
+    </details>
+  </div>
 </section>
 
 <section class="projects" id="projects">
@@ -1181,38 +1190,30 @@ footer a{text-decoration:none}
   </div>
 </section>
 
-<section class="personal" id="cars">
+<section class="personal" id="photos">
   <div class="personal-head reveal">
-    <div><p class="num mo">04 / Passions</p><h3 class="display">CARS.</h3></div>
-    <p class="body">Every photo here is one I took myself: a few favorites from the cars I’ve tracked down in person.</p>
+    <div><p class="num mo">04 / Off the clock</p><h3 class="display">OFF THE<br>CLOCK.</h3></div>
+    <p class="body">Trips, training, the people who keep me going, and the cars I’ve tracked down in person (every car photo is one I took).</p>
   </div>
   <div class="gallery-wrap reveal" data-slides='[
+    ["photos/personal-london.webp","Mason in London","London",1000,750],
     ["photos/car-dino.webp","Blue classic sports car","Classic Italian design",1000,667],
+    ["photos/personal-paris.webp","Paris river view","Paris",750,1000],
     ["photos/car-911.webp","Green classic Porsche 911","Air-cooled Porsche",750,1000],
+    ["photos/personal-dog.webp","White dog resting","Home",751,1000],
     ["photos/car-rally.webp","Red Porsche rally car","Rally character",1000,667],
+    ["photos/personal-gym.webp","Friends at the gym","Training",750,1000],
     ["photos/car-f40.webp","Red Ferrari F40 cars","Ferrari F40",1000,667],
+    ["photos/personal-formal.webp","Mason dressed formally outdoors","Celebrating",750,1000],
     ["photos/car-88.webp","Historic number 88 race car","Endurance history",750,1000],
+    ["photos/personal-punting.webp","Punting on a river","Exploring",750,1000],
     ["photos/car-carrera.webp","Silver Porsche Carrera GT","Engineering icon",750,1000],
+    ["photos/personal-giants.webp","Giants baseball game","Giants baseball",1000,750],
     ["photos/car-supercar.webp","White supercar on a street","Modern performance",1000,667],
+    ["photos/personal-hike.webp","Hiking by a mountain lake","Outdoors",1000,728],
     ["photos/car-917.webp","Porsche 917 race car","Porsche 917",750,1000],
     ["photos/car-heritage-1.webp","Porsche 962 race car","Porsche 962",750,1000],
     ["photos/car-heritage-2.webp","Silver McLaren F1","McLaren F1",750,1000]]'></div>
-</section>
-
-<section class="personal" id="photos">
-  <div class="personal-head reveal">
-    <div><p class="num mo">05 / Off the clock</p><h3 class="display">ME, OUTSIDE<br>THE WORK.</h3></div>
-    <p class="body">Beyond study and work, here is a glimpse of my travel, training, and the people that keep me going.</p>
-  </div>
-  <div class="gallery-wrap reveal" data-slides='[
-    ["photos/personal-paris.webp","Paris river view","Paris",750,1000],
-    ["photos/personal-dog.webp","White dog resting","Home",751,1000],
-    ["photos/personal-gym.webp","Friends at the gym","Training",750,1000],
-    ["photos/personal-formal.webp","Mason dressed formally outdoors","Celebrating",750,1000],
-    ["photos/personal-punting.webp","Punting on a river","Exploring",750,1000],
-    ["photos/personal-giants.webp","Giants baseball game","Giants baseball",1000,750],
-    ["photos/personal-hike.webp","Hiking by a mountain lake","Outdoors",1000,728],
-    ["photos/personal-london.webp","Mason in London","London",1000,750]]'></div>
 </section>
 
 <section class="contact" id="contact">
@@ -1222,7 +1223,7 @@ footer a{text-decoration:none}
   <div class="room-dark" aria-hidden="true"></div>
   <button class="room-switch" type="button" aria-label="Light switch" aria-pressed="true"></button>
   <div class="room-copy">
-  <p class="num mo reveal">06 / Contact</p>
+  <p class="num mo reveal">05 / Contact</p>
   <h3 class="reveal d1">LET’S BUILD<br><em>SOMETHING.</em></h3>
   <p class="reveal d2">Looking for a <b>Summer 2027 internship</b>, a <b>co-op</b>, or <b>remote</b> work. Email is the fastest way to reach me.</p>
   <div class="hero-actions reveal d3">
@@ -1482,20 +1483,11 @@ footer a{text-decoration:none}
     });
   });
 
-  // Experience link opens the collapsed list
-  const more = document.getElementById('experience');
-  document.getElementById('exp-link').addEventListener('click', e => {
-    e.preventDefault();
-    more.open = true;
-    if (window.siteLenis) window.siteLenis.scrollTo(more, { offset: -80 });
-    else more.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-  });
-
   // Nav border on scroll + active section
   const bar = document.getElementById('bar');
   addEventListener('scroll', () => bar.classList.toggle('scrolled', scrollY > 10), { passive: true });
   const links = [...document.querySelectorAll('.nav a')];
-  const navMap = { work: 'work', projects: 'projects', education: 'education', about: 'cars', cars: 'cars', photos: 'cars', contact: 'contact' };
+  const navMap = { work: 'work', projects: 'projects', education: 'education', photos: 'photos', contact: 'contact' };
   const secObs = new IntersectionObserver(entries => {
     entries.forEach(en => {
       if (!en.isIntersecting) return;

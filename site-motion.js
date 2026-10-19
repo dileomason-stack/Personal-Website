@@ -52,8 +52,7 @@ gsap.matchMedia().add('(min-width: 701px)', () => { gsap.to('.quick', { y: -70, 
 gsap.to('.scroll-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140', scrub: true } });
 
 // ---------- Hero entrance: one choreographed timeline, each piece arriving in its own way ----------
-// Plays right after the intro (or on load for returning visitors). The grid draws outward, the
-// eyebrow decodes, the headline's letters rise, the paragraph rises
+// Plays right after the intro (or on load for returning visitors). The eyebrow decodes, the headline's letters rise, the paragraph rises
 // line by line, the buttons spring up, the readout card boots like an instrument, and the scroll
 // cue arrives last.
 function heroEntrance() {
@@ -68,8 +67,7 @@ function heroEntrance() {
   const arrows = buttons.map(b => $('.arr', b));
   gsap.set(arrows, { transition: 'none' });
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
-  tl.fromTo(hero, { '--grid-size': '0%' }, { '--grid-size': '80%', duration: 2, ease: 'power2.out' }, 0)
-    .add(() => decode(eyebrow, 0.9), 0.05)
+  tl.add(() => decode(eyebrow, 0.9), 0.05)
     .from(letters.chars, { yPercent: 115, rotate: 6, transformOrigin: '0% 100%', duration: 1.1, stagger: 0.028 }, 0.15)
     .add(() => letters.revert(), 2.1)
     .from(lines.lines, { yPercent: 105, duration: 1, stagger: 0.08 }, 0.55)
@@ -84,8 +82,6 @@ function heroEntrance() {
     .from(rows.flatMap(r => [...r.children]), { autoAlpha: 0, y: 6, duration: 0.45, ease: 'power2.out', stagger: 0.05 }, 1.15)
     .add(scrambleReadout, 1.2)
     .from(cue, { autoAlpha: 0, y: -12, duration: 0.8, ease: 'power3.out' }, 1.9);
-  // Once the letters have landed, they become grabbable (desktop)
-  if (finePointer) tl.add(() => import('./hero-physics.js').then(m => m.initHeadline(h2)), 2.2);
   root.classList.remove('hero-wait');
 }
 
@@ -122,16 +118,12 @@ function scrambleReadout() {
 if (root.classList.contains('hero-wait')) (window.fontsReady || document.fonts.ready).then(heroEntrance);
 
 // ---------- Section headings: each line rises out of its own mask ----------
-// On desktop the letters also react to the cursor: Manrope is a variable font, so letters near the
-// pointer thin out (800 down to 300) like a lens passing over them, and fill back in behind it.
-const lensed = [];
 $$('.display').forEach(el => {
   let first = true;
   SplitText.create(el, {
-    type: 'lines,chars', mask: 'lines', autoSplit: true,
+    type: 'lines', mask: 'lines', autoSplit: true,
     onSplit: self => {
-      const entry = lensed.find(l => l.el === el) || (lensed.push({ el, chars: [] }), lensed.at(-1));
-      entry.chars = self.chars.map(c => ({ c, w: 800 }));
+      // Re-splits on resize just re-wrap the lines; the rise only plays once
       if (!first) return;
       first = false;
       return gsap.from(self.lines, {
@@ -141,33 +133,6 @@ $$('.display').forEach(el => {
     },
   });
 });
-if (finePointer) {
-  const R = 150, MIN = 300, MAX = 800;
-  let px = -1e4, py = -1e4, raf = 0;
-  const step = () => {
-    raf = 0;
-    let moving = false;
-    for (const { el, chars } of lensed) {
-      const box = el.getBoundingClientRect();
-      const near = px > box.left - R && px < box.right + R && py > box.top - R && py < box.bottom + R;
-      for (const ch of chars) {
-        let target = MAX;
-        if (near) {
-          const r = ch.c.getBoundingClientRect(), d = Math.hypot(px - (r.left + r.width / 2), py - (r.top + r.height / 2));
-          if (d < R) target = MAX - (MAX - MIN) * (1 - d / R) ** 2;
-        }
-        const w = ch.w + (target - ch.w) * 0.18;
-        if (Math.abs(w - ch.w) > 0.5) { ch.w = w; ch.c.style.fontWeight = Math.round(w); moving = true; }
-        else if (ch.w !== target) { ch.w = target; ch.c.style.fontWeight = target === MAX ? '' : target; }
-      }
-    }
-    if (moving) raf = requestAnimationFrame(step);
-  };
-  addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(step); }, { passive: true });
-  // Scrolling moves the letters under a still cursor too
-  lenis.on('scroll', () => { if (px > -1e4 && !raf) raf = requestAnimationFrame(step); });
-  document.addEventListener('pointerleave', () => { px = py = -1e4; if (!raf) raf = requestAnimationFrame(step); });
-}
 // The short rule before each section number draws itself in
 ScrollTrigger.batch('.num', { start: 'top 92%', once: true, onEnter: batch => batch.forEach(n => n.classList.add('drawn')) });
 

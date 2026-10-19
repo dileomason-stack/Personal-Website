@@ -46,7 +46,7 @@
 :root,[data-theme="bone"]{
   --bg:#f3f0ea;--bg-2:#e9e5dd;--surface:#fbfaf7;--tint:#e7e3da;
   --text:#151513;--text-2:#3d3c37;--muted:#76736b;
-  --line:#ddd8ce;--line-strong:#c6c0b3;--grid:#e2ddd3;
+  --line:#ddd8ce;--line-strong:#c6c0b3;
   --accent:#d4471f;--accent-ink:#ffffff;--accent-soft:#f5dbd1;
   --inv-bg:#131311;--inv-surface:#1b1b19;--inv-surface-2:#232320;--inv-line:#2e2d29;
   --inv-text:#f3f0ea;--inv-text-2:#b7b3a9;--inv-muted:#8b877d;--inv-accent:#e9c9a3;
@@ -56,7 +56,7 @@
 [data-theme="night"]{
   --bg:#0c0d0e;--bg-2:#151618;--surface:#131416;--tint:#101113;
   --text:#ededea;--text-2:#b3b3ad;--muted:#85857f;
-  --line:#232427;--line-strong:#35373b;--grid:#18191c;
+  --line:#232427;--line-strong:#35373b;
   --accent:#c6f25b;--accent-ink:#0c0d0e;--accent-soft:#1d2411;
   --inv-bg:#141517;--inv-surface:#1a1b1e;--inv-surface-2:#212226;--inv-line:#2a2c30;
   --inv-text:#ededea;--inv-text-2:#b3b3ad;--inv-muted:#85857f;--inv-accent:#c6f25b;
@@ -222,33 +222,11 @@ section{padding:clamp(72px,8vw,112px) var(--pad-x);position:relative}
 
 /* ---------- Hero ---------- */
 .hero{min-height:calc(100svh - 68px);display:grid;grid-template-columns:1.3fr .7fr;align-items:center;gap:clamp(40px,6vw,96px);padding-top:clamp(56px,7vw,96px);padding-bottom:clamp(64px,8vw,104px);overflow:hidden}
-.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:
-  linear-gradient(var(--grid) 1px,transparent 1px) 0 0/48px 48px,
-  linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/48px 48px;
-  -webkit-mask:radial-gradient(ellipse var(--grid-size,80%) calc(var(--grid-size,80%) * .875) at 30% 40%,#000 30%,transparent 80%);mask:radial-gradient(ellipse var(--grid-size,80%) calc(var(--grid-size,80%) * .875) at 30% 40%,#000 30%,transparent 80%)}
 .hero:after{content:"";position:absolute;z-index:-1;right:-12vw;top:-14vw;width:56vw;height:56vw;border-radius:50%;background:radial-gradient(circle,var(--accent-haze) 0,transparent 62%)}
 .eyebrow{color:var(--accent);margin:0 0 28px}
 .hero h2{font-size:clamp(54px,8.4vw,126px);line-height:.86;letter-spacing:-.06em;margin:0;font-weight:800}
 .hero h2 em{font-style:normal;color:var(--accent)}
-/* Grabbable headline (hero-physics.js): letters lift on hover; the note points at them until the first grab */
 .hero>div{position:relative}
-.grabbable{-webkit-user-select:none;user-select:none}
-.grabbable .ch{display:inline-block;cursor:grab;transition:translate .3s var(--ease)}
-.grabbable .ch:hover{translate:0 -.05em}
-.grabbable.live .ch{will-change:transform}
-.grabbable .ch.held{cursor:grabbing;position:relative;z-index:2;translate:none}
-.grab-note{position:absolute;width:0;height:0;pointer-events:none;color:var(--text)}
-.grab-note svg{position:absolute;left:0;top:-34px;width:70px;height:38px;overflow:visible}
-.grab-note path{fill:none;stroke:var(--muted);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
-.grab-note.on .shaft{animation:note-draw .5s .1s var(--ease) forwards}
-.grab-note.on .head{animation:note-draw .2s .52s ease-out forwards}
-.grab-note span{position:absolute;left:78px;top:-40px;white-space:nowrap}
-.grab-note b{display:block;font:600 15px/1.2 Manrope,system-ui,sans-serif;letter-spacing:-.01em}
-.grab-note small{display:block;margin-top:3px;font-size:10px;color:var(--muted)}
-.grab-note b,.grab-note small{clip-path:inset(0 100% 0 0)}
-.grab-note.on b{animation:note-write .6s .35s var(--ease) forwards}
-.grab-note.on small{animation:note-write .6s .5s var(--ease) forwards}
-.grab-note:not(.on){opacity:0;transition:opacity .3s}
 .lead{max-width:600px;font-size:clamp(18px,1.6vw,21px);line-height:1.55;margin:36px 0 36px;color:var(--text-2)}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
 /* The readout: a quiet instrument panel rather than a sticker */
@@ -917,8 +895,7 @@ footer a{text-decoration:none}
   "gsap/": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/",
   "html2canvas": "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js",
   "gsap/ScrollTrigger": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js/+esm",
-  "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.mjs",
-  "matter-js": "https://cdn.jsdelivr.net/npm/matter-js@0.20.0/+esm"
+  "lenis": "https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.mjs"
 } }
 </script>
 <script type="module">

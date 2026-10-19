@@ -70,7 +70,6 @@ and learn whatever skills they need. Open to internships and co-ops.`,
   stack: () => `No framework, no template:
   three.js           the 3D bedroom in the intro
   GSAP + Lenis       scroll and motion
-  Matter.js          the letters you can grab
   View Transitions   case studies opening out of their cards
   a JS port of my iOS app’s reminder parser (295/295 tests)
 Built with Claude Code. Source: ${link('https://github.com/dileomason-stack/Personal-Website', 'github.com/dileomason-stack/Personal-Website')}`,
@@ -96,7 +95,6 @@ Built with Claude Code. Source: ${link('https://github.com/dileomason-stack/Pers
   secrets: () => `Things to try:
   · the light switch on the wall at the bottom of the page
   · the baseball on that shelf
-  · grabbing a letter of the headline
   · flicking a photo off the pile`,
   history: () => history.map((h, i) => `${String(i + 1).padStart(3)}  ${esc(h)}`).join('\n') || '(empty)',
 };

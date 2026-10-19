@@ -11,7 +11,7 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 console.log(
   '%c MASON DI LEO %c Learning by building\n\n%cHey, you opened the console. I like you.\n\n' +
   'This site is hand-built, no framework or template: three.js for the room, GSAP and Lenis for the motion, ' +
-  'Matter.js for the letters, View Transitions for the case studies, and a JavaScript port of my iOS app\'s ' +
+  'View Transitions for the case studies, and a JavaScript port of my iOS app\'s ' +
   'reminder parser. Built with Claude Code.\n\n' +
   'Source:  https://github.com/dileomason-stack/Personal-Website\n' +
   'Email:   dileomason@gmail.com\n\n' +

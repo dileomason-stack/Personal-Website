@@ -227,6 +227,11 @@ section{padding:clamp(72px,8vw,112px) var(--pad-x);position:relative}
 /* The readout: a quiet instrument panel rather than a sticker */
 .quick{background:var(--inv-surface);color:var(--inv-text);padding:28px;border-radius:var(--r-lg);border:1px solid var(--inv-line);box-shadow:var(--shadow-lg);position:relative}
 .quick-head{display:flex;justify-content:space-between;align-items:center;gap:16px;color:var(--inv-muted)}
+/* Who's behind the card: a small round photo, name, and major */
+.quick-id{display:flex;align-items:center;gap:14px;margin:18px 0 4px}
+.quick-id img{flex:none;width:64px;height:64px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--inv-line)}
+.quick-id b{display:block;font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--inv-text)}
+.quick-id span{display:block;margin-top:2px;font-size:13px;line-height:1.4;color:var(--inv-muted)}
 .status{display:inline-flex;align-items:center;gap:8px;color:var(--inv-text)}
 .status:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 var(--ok-ring)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
@@ -981,6 +986,7 @@ footer a{text-decoration:none}
   </div>
   <aside class="quick reveal d2">
     <div class="quick-head"><span class="mo">Current readout</span><span class="mo status">Open to internships</span></div>
+    <div class="quick-id"><img src="photos/mason.webp" alt="Mason Di Leo" width="64" height="64"><div><b>Mason Di Leo</b><span>Business + Information Systems, Cal Poly</span></div></div>
     <dl>
       <div><dt>Major GPA</dt><dd>4.0 / 4.0</dd></div>
       <div><dt>Cumulative GPA</dt><dd>3.85 / 4.0</dd></div>

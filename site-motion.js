@@ -79,6 +79,7 @@ function heroEntrance() {
     .set(card, { clearProps: 'clipPath' })
     .from($('.status', card), { autoAlpha: 0, duration: 0.08, repeat: 4, yoyo: true, ease: 'none' }, 1.15)
     .fromTo(rows, { '--rule': 0 }, { '--rule': 1, duration: 0.7, ease: 'power2.inOut', stagger: 0.1 }, 1.05)
+    .from('.quick-id', { autoAlpha: 0, y: 6, duration: 0.5, ease: 'power2.out' }, 1.0)
     .from(rows.flatMap(r => [...r.children]), { autoAlpha: 0, y: 6, duration: 0.45, ease: 'power2.out', stagger: 0.05 }, 1.15)
     .from(cue, { autoAlpha: 0, y: -12, duration: 0.8, ease: 'power3.out' }, 1.9);
   root.classList.remove('hero-wait');

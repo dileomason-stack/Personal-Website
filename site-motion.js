@@ -44,11 +44,11 @@ function movePill() {
 }
 new MutationObserver(movePill).observe(nav, { subtree: true, attributes: true, attributeFilter: ['class'] });
 
-// ---------- Hero: the copy drifts up slower than the page, the readout card lags and tilts ----------
+// ---------- Hero: the copy drifts up slower than the page, the readout card drifts a little slower ----------
 const hero = { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true };
 gsap.to('.hero > div', { yPercent: -14, ease: 'none', scrollTrigger: hero });
-// (wide screens only: on a phone the card sits mid-screen, where the tilt just looks crooked)
-gsap.matchMedia().add('(min-width: 701px)', () => { gsap.to('.quick', { y: -70, rotate: -2, ease: 'none', scrollTrigger: hero }); });
+// (wide screens only, and it stays level: a tilt read as crooked)
+gsap.matchMedia().add('(min-width: 701px)', () => { gsap.to('.quick', { y: -70, ease: 'none', scrollTrigger: hero }); });
 gsap.to('.scroll-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=140', scrub: true } });
 
 // ---------- Hero entrance: one choreographed timeline, each piece arriving in its own way ----------

@@ -267,14 +267,16 @@ $$('.gallery-wrap').forEach(wrap => {
     const f = document.createElement('figure');
     f.className = `pol ${w > h ? 'wide' : 'tall'}`;
     f.style.setProperty('--ar', `${w} / ${h}`);
-    f.innerHTML = `<img alt="${alt}" width="${w}" height="${h}" decoding="async" draggable="false"><figcaption>${label}</figcaption>`;
+    // The description goes on with the photo itself: an image with a description but no photo yet shows a broken-image icon
+    f.innerHTML = `<img width="${w}" height="${h}" decoding="async" draggable="false"><figcaption>${label}</figcaption>`;
     f.dataset.src = src;
+    f.dataset.alt = alt;
     scatter(f, i);
     return f;
   });
   // order: indexes from the bottom of the pile to the top
   let order = data.map((_, i) => i).reverse(), near = false, spins = 0;
-  const load = i => { const img = cards[i].querySelector('img'); if (!img.src) img.src = cards[i].dataset.src; };
+  const load = i => { const img = cards[i].querySelector('img'); if (!img.src) { img.alt = cards[i].dataset.alt; img.src = cards[i].dataset.src; } };
   function sync() {
     order.forEach(i => pile.appendChild(cards[i]));
     const top = order.at(-1);
@@ -283,7 +285,14 @@ $$('.gallery-wrap').forEach(wrap => {
     if (near) order.slice(-3).forEach(load);
   }
   sync();
-  new IntersectionObserver(([en], io) => { if (en.isIntersecting) { near = true; sync(); io.disconnect(); } }, { rootMargin: '800px 0px' }).observe(pile);
+  // The top photos start loading well before the pile is on screen (even when the nav jumps straight to it),
+  // then the rest of the pile follows in the background so flicking through never lands on an empty frame
+  new IntersectionObserver(([en], io) => {
+    if (!en.isIntersecting) return;
+    near = true; sync(); io.disconnect();
+    const tops = order.slice(-3).map(i => cards[i].querySelector('img'));
+    Promise.all(tops.map(img => img.decode().catch(() => {}))).then(() => order.forEach(load));
+  }, { rootMargin: '2000px 0px' }).observe(pile);
   // Each polaroid as big as fits in the pile (with room for its tilt): the photo, a 3.2% border, and the caption
   const fit = () => {
     const W = pile.clientWidth, H = pile.clientHeight, capH = Math.min(Math.max(innerWidth * 0.02, 20), 28) * 1.6;

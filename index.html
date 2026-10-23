@@ -285,6 +285,10 @@ dd{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;font-variant-nu
 .more-work[open] .xb:nth-child(2){animation-delay:.05s}.more-work[open] .xb:nth-child(3){animation-delay:.1s}.more-work[open] .xb:nth-child(4){animation-delay:.14s}.more-work[open] .xb:nth-child(5){animation-delay:.18s}.more-work[open] .xb:nth-child(6){animation-delay:.22s}
 @keyframes xpIn{from{opacity:0;transform:translateY(10px)}}
 @media(max-width:1000px){.xb-grid{grid-template-columns:repeat(2,1fr)}.xb.big{grid-column:span 1}.xb-grid .xb:first-child{grid-column:span 2}}
+/* The open row has four roles: four across on wide screens, two by two below that */
+.exp .xb-open{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1200px){.exp .xb-open{grid-template-columns:repeat(2,1fr)}.exp .xb-open .xb:first-child{grid-column:span 1}}
+@media(max-width:600px){.exp .xb-open{grid-template-columns:1fr}}
 @media(max-width:600px){.xb-grid{grid-template-columns:1fr}.xb.big,.xb.wide,.xb-grid .xb:first-child{grid-column:auto}.more-meta{display:none}.xb,.xb.big{padding:20px}.xb-top{padding-bottom:16px}}
 
 /* ---------- Projects ---------- */
@@ -1070,6 +1074,11 @@ footer a{text-decoration:none}
   <div class="exp reveal" id="experience">
     <p class="exp-label mo">Experience</p>
     <div class="xb-grid xb-open">
+      <article class="xb big now">
+        <div class="xb-top"><time class="mo">2026 — Present</time><span class="xb-tag mo">Current</span></div>
+        <h4>Head of Operations</h4><p class="xb-org">Ikoniko Media · Remote, UK</p>
+        <p class="xb-desc">Run operations for an international student media platform: four department heads, weekly check-ins, and the pitch-to-publish pipeline in Notion.</p>
+      </article>
       <article class="xb big now">
         <div class="xb-top"><time class="mo">2026 — Present</time><span class="xb-tag mo">Current</span></div>
         

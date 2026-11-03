@@ -339,9 +339,11 @@ function start() {
   let running = true;
   // Adaptive quality: if it keeps running under ~40fps (two windows in a row, after startup's shader
   // compiles have settled), give up the things you notice least first: shadows, then the glow and some
-  // resolution (never below 1.5x on a Retina screen, so the screens' text stays sharp), then every
-  // other frame
-  const perf = { frames: 0, time: 0, level: 0 };
+  // resolution (never below 1.5x on a Retina screen, so the screens' text stays sharp). It never drops
+  // frames on purpose: that's what makes motion look choppy.
+  // A browser that caps the frame rate (Chrome's battery saver holds pages to 30fps) delivers perfectly
+  // even frames; a device that's struggling delivers uneven ones. Only the second is a reason to step down.
+  const perf = { frames: 0, time: 0, sq: 0, level: 0 };
   function degrade() {
     perf.level++;
     bulbLight.castShadow = false;
@@ -359,22 +361,22 @@ function start() {
     if (!running) return;
     requestAnimationFrame(frame);
     const raw = clock.getDelta(), dt = Math.min(raw, 0.05);
-    if (perf.level < 3 && !entered && clock.elapsedTime > 3 && !document.hidden) {
+    if (perf.level < 2 && !entered && clock.elapsedTime > 3 && !document.hidden) {
       perf.frames++;
       perf.time += raw;
+      perf.sq += raw * raw;
       if (perf.frames === 60) {
-        perf.slow = perf.frames / perf.time < 40 ? (perf.slow || 0) + 1 : 0;
+        const mean = perf.time / perf.frames, jitter = Math.sqrt(Math.max(0, perf.sq / perf.frames - mean * mean));
+        const struggling = 1 / mean < 40 && jitter > 0.004;
+        perf.slow = struggling ? (perf.slow || 0) + 1 : 0;
         if (perf.slow === 2) { degrade(); perf.slow = 0; }
-        perf.frames = perf.time = 0;
+        perf.frames = perf.time = perf.sq = 0;
       }
     }
-    // On the slowest devices, draw every other frame (30fps) to leave the main thread some room
-    if (perf.level === 3 && (skipFrame = !skipFrame)) return;
     // ?still: once frozen, nothing moves; the same frame is just drawn again
     if (still && window.introStill.frozen) { composer.render(0); return; }
     draw(dt, clock.elapsedTime);
   }
-  let skipFrame = false;
   function draw(dt, t) {
     const k = 1 - Math.exp(-dt * 5);
 
@@ -489,6 +491,7 @@ function start() {
     [[0.18, 0.22, 0.12], [0.34, 0, 0.1], [0.52, 0.85, 0.06], [0.66, 0.08, 0.12], [0.86, 0.6, 0.07],
      [0.95, 0.15, 0.1], [1.08, 1, 0.08], [1.2, 0.7, 0.06], [1.28, 1, 0.1]]
       .forEach(([at, v, d]) => tl.to(S, { bulb: v, room: v * 0.35, duration: d, ease: 'sine.inOut' }, at));
+    tl.add(prepareFlight, 0.9);
 
     tl.to(S, { bulb: 1, room: 1, torch: 0, duration: 0.8, ease: 'power2.out' }, 1.38)
       .to(copy, { '--hi': '#121a19', '--base': '#121a19', duration: 0.6 }, 1.4)
@@ -546,26 +549,41 @@ function start() {
     snap.texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     room.paperMat.map = snap.texture;
     room.paperMat.needsUpdate = true;
+    renderer.initTexture(snap.texture);
   }
 
   // Fly from where the camera is now to square in front of the screen, close enough to fill the window
-  function planFlight() {
-    const center = room.screen.getWorldPosition(new THREE.Vector3());
-    const normal = new THREE.Vector3(0, 0, 1).transformDirection(room.screen.matrixWorld);
+  // How close the camera ends up (filling the window with the screen) doesn't depend on where it starts,
+  // so the heavy part (the sharp terminal and the homepage snapshot, both uploaded to the GPU) is done
+  // while the bulb flickers and the camera is still, not on the first frames of the flight
+  function flightEnd() {
     const s = room.screen.getWorldScale(new THREE.Vector3()).x;
     const [sw0, sh0] = room.screenSize;
     const tan = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
     const d = Math.min((sh0 * s / 2) / tan, (sw0 * s / 2) / (tan * camera.aspect)) * 0.92;
+    const visH = 2 * d * tan;
+    return { d, frac: [visH * camera.aspect / (sw0 * s), visH / (sh0 * s)] };
+  }
+  function prepareFlight() {
+    if (snap.frac) return;
+    snap.frac = flightEnd().frac;
+    room.highRes();
+    room.update(session.t);
+    composeSnapshot();
+    renderer.initTexture(room.screen.material.map);
+    if (snap.texture) renderer.initTexture(snap.texture);
+  }
+  function planFlight() {
+    prepareFlight();
+    const center = room.screen.getWorldPosition(new THREE.Vector3());
+    const normal = new THREE.Vector3(0, 0, 1).transformDirection(room.screen.matrixWorld);
+    const { d } = flightEnd();
     const from = camera.position.clone().sub(shake);
     const to = center.clone().addScaledVector(normal, d);
     const mid = from.clone().lerp(to, 0.5).add(new THREE.Vector3(0, 0.35, 0.6));
     flight.curve = new THREE.CatmullRomCurve3([from, mid, to]);
     flight.lookFrom.copy(look);
     flight.lookTo.copy(center);
-    room.highRes();
-    const visH = 2 * d * tan;
-    snap.frac = [visH * camera.aspect / (sw0 * s), visH / (sh0 * s)];
-    composeSnapshot();
   }
 
   function finish() {

@@ -39,6 +39,12 @@ export function track(path, title) {
 }
 addEventListener('intro:skip', () => track('intro/skipped', 'Skipped the intro'));
 addEventListener('intro:done', () => setTimeout(() => sent.has('intro/skipped') || track('intro/watched', 'Watched the intro'), 0));
+// Which intro each first-time visitor got: the 3D room, or the basic one and why (no 3D support in their
+// browser, too slow to load, or an error), so it's clear how often the basic one shows
+addEventListener('intro:done', () => {
+  const kind = document.documentElement.dataset.intro;
+  if (kind) track(`intro/${kind}`, kind === '3d' ? 'Saw the 3D intro' : `Saw the basic intro (${kind.replace('basic-', '').replace(/-/g, ' ')})`);
+}, { once: true });
 
 // ---------- Nav: what Mason's probably up to right now (his local time is in the tooltip) ----------
 // Edit the moods here. Hours are Pacific time; `days` limits a row to weekdays (1-5) or weekends.

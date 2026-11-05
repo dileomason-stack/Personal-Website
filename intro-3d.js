@@ -23,9 +23,10 @@ const sw = document.getElementById('switch');
 if (!root.classList.contains('intro-3d-pending') || intro.classList.contains('on') || intro.classList.contains('done')) {
   root.classList.remove('intro-3d-pending');
 } else {
-  try { start(); } catch (err) {
+  try { start(); root.dataset.intro = '3d'; } catch (err) {
     console.error('3D intro failed, using the CSS one', err);
     root.classList.remove('intro-3d-pending', 'intro-3d');
+    root.dataset.intro = 'basic-3d-error';
   }
 }
 
@@ -619,6 +620,7 @@ function start() {
     entered = true;
     sound.stop();
     teardown();
+    root.dataset.intro = 'basic-3d-error';
     root.classList.remove('intro-3d');
     delete intro.dataset.mode;
     copy.removeAttribute('style');

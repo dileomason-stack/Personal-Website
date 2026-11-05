@@ -880,7 +880,8 @@ footer a{text-decoration:none}
 </script>
 <script>
   // Visitors who've seen the intro in the last two weeks go straight to the site (?intro replays it).
-  // Otherwise try the 3D intro, only with WebGL and motion allowed; give up after 6s and keep the CSS one.
+  // Otherwise try the 3D intro, only with WebGL and motion allowed; give up after 10s and keep the CSS one.
+  // Which intro a first-time visitor got, and why, goes in data-intro (site-live.js counts it in the stats).
   (() => {
     const root = document.documentElement;
     let seen = 0;
@@ -893,10 +894,14 @@ footer a{text-decoration:none}
       }
       return;
     }
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    try { if (!document.createElement('canvas').getContext('webgl2')) return; } catch (e) { return; }
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { root.dataset.intro = 'basic-reduced-motion'; return; }
+    try { if (!document.createElement('canvas').getContext('webgl2')) throw 0; } catch (e) { root.dataset.intro = 'basic-no-3d-support'; return; }
     root.classList.add('intro-3d-pending');
-    setTimeout(() => root.classList.remove('intro-3d-pending'), 6000);
+    setTimeout(() => {
+      if (!root.classList.contains('intro-3d-pending')) return;
+      root.classList.remove('intro-3d-pending');
+      root.dataset.intro = 'basic-3d-too-slow';
+    }, 10000);
   })();
 </script>
 <script type="importmap">

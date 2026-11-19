@@ -592,6 +592,7 @@ html.lenis{scroll-behavior:auto}
 .case-meta div{display:block;margin:0;padding:0;border:0}
 .case-meta dt{color:var(--muted);margin-bottom:8px}
 .case-meta dd{margin:0;font-size:15px;font-weight:500;letter-spacing:0;line-height:1.5;color:var(--text)}
+.case-meta dd a{color:inherit;text-decoration-color:var(--accent);text-underline-offset:3px}
 .case-row{display:grid;grid-template-columns:minmax(160px,.32fr) 1fr;gap:clamp(20px,4vw,64px);padding:clamp(32px,4vw,48px) 0;border-bottom:1px solid var(--line)}
 .case-row .case-h{margin:6px 0 0}
 .case-copy{max-width:68ch}
@@ -620,7 +621,13 @@ html.vt-case-out::view-transition-new(root){animation:none}
 @media(max-width:900px){.case-meta{grid-template-columns:1fr 1fr}.case-row{grid-template-columns:1fr;gap:12px}.case-demo-head{grid-template-columns:1fr}.case-demo h3{white-space:normal}.case-crumb{display:none}}
 
 /* Hold This Thought case: a lineup of app screens, and the reader playground */
-.sc-case{margin:0 0 26px}
+.sc-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:0 0 26px}
+.sc-case{margin:0}
+/* Apple's badge, unaltered (their artwork), sized to sit level with the button beside it */
+.app-badge{display:block;line-height:0;border-radius:9px;transition:transform .25s var(--ease)}
+.app-badge img{display:block;height:48px;width:auto}
+.app-badge:hover{transform:translateY(-2px)}
+.app-badge:focus-visible{outline:2px solid var(--inv-accent);outline-offset:3px}
 .case-phones{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,2vw,28px);align-items:end}
 .cp{padding:clamp(4px,.6vw,8px);border-radius:clamp(20px,3vw,40px);background:#101010;box-shadow:var(--shadow-lg)}
 .cp img{width:100%;height:auto;border-radius:clamp(16px,2.5vw,33px)}
@@ -1014,10 +1021,13 @@ footer a{text-decoration:none}
   </div>
   <article class="feature showcase reveal" id="holdthisthought">
     <div class="sc-copy">
-      <span class="sc-label mo"><img class="sc-icon" src="hold-this-thought-logo-transparent.webp" alt="" width="40" height="40">Hold This Thought / Active build</span>
+      <span class="sc-label mo"><img class="sc-icon" src="hold-this-thought-logo-transparent.webp" alt="" width="40" height="40">Hold This Thought / Live on the App Store</span>
       <h4>Hold This Thought</h4>
       <p>A native iOS app that turns spoken or typed thoughts into reminders that go off at the right time, the right place, or with the right people. I lead product, design, and iOS development.</p>
-      <button class="btn case-open sc-case" type="button" data-case="holdthisthought">CASE STUDY + PARSER <span class="arr">→</span></button>
+      <div class="sc-actions">
+        <button class="btn case-open sc-case" type="button" data-case="holdthisthought">CASE STUDY + PARSER <span class="arr">→</span></button>
+        <a class="app-badge" href="https://apps.apple.com/us/app/hold-this-thought/id6812018048" target="_blank" rel="noopener noreferrer"><img src="app-store-badge.svg" alt="Download Hold This Thought on the App Store" width="150" height="50"></a>
+      </div>
       <div class="sc-steps" role="tablist" aria-label="How Hold This Thought works">
         <button class="sc-step is-active" type="button" role="tab" aria-selected="true"><b>At the right time.</b><i class="sc-bar" aria-hidden="true"></i></button>
         <button class="sc-step" type="button" role="tab" aria-selected="false"><b>Say it once.</b><i class="sc-bar" aria-hidden="true"></i></button>
@@ -1269,9 +1279,9 @@ footer a{text-decoration:none}
   </header>
   <dl class="case-meta">
     <div><dt class="mo">Role</dt><dd>Founder: product, design and iOS development, with AI coding tools</dd></div>
-    <div><dt class="mo">Timeline</dt><dd>Active build, fall 2026; testers on TestFlight</dd></div>
+    <div><dt class="mo">Timeline</dt><dd>Built fall 2026; launched on the App Store, November 2026</dd></div>
     <div><dt class="mo">Stack</dt><dd>Swift, SwiftUI, App Intents, WidgetKit, CloudKit, Core Location, EventKit, Speech</dd></div>
-    <div><dt class="mo">Status</dt><dd>Beta; App Store listing ready</dd></div>
+    <div><dt class="mo">Status</dt><dd>Live: <a href="https://apps.apple.com/us/app/hold-this-thought/id6812018048" target="_blank" rel="noopener noreferrer">free on the App Store ↗&#xFE0E;</a></dd></div>
   </dl>
   <section class="case-row"><p class="mo case-h">The problem</p><div class="case-copy"><p>Thoughts show up at the wrong moment: on a walk, in class, half asleep. A reminder app wants you to stop and fill in a title, a date and a time, so most of them never get saved. Hold This Thought lets you say it the way you’d text a friend and does the rest.</p></div></section>
   <section class="case-row"><p class="mo case-h">What it does</p><div class="case-copy"><ul class="case-list">

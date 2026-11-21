@@ -201,7 +201,9 @@ const whenSeen = (el, fn) => {
   io.observe(el);
 };
 
-// ---------- GitHub activity: total commits and a bar per day (data/activity.json, baked at deploy) ----------
+// ---------- GitHub activity: total commits and a small 3D city, one building per day ----------
+// Weeks run left to right, weekdays run back (Sunday at the back, like GitHub's grid), and each building is as
+// tall as that day's commits. Plain SVG drawn from data/activity.json, which a daily Action refreshes.
 const activity = $('#activity');
 if (activity) whenNear(activity, async () => {
   let data;
@@ -214,24 +216,55 @@ if (activity) whenNear(activity, async () => {
   const days = [];
   for (let d = first; d <= today; d = new Date(+d + 864e5)) days.push([d, sum(data.days[d.toISOString().slice(0, 10)])]);
   const max = Math.max(...days.map(d => d[1]));
-  const bars = $('.act-bars', activity), tip = $('.act-tip', activity), counter = $('.act-total b', activity);
-  bars.innerHTML = days.map(([d, n]) => `<i class="${n ? '' : 'zero'}" style="--h:${Math.max(12, Math.sqrt(n / max) * 100)}%" data-tip="${label(d)} · ${n} commit${n === 1 ? '' : 's'}"></i>`).join('');
+  const best = days.find(d => d[1] === max);
+  const svg = $('.act-city', activity), tip = $('.act-tip', activity), counter = $('.act-total b', activity);
+
+  // Projection: one step along a week (U), one step back a weekday (V), and height straight up
+  const S = 20, U = [S * 1.3, S * .15], V = [S * .45, -S * .32], H = 90;
+  const sunday = +first - first.getUTCDay() * 864e5;
+  const cells = days.map(([d, n]) => {
+    const k = Math.sqrt(n / max);
+    return { d, n, w: Math.floor((+d - sunday) / 6048e5), r: 6 - d.getUTCDay(), h: n ? Math.max(4, k * H) : 0, lv: n ? Math.min(4, Math.ceil(k * 4)) : 0 };
+  });
+  const pt = (w, r, z) => `${(w * U[0] + r * V[0]).toFixed(1)},${(w * U[1] + r * V[1] - z).toFixed(1)}`;
+  const weeks = Math.max(...cells.map(c => c.w)) + 1;
+  const x1 = weeks * U[0] + 7 * V[0], y0 = 7 * V[1] - H, y1 = weeks * U[1];
+  svg.setAttribute('viewBox', `-2 ${(y0 - 2).toFixed(1)} ${(x1 + 4).toFixed(1)} ${(y1 - y0 + 4).toFixed(1)}`);
+
+  // Back rows first, then left to right, so nearer buildings are drawn over farther ones
+  cells.sort((a, b) => b.r - a.r || a.w - b.w);
+  const ns = 'http://www.w3.org/2000/svg';
+  for (const c of cells) {
+    const g = document.createElementNS(ns, 'g');
+    g.setAttribute('class', `b l${c.lv}`);
+    g.dataset.tip = `${label(c.d)} · ${c.n} commit${c.n === 1 ? '' : 's'}`;
+    c.faces = ['r', 'f', 't'].map(f => { const p = document.createElementNS(ns, 'polygon'); p.setAttribute('class', f); g.append(p); return p; });
+    svg.append(g);
+  }
+  const draw = (c, h) => {
+    const { w, r } = c, [rt, fr, tp] = c.faces;
+    tp.setAttribute('points', [pt(w, r, h), pt(w + 1, r, h), pt(w + 1, r + 1, h), pt(w, r + 1, h)].join(' '));
+    fr.setAttribute('points', h ? [pt(w, r, 0), pt(w + 1, r, 0), pt(w + 1, r, h), pt(w, r, h)].join(' ') : '');
+    rt.setAttribute('points', h ? [pt(w + 1, r, 0), pt(w + 1, r + 1, 0), pt(w + 1, r + 1, h), pt(w + 1, r, h)].join(' ') : '');
+  };
+
+  tip.textContent = `Biggest day: ${max} commits, ${label(best[0])}`;
   $('.act-since', activity).textContent = label(first);
   activity.setAttribute('aria-label', `${total} commits on GitHub since ${label(first)}. Open GitHub profile.`);
-  bars.addEventListener('pointerover', e => { if (e.target.dataset.tip) tip.textContent = e.target.dataset.tip; });
-  if (reduce) { counter.textContent = total; return; }
-  const cells = $$('i', bars);
-  cells.forEach(c => (c.style.transform = 'scaleY(0)'));
+  svg.addEventListener('pointerover', e => { const g = e.target.closest('.b'); if (g) tip.textContent = g.dataset.tip; });
+  svg.addEventListener('pointerleave', () => { tip.textContent = `Biggest day: ${max} commits, ${label(best[0])}`; });
+
+  if (reduce) { cells.forEach(c => draw(c, c.h)); counter.textContent = total; return; }
+  // Start as a flat grid, then the buildings rise week by week once the card is in view
+  cells.forEach(c => draw(c, 0));
   whenSeen(activity, () => {
-    cells.forEach((c, i) => {
-      c.style.transform = '';
-      c.animate({ transform: ['scaleY(0)', 'scaleY(1)'] }, { duration: 600, delay: i * 18, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
-    });
-    const t0 = performance.now(), length = cells.length * 18 + 500;
+    const t0 = performance.now(), stagger = 70, rise = 800, length = (weeks - 1) * stagger + 6 * 12 + rise;
+    const ease = p => 1 - (1 - p) ** 3;
     const step = now => {
-      const p = Math.min(1, (now - t0) / length);
-      counter.textContent = Math.round(total * (1 - (1 - p) ** 3));
-      if (p < 1) requestAnimationFrame(step);
+      const t = now - t0;
+      for (const c of cells) if (c.h) draw(c, c.h * ease(Math.min(1, Math.max(0, (t - c.w * stagger - (6 - c.r) * 12) / rise))));
+      counter.textContent = Math.round(total * ease(Math.min(1, t / length)));
+      if (t < length) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
   });

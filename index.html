@@ -791,19 +791,27 @@ html.vt-case-out::view-transition-new(root){animation:none}
 .ww-best b{color:#4ade80;font-weight:600}
 @media(max-width:640px){.ww-grid{--h:26px;grid-template-columns:34px repeat(5,1fr)}}
 
-/* ---------- GitHub activity: total commits and a bar per day (data/activity.json) ---------- */
-.activity{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:auto auto 1fr;align-items:end;gap:6px 22px;padding:20px 24px;
+/* ---------- GitHub activity: total commits and a 3D city, one building per day (data/activity.json) ---------- */
+.activity{margin-top:clamp(40px,5vw,64px);display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:center;gap:6px clamp(20px,4vw,56px);padding:20px 24px;
   border:1px solid var(--line);border-radius:var(--r-md);background:var(--surface);text-decoration:none;position:relative;transition:border-color .25s}
 .activity:hover{border-color:var(--line-strong)}
-.act-total{margin:0;font-size:clamp(28px,3vw,40px);font-weight:800;letter-spacing:-.04em;line-height:1;white-space:nowrap}
+.act-total{margin:0;font-size:clamp(28px,3vw,40px);font-weight:800;letter-spacing:-.04em;line-height:1;white-space:nowrap;align-self:end}
 .act-total b{color:var(--accent);font-variant-numeric:tabular-nums}
-.act-sub{margin:0 0 4px;color:var(--muted);white-space:nowrap}
-.act-bars{display:flex;align-items:end;gap:3px;height:40px;min-width:0}
-.act-bars i{flex:1;min-width:2px;max-width:12px;border-radius:2px;background:var(--accent);height:var(--h);transform-origin:bottom}
-.act-bars i.zero{background:var(--line);height:3px}
-.act-tip{position:absolute;right:24px;top:10px;color:var(--muted);font-size:10px;opacity:0;transition:opacity .2s}
+.act-sub{margin:0;color:var(--muted);white-space:nowrap;align-self:start}
+.act-city{grid-column:2;grid-row:1/3;display:block;width:100%;height:clamp(170px,17vw,240px);overflow:visible}
+.act-city .b{--c:var(--accent)}
+.act-city .l0{--c:var(--line)}
+.act-city .l1{--c:color-mix(in oklab,var(--accent) 38%,var(--surface))}
+.act-city .l2{--c:color-mix(in oklab,var(--accent) 60%,var(--surface))}
+.act-city .l3{--c:color-mix(in oklab,var(--accent) 80%,var(--surface))}
+.act-city .t{fill:color-mix(in oklab,var(--c) 85%,white)}
+.act-city .f{fill:var(--c)}
+.act-city .r{fill:color-mix(in oklab,var(--c) 72%,black)}
+.act-city .l0 .t{fill:var(--line)}
+.act-city .b{transition:opacity .2s}
+.act-city:hover .b:not(:hover){opacity:.55}
+.act-tip{position:absolute;right:24px;top:12px;color:var(--muted);font-size:10px;opacity:0;transition:opacity .2s}
 .activity:hover .act-tip{opacity:1}
-@media(max-width:700px){.activity{grid-template-columns:1fr auto}.act-bars{grid-column:1/-1;height:34px}.act-tip{display:none}}
 
 footer{display:flex;justify-content:space-between;gap:12px;padding:26px var(--pad-x);background:var(--inv-bg);color:var(--inv-muted);font-size:12px;border-top:1px solid var(--inv-line)}
 footer a{text-decoration:none}
@@ -837,9 +845,10 @@ footer a{text-decoration:none}
   .quick dd{font-size:17px;text-align:right}
 }
 @media(max-width:700px){
-  .activity{grid-template-columns:1fr;gap:4px}
-  .act-sub{white-space:normal;margin-bottom:12px}
-  .act-bars{grid-column:auto}
+  .activity{grid-template-columns:1fr;grid-template-rows:none;gap:4px}
+  .act-sub{white-space:normal;margin-bottom:10px}
+  .act-city{grid-column:auto;grid-row:auto;height:auto}
+  .act-tip{display:none}
   .room-copy:before{content:"";position:absolute;z-index:-1;left:-10%;right:-10%;top:4%;bottom:-6%;background:radial-gradient(ellipse at 50% 45%,rgba(236,230,218,.9),rgba(236,230,218,.55) 45%,transparent 72%);pointer-events:none;opacity:var(--wash,1);transition:opacity .4s}
   .contact h3{font-size:clamp(40px,12vw,56px)}
 }
@@ -1175,7 +1184,7 @@ footer a{text-decoration:none}
   <a class="activity reveal" id="activity" href="https://github.com/dileomason-stack" target="_blank" rel="noopener noreferrer">
     <p class="act-total"><b>0</b> commits</p>
     <p class="act-sub mo">on GitHub since <span class="act-since">Sep 4</span></p>
-    <div class="act-bars" aria-hidden="true"></div>
+    <svg class="act-city" aria-hidden="true" preserveAspectRatio="xMaxYMid meet"></svg>
     <span class="act-tip mo" aria-hidden="true"></span>
   </a>
 </section>
